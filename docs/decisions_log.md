@@ -84,6 +84,44 @@
 
 ---
 
+## Planning Session 2 — 2026-05-28 (Pre-Kickoff Requirements and Backlog)
+
+**What happened:** Second planning session focused on detailed requirements, backlog revision, and roadmap rebuild from scratch.
+
+**Artifacts updated:**
+- `docs/roadmap.md` — full rewrite: added Pre-work phase (P.1–P.11), parallel track structure, buffer strategy (2 days, 13%), presentations as explicit tasks (1.10, 2.13, 3.24), handoff tasks (H.1–H.3), updated key dates (M2 presentation moved to Jun 11 for 1 buffer day)
+- `docs/backlog.md` — full rewrite: 60 tasks across Pre-work/M1/M2/M3/Handoff; Track column added (PM/Dev/Both) to make parallel work visible; PM checklist added at bottom
+- Detailed requirements captured in conversation (now source of truth for what to build): backend modules, unified interface contract, REST API endpoints, unit/integration/E2E testing standards, 6 UIX screen specifications
+
+**Key planning decisions made:**
+- Working days reality: 15 working days across 21 calendar days
+- Buffer: 2 days (13%) — 1 to M2 (presentation Jun 11 not Jun 10), 1 to M3 (Jun 15 = checklist only)
+- M3 is the tightest phase (4 working days) — deployment infra must start Jun 12 in parallel
+- Deferrable if M3 slips: sync panel (3.13) and admin panel (3.14) — minimum viable is login + file operations + deploy
+- Milestone presentations are distinct tasks from internal gate checks
+
+**Still open before kickoff:**
+- Manager Part A conversation (Q1–Q24) — not yet done
+- Team Part A-2 conversation (K01–K14) — not yet done
+- D-001 tech stack — not yet decided
+
+---
+
+## Planning Session 1 — 2026-05-28
+
+**What happened:** Pre-sprint planning session completed. No code decisions made yet; this session focused on PM setup and discovery.
+
+**Artifacts produced:**
+- `docs/discovery.md` updated — rclone open-source-vs-embeddable distinction clarified; 6 deployment questions added (Q19–Q24); Part A-2 (team kickoff questions K01–K14) added
+- `docs/pm_playbook.md` created — complete PM operating guide for the full 20-day lifecycle
+- `CLAUDE.md` updated — 9-file structure documented; PM reference section added
+
+**Open decisions as of today:** D-001 (tech stack) and D-002 (credential management) are due today, 2026-05-28. If not resolved by end of day, PM invokes R05 contingency (default to Python).
+
+**Next action:** Complete manager conversation (Part A questions in discovery.md). Run developer kickoff (Part A-2 questions). Close D-001 and D-002.
+
+---
+
 ## Weekly Status
 
 > Add a short paragraph here every Friday. What moved, what's at risk, what's next week.

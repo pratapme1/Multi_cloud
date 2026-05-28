@@ -18,8 +18,14 @@
 
 | Role | Responsibilities |
 |------|-----------------|
-| PM / PO | Scope, priorities, milestone gates, sessions with Claude |
-| Developer | Architecture, implementation, testing, deployment |
+| PM / PO | Scope, priorities, milestone gates, sessions with Claude, **UX wireframes + screen design (Designer)**, E2E acceptance testing |
+| Developer | Architecture, implementation, **unit + integration tests (QA)**, deployment |
+
+**Role overlap decisions:**
+- PM = Designer. PM owns all wireframes and screen definitions. No dedicated designer on the team.
+- Developer = QA. Developer writes unit tests alongside each module and integration tests in M2. No dedicated QA on the team.
+- PM acts as independent tester for E2E on production (task 3.19) and co-leads security review (task 3.17).
+- If developer is backend-only: frontend developer may be added for M3 (see R09 in risk_log.md).
 
 PM drives Claude sessions. Developer owns all implementation decisions unless explicitly asking for suggestions.
 
@@ -65,7 +71,7 @@ PM drives Claude sessions. Developer owns all implementation decisions unless ex
 ## 6. What NOT To Do
 
 - **Do not create files without explicit approval.** Brainstorm and propose first.
-- **Do not add documents not in the agreed 8-file structure** unless PM explicitly asks.
+- **Do not add documents not in the agreed 9-file structure** unless PM explicitly asks. The 9 files are: `CLAUDE.md`, `charter.md`, `roadmap.md`, `backlog.md`, `decisions_log.md`, `risk_log.md`, `release_checklist.md`, `discovery.md`, `pm_playbook.md`.
 - **Do not suggest out-of-scope features** — scope is locked in `docs/charter.md`.
 - **Do not use story points, velocity tracking, or sprint burndown** — this project uses S/M/L sizing only.
 - **Do not assume a tech stack** until D-001 is decided and Section 3 above is filled in.
@@ -79,3 +85,9 @@ PM drives Claude sessions. Developer owns all implementation decisions unless ex
 Every session that produces a significant decision → add an entry to `docs/decisions_log.md`.
 Every session that moves tasks to done → update status in `docs/backlog.md`.
 Weekly on Fridays → add a status paragraph to the bottom of `docs/decisions_log.md` under `## Weekly Status`.
+
+---
+
+## 8. PM Reference
+
+The PM's complete operating guide is at `docs/pm_playbook.md`. It covers: role boundaries, the full week-by-week timeline, how to run milestone gates, working with the developer, technical minimum, wireframe guidance, presentation templates, decision framework, and escalation paths.

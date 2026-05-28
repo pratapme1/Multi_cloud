@@ -1,0 +1,66 @@
+# Environment & secrets
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+pip-wheel-metadata/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Node / JS (if frontend is added)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnp/
+.yarn/
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Terraform / IaC (if used later)
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
+# Temporary / build artifacts
+tmp/
+temp/
+*.tmp
+*.bak

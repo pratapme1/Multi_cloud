@@ -141,6 +141,29 @@ That answer shows: (1) you did your homework, (2) you made a reasoned choice, (3
 
 ---
 
+## About the Team and Skills
+
+| # | Question | Answer |
+|---|----------|--------|
+| 25 | Is the developer assigned to this project full-stack (can build both backend API and web UI), or primarily backend? | |
+| 26 | If a frontend skill gap is confirmed at team kickoff, can we request a 3rd team member (frontend developer) for M3? | |
+| 27 | Is the M3 evaluation focused on technical integration and PM process, or is UI visual quality also being scored? | |
+
+---
+
+## About Deployment
+
+| # | Question | Answer |
+|---|----------|--------|
+| 19 | Where should the web UI be deployed for the M3 demo — is a live production URL required, or is localhost acceptable? | |
+| 20 | Do we have access to a company-provisioned cloud hosting environment (on-prem, internal cloud, or shared account)? | |
+| 21 | If not company-provided, are we expected to self-provision hosting (e.g., a VPS or PaaS account)? | |
+| 22 | Are there IT or security approval gates before we can deploy anything to an external URL? | |
+| 23 | Does the application need to remain running after Go-Live on June 16, or is it demo-only and can be torn down? | |
+| 24 | Who owns the cloud accounts and hosting after the project ends — is there a handover process? | |
+
+---
+
 ## What to Listen For
 
 When answers are vague, note it. Vague answers from managers on a capstone usually mean one of two things:
@@ -148,6 +171,65 @@ When answers are vague, note it. Vague answers from managers on a capstone usual
 - **They haven't thought it through** — your job as PM is to propose a reasonable interpretation and confirm it
 
 Either way, document what you heard, what you interpreted, and flag it in the charter as an assumption.
+
+---
+
+# PART A-2 — Questions for Your Developer (Team Kickoff)
+
+> Ask these at your first sit-down with the developer — before Sprint 1 begins.
+> You're not interrogating them. You're establishing how you'll work together.
+> Document what you hear. It sets expectations for both sides.
+
+---
+
+## Availability and Capacity
+
+| # | Question | Answer |
+|---|----------|--------|
+| K01 | Is this project 100% of your time for the 20 days, or do you have other work alongside it? | |
+| K02 | Are there any days in the May 28 – June 16 window where you're unavailable (travel, leave, other obligations)? | |
+| K03 | What hours do you typically work — and when are you best reached if something is urgent? | |
+
+---
+
+## Experience and Background
+
+| # | Question | Answer |
+|---|----------|--------|
+| K04 | Have you worked with any of the three cloud providers before — AWS S3, Azure Blob, or GCS? Which one(s)? | |
+| K05 | Do you have a strong language preference for this project, or are you neutral on D-001? | |
+| K06 | Have you built a web API or backend service before? What stack? | |
+| K07 | Have you deployed an application to a live server before (not just localhost)? | |
+
+---
+
+## How They Want to Work
+
+| # | Question | Answer |
+|---|----------|--------|
+| K08 | How do you prefer to receive task context — written in the backlog is enough, or do you want a brief verbal walkthrough? | |
+| K09 | How do you want to communicate status — daily check-in, async message, or something else? | |
+| K10 | When you're blocked, what's your default — work around it yourself, message me immediately, or wait for our next check-in? | |
+| K11 | Do you want to be involved in milestone presentation prep, or is that fully my responsibility? | |
+
+---
+
+## Their Read on the Project
+
+| # | Question | Answer |
+|---|----------|--------|
+| K12 | What's your honest first reaction to this project — anything that excites you or concerns you? | |
+| K13 | Is there anything in the scope that you think is underestimated or that we should de-risk early? | |
+| K14 | Is there anything you're hoping to learn or practice from this project specifically? | |
+
+---
+
+## What to Listen For (Team Kickoff Version)
+
+- If they flag GCP as a concern — they've done their homework. That's a good sign.
+- If they push back on a feature as too complex — don't dismiss it. Ask what a minimum version looks like.
+- If they don't have opinions on the tech stack — you may need to drive D-001 more actively.
+- If they say they're not 100% on the project — note it. Log it. That's risk R08 materializing early.
 
 ---
 ---
@@ -212,8 +294,8 @@ This is a question your manager may ask — or that you should answer proactivel
 
 | Tool | What it does | Why it's not the answer here |
 |------|-------------|-------------------------------|
-| **rclone** | CLI tool, supports 70+ cloud providers including S3/Azure/GCS | Powerful but command-line only, no web UI, no developer API, not embeddable into an application |
-| **RcloneView** | GUI wrapper for rclone | Still tied to rclone's model, not a library you integrate into your own app |
+| **rclone** | CLI tool, supports 70+ cloud providers including S3/Azure/GCS | **Open source but not embeddable as a library.** rclone is a Go binary — you can't import it into your own code. Using it means shelling out to an external process (`exec("rclone copy ...")`), which loses type safety, makes error handling messy, and creates a binary dependency your app can't control. It also means your developer never learns the underlying S3/Azure/GCS SDKs — which is the entire learning goal of this capstone. |
+| **RcloneView** | GUI wrapper for rclone | **Open source but same limitation.** Adds a GUI on top of the rclone binary. Still not a library. The codebase can't call it programmatically, and the learning objective (hands-on SDK experience) is still not met. |
 | **MultCloud** | SaaS web interface for multi-cloud file management | Third-party SaaS dependency, no code ownership, not suitable for embedding into a company's own product |
 | **Cyberduck** | Desktop app for cloud file browsing | Desktop-only, not a developer library, no redundancy or sync programming |
 | **FluentStorage (.NET)** | Code abstraction library for multi-cloud storage | .NET only, limited to the languages/patterns it supports, no web UI |

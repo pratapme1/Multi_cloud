@@ -52,8 +52,13 @@ Build an application that integrates AWS S3, Azure Blob Storage, and Google Clou
 
 | Role | Name | Responsibilities |
 |------|------|-----------------|
-| PM / PO | TBD | Scope, milestone gates, stakeholder comms |
-| Developer | TBD | Architecture, implementation, testing, deployment |
+| PM / PO | TBD | Scope, milestone gates, stakeholder comms, **UX wireframes and screen design (Designer role)**, E2E acceptance testing on production |
+| Developer | TBD | Architecture, implementation, **unit tests + integration tests (QA role)**, deployment |
+
+**Role coverage decisions:**
+- No dedicated Designer — PM owns all UX wireframes, screen layouts, and interaction flows. Developer implements using a CSS framework (Bootstrap / Tailwind / Material UI).
+- No dedicated QA — Developer owns unit tests (written alongside each module) and integration tests (written in M2). PM acts as independent tester for E2E acceptance in M3 and co-leads the security review.
+- A 3rd team member (frontend developer) may be requested if team kickoff confirms the developer is backend-only (see R09 in risk_log.md and Q26 in discovery.md).
 
 ---
 

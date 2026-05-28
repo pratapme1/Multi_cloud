@@ -18,6 +18,7 @@
 | R06 | Cloud API rate limits hit during development | 2 | 2 | **4** | Use small test files; stay within free-tier; mock in unit tests | Throttle test runs; batch calls | Dev | Open |
 | R07 | Auth implementation more complex than estimated | 2 | 2 | **4** | Use established library (not home-grown); simple JWT or session | Ship with hardcoded admin user as MVP; full auth post-launch | Dev | Open |
 | R08 | Developer unavailable for 1+ days mid-project | 1 | 2 | **2** | Keep sprint at 80% capacity; no overtime assumed | PM handles docs/planning tasks; defer non-critical work | PM | Open |
+| R09 | Developer is backend-only — cannot build web UI for M3 | 2 | 3 | **6** | Confirm full-stack capability at team kickoff (K06, K07 in discovery.md); if gap found, decide immediately — not at M3 start | Add frontend developer for M3, OR reduce UI to server-rendered templates + CSS framework (Bootstrap/Tailwind); PM assists with UI structure and layout decisions | PM | Open |
 
 ---
 
