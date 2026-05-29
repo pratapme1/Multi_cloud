@@ -8,9 +8,9 @@
 
 ## Meeting 1 — Developer Kickoff (Team Kickoff)
 
-**Status:** ⬜ Scheduled / ✅ Complete — *(mark when done)*
+**Status:** ✅ Complete
 **Date / Time:** 2026-05-28
-**Who:** PM + Developer
+**Who:** Vishnu (PM) + Anushman + Anand
 **Purpose:** Understand developer's background, capacity, and preferences so you can plan M1 work and close D-001.
 
 ---
@@ -19,20 +19,20 @@
 
 | # | Question | Ref | Answer |
 |---|----------|-----|--------|
-| K01 | What are your working hours and timezone? | discovery K01 | |
-| K02 | Are there any days you are unavailable between now and June 16? | discovery K02 | |
-| K03 | Can you realistically commit full-time (5–6 hrs/day)? | discovery K03 | |
-| K04 | What cloud providers have you worked with before? | discovery K04 | |
-| K05 | What language and framework are you most comfortable with? (Python / Node / Go) | discovery K05 + D-001 | |
-| K06 | **CRITICAL:** Are you full-stack, or primarily backend? | discovery K06 + R09 | |
-| K07 | Have you built a web UI before? Which framework? | discovery K07 + R09 | |
-| K08 | How do you prefer to get requirements — doc, chat, or verbal? | discovery K08 | |
-| K09 | What is your preferred check-in format and frequency? | discovery K09 | |
-| K10 | **CRITICAL:** If you hit a blocker, how will you let me know? | discovery K10 | |
-| K11 | How do you feel about writing tests alongside each module (not at the end)? | discovery K11 | |
-| K12 | Any concerns about the scope or timeline? | discovery K12 | |
-| K13 | Anything in the plan you'd approach differently? | discovery K13 | |
-| K14 | Any dependencies or setup you'll need help with on Day 1? | discovery K14 | |
+| K01 | What are your working hours and timezone? | discovery K01 | 2–3 hours/day |
+| K02 | Are there any days you are unavailable between now and June 16? | discovery K02 | Not captured — follow up |
+| K03 | Can you realistically commit full-time (5–6 hrs/day)? | discovery K03 | No — 2–3 hrs/day only ⚠️ |
+| K04 | What cloud providers have you worked with before? | discovery K04 | Anushman: minimal AWS, no Azure/GCP. Anand: REST API testing via Postman |
+| K05 | What language and framework are you most comfortable with? | discovery K05 + D-001 | Anushman: .NET (backend), Java, React (5 yrs). Stack preference not formally closed — D-001 still open |
+| K06 | **CRITICAL:** Are you full-stack, or primarily backend? | discovery K06 + R09 | Anushman: Full-stack (.NET backend + React frontend) ✅ R09 resolved |
+| K07 | Have you built a web UI before? Which framework? | discovery K07 + R09 | Anushman: Yes — React, built new features |
+| K08 | How do you prefer to get requirements — doc, chat, or verbal? | discovery K08 | Chat: Teams. Documentation format: PM decides |
+| K09 | What is your preferred check-in format and frequency? | discovery K09 | Daily standup. End of each milestone: sprint review call. Demo to leaders on last day of milestone |
+| K10 | **CRITICAL:** If you hit a blocker, how will you let me know? | discovery K10 | Not captured — follow up |
+| K11 | How do you feel about writing tests alongside each module (not at the end)? | discovery K11 | Anushman: agrees, will do it. Anand: can act as QA |
+| K12 | Any concerns about the scope or timeline? | discovery K12 | Not captured — follow up |
+| K13 | Anything in the plan you'd approach differently? | discovery K13 | Not captured — follow up |
+| K14 | Any dependencies or setup you'll need help with on Day 1? | discovery K14 | Not captured — follow up |
 
 **Three non-negotiables — do not leave the call without these:**
 1. K06/K07 — Full-stack or backend-only? (Determines R09 — add frontend dev or not)
@@ -62,44 +62,56 @@
 
 ### AFTER — What Was Captured
 
-**Date completed:** *(fill in)*
+**Date completed:** 2026-05-28
 **Call duration:** *(fill in)*
 
-**Availability:**
-- Working hours: *(fill in)*
-- Unavailable dates: *(fill in)*
-- Daily commitment: *(fill in)*
+> **KEY DISCOVERY: Team is 3 people, not 2.** PM + Anushman (full-stack dev) + Anand (QA/validation). Update charter.md and backlog.md.
+
+**Team roster confirmed:**
+| Person | Role | Background |
+|--------|------|-----------|
+| Anushman | Full-stack Developer | .NET backend, Java, React (5 yrs); Signify (Philips Lighting), .NET device platform; minimal AWS, no Azure/GCP |
+| Anand | QA / Validation | 11 yrs; hardware + software validation, Dell Technologies, server validation, manual testing, integration testing, GPU/DPU platforms |
+
+**Availability: ⚠️ RISK — only 2–3 hrs/day (not 5–6)**
+- Working hours: 2–3 hours/day
+- Unavailable dates: Not captured — ask next session
+- Daily commitment: Below plan assumption — need to recalibrate timeline or scope
 
 **Background:**
-- Cloud experience: *(fill in)*
-- Language preference: *(fill in)*
-- Full-stack or backend-only: *(fill in — CRITICAL)*
-- UI/frontend experience: *(fill in)*
+- Cloud experience: Anushman has minimal AWS only; no Azure or GCP — GCP ramp-up risk (R04) is now confirmed for ALL 3 providers
+- Language/stack: Anushman → .NET (C#) backend + React frontend; Anand → manual/integration testing, Postman
+- Full-stack confirmed: Yes (Anushman) — R09 resolved, no need for additional frontend developer
+- UI/frontend experience: React (Anushman built new features in React)
 
 **Working model:**
-- Preferred check-in frequency: *(fill in)*
-- Blocker communication method: *(fill in)*
-- Requirements format preference: *(fill in)*
-- View on testing alongside coding: *(fill in)*
+- Check-in: Daily standup + sprint review at end of each milestone + demo to leaders on final milestone day
+- Blocker communication: Not captured — follow up ⚠️
+- Requirements format: Chat via Teams; documentation format = PM decides
+- Testing alongside coding: Agreed — Anushman writes tests, Anand acts as QA
 
 **Developer's read on the project:**
-- Concerns raised: *(fill in)*
-- Suggestions offered: *(fill in)*
-- Day 1 dependencies or setup needs: *(fill in)*
+- Concerns raised: Not captured — follow up
+- Suggestions offered: Not captured — follow up
+- Day 1 dependencies: Not captured — follow up
 
 **D-001 — Tech Stack Decision:**
-- Language decided: *(fill in / or still open)*
-- If still open — follow up by: 2026-05-29 morning
+- Stack lean: .NET (C#) backend + React frontend (Anushman's comfort zone)
+- Formally decided: ⬜ Still open — needs explicit closure
+- Follow up by: 2026-05-29 morning
 
 ---
 
 ### AFTER — Immediate Post-Call Actions
 
-- [ ] Fill in K01–K14 answers in `docs/discovery.md` Part A-2
-- [ ] If D-001 decided: log it in `docs/decisions_log.md` immediately
-- [ ] If developer is backend-only: update R09 status to Active in `docs/risk_log.md`; ask manager Q26 in next meeting
+- [ ] Update `docs/discovery.md` Part A-2 with K01–K14 answers (use clean summary above)
+- [ ] Update `docs/charter.md` Team section — team is now PM + Anushman + Anand (3 people)
+- [ ] Update `docs/backlog.md` — reassign QA tasks to Anand; Anushman = Dev; reconsider timeline given 2–3 hrs/day capacity
+- [ ] Update `docs/risk_log.md` — R09 CLOSED (full-stack confirmed); R08 ELEVATED (only 2–3 hrs/day, not 5–6); R04 status update (no Azure/GCP experience)
+- [ ] Close D-001 tomorrow (2026-05-29 morning) — stack leans to .NET + React; decide and log in `docs/decisions_log.md`
+- [ ] Follow up: K02 (unavailable days), K10 (blocker communication), K12–K14 (concerns, suggestions, Day 1 needs)
 - [ ] Mark **P.2** (Team Kickoff) as `Done` in `docs/backlog.md`
-- [ ] Send developer the Day 1 task list: P.5 (repo init), P.6–P.8 (cloud accounts), P.9 (architecture sketch)
+- [ ] Send Day 1 task list to Anushman: P.5 (repo init), P.6–P.8 (cloud accounts), P.9 (architecture sketch)
 
 ---
 
@@ -109,7 +121,7 @@
 
 **Status:** ⬜ Not started
 **Date / Time:** *(schedule ASAP — P.1 is open and blocking charter sign-off)*
-**Who:** PM + Manager
+**Who:** Vishnu (PM) + Manager
 **Purpose:** Confirm constraints, get answers to scope and deployment questions, obtain charter sign-off.
 
 ---
@@ -210,7 +222,7 @@
 - [ ] Live demo: download that file from each provider successfully
 - [ ] Live demo: list files on each provider
 - [ ] Live demo: delete a file on each provider
-- [ ] All 3 module unit test suites pass
+- [ ] All 3 module unit test suites pass (happy path coverage)
 - [ ] No raw SDK errors surfaced to the caller — clean error messages only
 
 **Result:** *(Pass / Fail — log in decisions_log.md)*
@@ -249,10 +261,9 @@
 ### Pass Criteria (all must be true)
 - [ ] Change ACTIVE_PROVIDER in .env → same test works on a different provider, zero code changes
 - [ ] PM verifies the swap live — not just developer's verbal confirmation
-- [ ] Sync: copies missing files, skips unchanged, returns {copied, skipped, failed}
-- [ ] Sync idempotency: running twice produces same result
+- [ ] Sync: copies missing files (by filename), skips unchanged, returns {copied, skipped, failed}
 - [ ] Redundant upload: writes to 2 providers; partial failure explicitly reported
-- [ ] Integration tests pass against real APIs
+- [ ] Anand's Postman validation passes against real APIs for all 4 unified ops
 
 **Result:** *(Pass / Fail — log in decisions_log.md)*
 

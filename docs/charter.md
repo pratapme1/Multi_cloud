@@ -23,6 +23,7 @@ Build an application that integrates AWS S3, Azure Blob Storage, and Google Clou
 **In scope**
 - AWS S3, Azure Blob, GCS integration modules
 - Unified interface: upload, download, list, delete, sync, redundancy
+- File size and file types
 - Web UI for file management
 - User authentication and role-based access control
 - Security: credential management, no secrets in version control
@@ -52,13 +53,15 @@ Build an application that integrates AWS S3, Azure Blob Storage, and Google Clou
 
 | Role | Name | Responsibilities |
 |------|------|-----------------|
-| PM / PO | TBD | Scope, milestone gates, stakeholder comms, **UX wireframes and screen design (Designer role)**, E2E acceptance testing on production |
-| Developer | TBD | Architecture, implementation, **unit tests + integration tests (QA role)**, deployment |
+| PM / PO | Vishnu | Scope, milestone gates, stakeholder comms, **UX wireframes and screen design (Designer role)**, E2E acceptance testing on production |
+| Developer (Full-stack) | Anushman | Architecture, implementation, unit tests (written alongside each module), deployment. Stack: .NET (C#) / Core Java + React. 5 yrs experience. |
+| QA / Validation | Anand | Integration testing, manual testing, API validation (Postman). 11 yrs hardware + software validation experience. |
 
-**Role coverage decisions:**
+**Role coverage decisions (updated 2026-05-28 post-kickoff):**
 - No dedicated Designer — PM owns all UX wireframes, screen layouts, and interaction flows. Developer implements using a CSS framework (Bootstrap / Tailwind / Material UI).
-- No dedicated QA — Developer owns unit tests (written alongside each module) and integration tests (written in M2). PM acts as independent tester for E2E acceptance in M3 and co-leads the security review.
-- A 3rd team member (frontend developer) may be requested if team kickoff confirms the developer is backend-only (see R09 in risk_log.md and Q26 in discovery.md).
+- QA covered by Anand — dedicated QA role. Anand runs integration and manual tests; Anushman writes unit tests alongside each module. PM runs independent E2E on production (task 3.19).
+- R09 resolved — Anushman confirmed full-stack (React + .NET). No additional frontend developer needed.
+- Capacity constraint: Both developers are 2–3 hrs/day only (not full-time). Timeline under review.
 
 ---
 
@@ -67,9 +70,9 @@ Build an application that integrates AWS S3, Azure Blob Storage, and Google Clou
 | Constraint | Detail |
 |------------|--------|
 | Time | 20 calendar days — go-live June 16, 2026 |
-| Team | 2 people, no additional resource |
+| Team | 3 people (PM + Anushman + Anand). Developer capacity: 2–3 hrs/day each — not full-time. |
 | Budget | Cloud free-tier only (assumed) |
-| Tech stack | TBD — must be decided by 2026-05-28 |
+| Tech stack | TBD — D-001 overdue (was due 2026-05-28); stack leans .NET + React but not formally closed |
 
 ---
 
@@ -78,7 +81,8 @@ Build an application that integrates AWS S3, Azure Blob Storage, and Google Clou
 - Cloud accounts provisionable within 2 days
 - Free-tier limits sufficient for development and testing
 - No external review gates between milestones
-- Developer has prior experience with at least one cloud provider
+- Developer has prior experience with at least one cloud provider *(partially invalidated — Anushman has minimal AWS only, no Azure/GCP)*
+- Both developers available 2–3 hrs/day — timeline built on 5–6 hrs/day assumption; may require scope review
 
 ---
 
@@ -86,5 +90,7 @@ Build an application that integrates AWS S3, Azure Blob Storage, and Google Clou
 
 | Role | Name | Date |
 |------|------|------|
-| PM / PO | | |
-| Developer | | |
+| PM / PO/PD | Vishnu |28-05-2026 |
+| FullStack Developer |Anushman |28-05-2026 |
+| QA-Manual Testing |Anand |28-05-2026 |
+

@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Cloud Storage — UI Prototype</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background:#f0f2f5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; margin:0; }
+
+    /* ── Login ── */
+    .login-wrapper { min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); }
+    .login-card { width:400px; border:none; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.35); }
+    .login-logo { width:52px; height:52px; background:linear-gradient(135deg,#4f46e5,#7c3aed);
+      border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+
+    /* ── Navbar ── */
+    .app-navbar { background:#1e293b; box-shadow:0 2px 10px rgba(0,0,0,.25); min-height:54px; }
+    .nav-brand { display:flex; align-items:center; gap:10px; color:#fff; font-weight:600; font-size:1.05rem; text-decoration:none; }
+    .brand-icon { width:32px; height:32px; background:linear-gradient(135deg,#4f46e5,#7c3aed);
+      border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .role-pill { font-size:.7rem; padding:2px 9px; border-radius:12px; font-weight:700; }
+    .role-admin { background:#7c3aed; color:#fff; }
+    .role-readonly { background:#0891b2; color:#fff; }
+    .health-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+    .dot-ok { background:#22c55e; }
+    .dot-err { background:#ef4444; }
+
+    /* ── Content ── */
+    .content { min-height:calc(100vh - 54px); padding:24px; }
+
+    /* ── Summary cards ── */
+    .summary-card { border:none; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+
+    /* ── File table ── */
+    .files-card { border:none; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.07); }
+    .files-card .card-header { background:#fff; border-bottom:1px solid #e2e8f0;
+      border-radius:12px 12px 0 0!important; padding:14px 20px; }
+    .table th { background:#f8fafc; font-size:.78rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:.05em; color:#64748b; border-bottom:2px solid #e2e8f0; padding:11px 16px; }
+    .table td { padding:11px 16px; vertical-align:middle; border-bottom:1px solid #f1f5f9; }
+    .table tbody tr:hover { background:#f8fafc; }
+    .table tbody tr:last-child td { border-bottom:none; }
+    .file-name { font-weight:500; color:#1e293b; display:flex; align-items:center; gap:8px; }
+    .file-icon { width:32px; height:32px; border-radius:8px; display:flex;
+      align-items:center; justify-content:center; font-size:.9rem; flex-shrink:0; }
+    .file-size { color:#64748b; font-size:.83rem; }
+
+    /* ── Provider badges ── */
+    .badge-aws { background:#FF9900!important; color:#1a1a1a!important; }
+    .badge-azure { background:#0078D4!important; color:#fff!important; }
+    .badge-gcs { background:#34A853!important; color:#fff!important; }
+    .pbadge { padding:4px 10px; border-radius:20px; font-size:.73rem; font-weight:700; }
+
+    /* ── Action buttons ── */
+    .btn-act { padding:3px 11px; font-size:.78rem; border-radius:6px; }
+
+    /* ── Upload modal provider options ── */
+    .p-opt { display:flex; align-items:center; gap:10px; padding:10px 14px;
+      border:2px solid #e2e8f0; border-radius:8px; cursor:pointer;
+      transition:border-color .15s,background .15s; margin-bottom:8px; }
+    .p-opt:hover { border-color:#4f46e5; background:#fafafe; }
+    .p-opt.sel { border-color:#4f46e5; background:#f0f0ff; }
+    .p-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+
+    /* ── Shimmer ── */
+    .shimmer { background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);
+      background-size:200% 100%; animation:shim 1.5s infinite; border-radius:4px; }
+    @keyframes shim { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+
+    /* ── Empty state ── */
+    .empty-state { text-align:center; padding:64px 20px; color:#94a3b8; }
+    .empty-state i { font-size:2.8rem; margin-bottom:14px; display:block; }
+
+    /* ── Health grid ── */
+    .health-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:20px; }
+    .health-card { background:#fff; border-radius:12px; padding:20px; border:2px solid transparent;
+      box-shadow:0 2px 8px rgba(0,0,0,.06); text-align:center; }
+    .health-icon { width:48px; height:48px; border-radius:12px; display:flex;
+      align-items:center; justify-content:center; margin:0 auto 12px; font-size:1.4rem; }
+    .h-pill { display:inline-flex; align-items:center; gap:6px; padding:4px 12px;
+      border-radius:20px; font-size:.8rem; font-weight:600; }
+    .h-ok { background:#dcfce7; color:#166534; }
+    .h-err { background:#fee2e2; color:#991b1b; }
+
+    /* ── Sync result ── */
+    .sync-result { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; }
+    .sync-num { font-size:2rem; font-weight:700; line-height:1; }
+    .sync-lbl { font-size:.75rem; color:#64748b; margin-top:4px; }
+
+    /* ── Provider result row ── */
+    .p-result { display:flex; align-items:center; gap:10px; padding:9px 14px;
+      border-bottom:1px solid #f1f5f9; }
+    .p-result:last-child { border-bottom:none; }
+
+    /* ── Screen fade ── */
+    .screen { animation:fd .18s ease-in; }
+    @keyframes fd { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── Prototype nav ── */
+    .proto-nav { position:fixed; bottom:16px; right:16px; z-index:9999; background:#1e293b;
+      border-radius:12px; padding:12px; box-shadow:0 8px 32px rgba(0,0,0,.35);
+      max-height:calc(100vh - 80px); overflow-y:auto; width:210px; }
+    .proto-section { color:#64748b; font-size:.65rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:.08em; margin:8px 0 5px; }
+    .proto-section:first-child { margin-top:0; }
+    .pb { display:block; width:100%; text-align:left; padding:5px 9px; border-radius:6px;
+      font-size:.74rem; color:#cbd5e1; background:transparent; border:1px solid #334155;
+      margin-bottom:3px; cursor:pointer; transition:background .12s; }
+    .pb:hover, .pb.active { background:#4f46e5; border-color:#4f46e5; color:#fff; }
+
+    /* ── Status bar ── */
+    .status-bar { background:#0f172a; color:#64748b; font-size:.68rem; padding:3px 14px;
+      display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:100; }
+
+    /* ── Modal backdrop ── */
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:flex; align-items:center; justify-content:center; z-index:1050; }
+    .modal-box { width:460px; background:#fff; border-radius:14px;
+      box-shadow:0 25px 60px rgba(0,0,0,.4); overflow:hidden; }
+    .modal-box .mh { background:#f8fafc; padding:20px 24px 16px; border-bottom:1px solid #e2e8f0;
+      display:flex; justify-content:space-between; align-items:flex-start; }
+    .bg-blur { filter:blur(3px); pointer-events:none; user-select:none; opacity:.5; }
+
+    /* ── File drop zone ── */
+    .dropzone { border:2px dashed #e2e8f0; border-radius:10px; padding:28px 20px;
+      text-align:center; cursor:pointer; transition:border-color .15s; }
+    .dropzone:hover { border-color:#4f46e5; background:#fafafe; }
+    .file-chip { border:2px solid #4f46e5; border-radius:10px; padding:12px 16px;
+      display:flex; align-items:center; gap:12px; background:#fafafe; }
+
+    @media(max-width:768px) { .content{padding:12px;} .health-grid{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     STATUS BAR
+══════════════════════════════════════════ -->
+<div class="status-bar">
+  <span style="color:#475569;font-weight:600">⚡ PROTOTYPE</span>
+  <span id="screenLabel">Login — Default</span>
+  <span style="margin-left:auto">Multi-Cloud Storage v1.0 &nbsp;·&nbsp; Use the nav (bottom-right) to jump between screens</span>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PROTOTYPE NAVIGATOR
+══════════════════════════════════════════ -->
+<div class="proto-nav">
+  <div class="proto-section">Auth</div>
+  <button class="pb active" onclick="go('login-default')">Login — Default</button>
+  <button class="pb" onclick="go('login-submitting')">Login — Submitting</button>
+  <button class="pb" onclick="go('login-error')">Login — Error</button>
+
+  <div class="proto-section">Admin Flows</div>
+  <button class="pb" onclick="go('files-loading')">Files — Loading</button>
+  <button class="pb" onclick="go('files-admin')">Files — Loaded (Admin)</button>
+  <button class="pb" onclick="go('files-empty')">Files — Empty</button>
+  <button class="pb" onclick="go('files-error')">Files — Error State</button>
+  <button class="pb" onclick="go('upload-default')">Upload — Default</button>
+  <button class="pb" onclick="go('upload-ready')">Upload — File Selected</button>
+  <button class="pb" onclick="go('upload-uploading')">Upload — Uploading</button>
+  <button class="pb" onclick="go('upload-success')">Upload — Single Success</button>
+  <button class="pb" onclick="go('upload-redundant')">Upload — All 3 Success</button>
+  <button class="pb" onclick="go('upload-partial')">Upload — Partial Fail</button>
+  <button class="pb" onclick="go('sync-panel')">Sync Panel</button>
+
+  <div class="proto-section">Readonly</div>
+  <button class="pb" onclick="go('files-readonly')">Files — Readonly View</button>
+  <button class="pb" onclick="go('readonly-403')">Upload Attempt → 403</button>
+
+  <div class="proto-section">System</div>
+  <button class="pb" onclick="go('health-ok')">Health — All OK</button>
+  <button class="pb" onclick="go('health-degraded')">Health — Degraded</button>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S01 · LOGIN — DEFAULT
+══════════════════════════════════════════ -->
+<div id="s-login-default" class="screen">
+  <div class="login-wrapper">
+    <div>
+      <div class="d-flex justify-content-center gap-2 mb-4">
+        <span class="badge rounded-pill py-2 px-3" style="background:#FF9900;color:#1a1a1a;font-size:.73rem"><i class="bi bi-cloud-fill me-1"></i>AWS S3</span>
+        <span class="badge rounded-pill bg-primary py-2 px-3" style="font-size:.73rem"><i class="bi bi-cloud-fill me-1"></i>Azure Blob</span>
+        <span class="badge rounded-pill py-2 px-3" style="background:#34A853;font-size:.73rem"><i class="bi bi-cloud-fill me-1"></i>Google Cloud</span>
+      </div>
+      <div class="card login-card">
+        <div class="card-body p-4">
+          <div class="text-center mb-4">
+            <div class="login-logo"><i class="bi bi-clouds-fill text-white fs-4"></i></div>
+            <h4 class="fw-bold mt-2 mb-1">Multi-Cloud Storage</h4>
+            <p class="text-muted small mb-0">Sign in to manage your files</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+              <input type="text" class="form-control border-start-0" placeholder="Enter username">
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold small">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+              <input type="password" class="form-control border-start-0" placeholder="Enter password">
+              <button class="input-group-text bg-light border-start-0"><i class="bi bi-eye text-muted"></i></button>
+            </div>
+          </div>
+          <div class="d-grid mb-3">
+            <button class="btn btn-primary btn-lg fw-semibold" onclick="go('login-submitting')">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+          </div>
+          <div class="rounded-2 p-3" style="background:#f8fafc;border:1px dashed #e2e8f0">
+            <p class="mb-1 fw-bold" style="font-size:.69rem;color:#94a3b8;letter-spacing:.06em">DEMO CREDENTIALS</p>
+            <p class="mb-0" style="font-size:.74rem;color:#475569"><strong>admin</strong> / Admin@123 — full access</p>
+            <p class="mb-0" style="font-size:.74rem;color:#475569"><strong>viewer</strong> / View@123 — read-only</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-center mt-3" style="color:rgba(255,255,255,.3);font-size:.73rem">Multi-Cloud Storage Integration &nbsp;·&nbsp; v1.0</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S02 · LOGIN — SUBMITTING
+══════════════════════════════════════════ -->
+<div id="s-login-submitting" class="screen" style="display:none">
+  <div class="login-wrapper">
+    <div>
+      <div class="d-flex justify-content-center gap-2 mb-4">
+        <span class="badge rounded-pill py-2 px-3" style="background:#FF9900;color:#1a1a1a;font-size:.73rem"><i class="bi bi-cloud-fill me-1"></i>AWS S3</span>
+        <span class="badge rounded-pill bg-primary py-2 px-3" style="font-size:.73rem"><i class="bi bi-cloud-fill me-1"></i>Azure Blob</span>
+        <span class="badge rounded-pill py-2 px-3" style="background:#34A853;font-size:.73rem"><i class="bi bi-cloud-fill me-1"></i>Google Cloud</span>
+      </div>
+      <div class="card login-card">
+        <div class="card-body p-4">
+          <div class="text-center mb-4">
+            <div class="login-logo"><i class="bi bi-clouds-fill text-white fs-4"></i></div>
+            <h4 class="fw-bold mt-2 mb-1">Multi-Cloud Storage</h4>
+            <p class="text-muted small mb-0">Sign in to manage your files</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+              <input type="text" class="form-control border-start-0" value="admin" disabled>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold small">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+              <input type="password" class="form-control border-start-0" value="Admin@123" disabled>
+              <button class="input-group-text bg-light border-start-0" disabled><i class="bi bi-eye text-muted"></i></button>
+            </div>
+          </div>
+          <div class="d-grid mb-3">
+            <button class="btn btn-primary btn-lg fw-semibold" disabled onclick="go('files-admin')">
+              <span class="spinner-border spinner-border-sm me-2"></span>Signing in...
+            </button>
+          </div>
+          <p class="text-center text-muted small mb-0">Click the button above to proceed to Files</p>
+          <!-- Auto-advance hint -->
+          <div class="text-center mt-2">
+            <button class="btn btn-sm btn-link text-muted p-0" onclick="go('files-admin')" style="font-size:.75rem">→ Skip to Files (Admin)</button>
+            &nbsp;|&nbsp;
+            <button class="btn btn-sm btn-link text-muted p-0" onclick="go('login-error')" style="font-size:.75rem">→ Show error state</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S03 · LOGIN — ERROR
+══════════════════════════════════════════ -->
+<div id="s-login-error" class="screen" style="display:none">
+  <div class="login-wrapper">
+    <div>
+      <div class="d-flex justify-content-center gap-2 mb-4">
+        <span class="badge rounded-pill py-2 px-3" style="background:#FF9900;color:#1a1a1a;font-size:.73rem"><i class="bi bi-cloud-fill me-1"></i>AWS S3</span>
+        <span class="badge rounded-pill bg-primary py-2 px-3" style="font-size:.73rem"><i class="bi bi-cloud-fill me-1"></i>Azure Blob</span>
+        <span class="badge rounded-pill py-2 px-3" style="background:#34A853;font-size:.73rem"><i class="bi bi-cloud-fill me-1"></i>Google Cloud</span>
+      </div>
+      <div class="card login-card">
+        <div class="card-body p-4">
+          <div class="text-center mb-4">
+            <div class="login-logo"><i class="bi bi-clouds-fill text-white fs-4"></i></div>
+            <h4 class="fw-bold mt-2 mb-1">Multi-Cloud Storage</h4>
+            <p class="text-muted small mb-0">Sign in to manage your files</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+              <input type="text" class="form-control border-start-0 is-invalid" value="wronguser">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+              <input type="password" class="form-control border-start-0 is-invalid" placeholder="(cleared)">
+              <button class="input-group-text bg-light border-start-0"><i class="bi bi-eye text-muted"></i></button>
+            </div>
+          </div>
+          <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span style="font-size:.875rem">Invalid username or password.</span>
+          </div>
+          <div class="d-grid">
+            <button class="btn btn-primary btn-lg fw-semibold" onclick="go('files-admin')">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SHARED NAVBAR FRAGMENTS (inline in each screen)
+     Files — Loading
+══════════════════════════════════════════ -->
+<div id="s-files-loading" class="screen" style="display:none">
+  <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+    <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="role-pill role-admin">admin</span>
+      <span style="color:#cbd5e1;font-size:.85rem">admin</span>
+      <button class="btn btn-sm" style="border-color:#334155;color:#cbd5e1" onclick="go('login-default')"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div><h5 class="fw-bold mb-0">Files</h5><p class="text-muted small mb-0">Fetching files…</p></div>
+      <div class="d-flex gap-2">
+        <select class="form-select form-select-sm" style="width:auto" disabled><option>All Providers</option></select>
+        <button class="btn btn-primary btn-sm" disabled><i class="bi bi-cloud-upload me-1"></i>Upload</button>
+      </div>
+    </div>
+    <div class="card files-card">
+      <div class="card-header"><div class="shimmer" style="height:16px;width:70px"></div></div>
+      <div class="card-body p-0">
+        <table class="table mb-0"><thead><tr><th>Name</th><th>Size</th><th>Provider</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td><div class="shimmer" style="height:15px;width:230px"></div></td><td><div class="shimmer" style="height:15px;width:55px"></div></td><td><div class="shimmer" style="height:20px;width:68px;border-radius:20px"></div></td><td><div class="shimmer" style="height:26px;width:155px;border-radius:6px"></div></td></tr>
+          <tr><td><div class="shimmer" style="height:15px;width:190px"></div></td><td><div class="shimmer" style="height:15px;width:48px"></div></td><td><div class="shimmer" style="height:20px;width:68px;border-radius:20px"></div></td><td><div class="shimmer" style="height:26px;width:155px;border-radius:6px"></div></td></tr>
+          <tr><td><div class="shimmer" style="height:15px;width:270px"></div></td><td><div class="shimmer" style="height:15px;width:60px"></div></td><td><div class="shimmer" style="height:20px;width:68px;border-radius:20px"></div></td><td><div class="shimmer" style="height:26px;width:155px;border-radius:6px"></div></td></tr>
+          <tr><td><div class="shimmer" style="height:15px;width:210px"></div></td><td><div class="shimmer" style="height:15px;width:52px"></div></td><td><div class="shimmer" style="height:20px;width:68px;border-radius:20px"></div></td><td><div class="shimmer" style="height:26px;width:155px;border-radius:6px"></div></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="text-center mt-4">
+      <p class="text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Connecting to AWS S3…</p>
+      <button class="btn btn-sm btn-outline-secondary mt-1" onclick="go('files-admin')">Skip → loaded view</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S05 · FILES — ADMIN LOADED
+══════════════════════════════════════════ -->
+<div id="s-files-admin" class="screen" style="display:none">
+  <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+    <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+    <div class="d-flex align-items-center gap-3">
+      <div class="d-flex align-items-center gap-2" style="cursor:pointer" onclick="go('health-ok')" title="View system health">
+        <span class="health-dot dot-ok"></span>
+        <span style="color:#94a3b8;font-size:.8rem">All systems OK</span>
+      </div>
+      <span class="role-pill role-admin">admin</span>
+      <span style="color:#cbd5e1;font-size:.85rem">admin</span>
+      <button class="btn btn-sm" style="border-color:#334155;color:#cbd5e1" onclick="go('login-default')"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </nav>
+  <div class="content">
+
+    <!-- Page header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h5 class="fw-bold mb-0">Files</h5>
+        <p class="text-muted small mb-0">7 files across 3 providers</p>
+      </div>
+      <div class="d-flex gap-2 align-items-center">
+        <select class="form-select form-select-sm" style="width:auto">
+          <option>All Providers</option><option>AWS S3</option><option>Azure Blob</option><option>Google Cloud</option>
+        </select>
+        <button class="btn btn-primary btn-sm fw-semibold" onclick="go('upload-default')"><i class="bi bi-cloud-upload me-1"></i>Upload</button>
+        <button class="btn btn-outline-secondary btn-sm" title="Refresh" onclick="go('files-loading')"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+    </div>
+
+    <!-- Provider summary -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card summary-card" style="background:linear-gradient(135deg,#fff8ed,#fff3d6);border-left:4px solid #FF9900">
+          <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between">
+            <div><p class="text-muted small mb-1 fw-semibold">AWS S3</p><h4 class="fw-bold mb-0">3 files</h4><p class="text-muted mb-0" style="font-size:.74rem">2.7 MB total</p></div>
+            <div style="width:42px;height:42px;background:#FF9900;border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="bi bi-cloud-fill text-white"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card summary-card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-left:4px solid #0078D4">
+          <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between">
+            <div><p class="text-muted small mb-1 fw-semibold">Azure Blob</p><h4 class="fw-bold mb-0">2 files</h4><p class="text-muted mb-0" style="font-size:.74rem">9.3 MB total</p></div>
+            <div style="width:42px;height:42px;background:#0078D4;border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="bi bi-cloud-fill text-white"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card summary-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-left:4px solid #34A853">
+          <div class="card-body py-3 px-4 d-flex align-items-center justify-content-between">
+            <div><p class="text-muted small mb-1 fw-semibold">Google Cloud</p><h4 class="fw-bold mb-0">2 files</h4><p class="text-muted mb-0" style="font-size:.74rem">43.5 MB total</p></div>
+            <div style="width:42px;height:42px;background:#34A853;border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="bi bi-cloud-fill text-white"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- File table -->
+    <div class="card files-card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold" style="font-size:.9rem">All Files</span>
+        <span class="text-muted" style="font-size:.8rem">7 items</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Name</th><th>Size</th><th>Provider</th><th style="width:190px">Actions</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="file-name"><div class="file-icon" style="background:#fef2f2"><i class="bi bi-file-earmark-pdf" style="color:#ef4444"></i></div>quarterly-report-Q1-2026.pdf</div></td>
+              <td><span class="file-size">2.3 MB</span></td>
+              <td><span class="badge pbadge badge-aws">AWS S3</span></td>
+              <td>
+                <button class="btn btn-outline-primary btn-act me-1" onclick="dlToast('quarterly-report-Q1-2026.pdf')"><i class="bi bi-download me-1"></i>Download</button>
+                <button class="btn btn-outline-danger btn-act" onclick="delConfirm('quarterly-report-Q1-2026.pdf','aws')"><i class="bi bi-trash me-1"></i>Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="file-name"><div class="file-icon" style="background:#f0fdf4"><i class="bi bi-file-earmark-image" style="color:#22c55e"></i></div>team-photo.png</div></td>
+              <td><span class="file-size">825 KB</span></td>
+              <td><span class="badge pbadge badge-azure">Azure Blob</span></td>
+              <td>
+                <button class="btn btn-outline-primary btn-act me-1" onclick="dlToast('team-photo.png')"><i class="bi bi-download me-1"></i>Download</button>
+                <button class="btn btn-outline-danger btn-act" onclick="delConfirm('team-photo.png','azure')"><i class="bi bi-trash me-1"></i>Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="file-name"><div class="file-icon" style="background:#fff7ed"><i class="bi bi-file-earmark-code" style="color:#f97316"></i></div>backup-config.json</div></td>
+              <td><span class="file-size">1.2 KB</span></td>
+              <td><span class="badge pbadge badge-gcs">GCS</span></td>
+              <td>
+                <button class="btn btn-outline-primary btn-act me-1" onclick="dlToast('backup-config.json')"><i class="bi bi-download me-1"></i>Download</button>
+                <button class="btn btn-outline-danger btn-act" onclick="delConfirm('backup-config.json','gcs')"><i class="bi bi-trash me-1"></i>Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="file-name"><div class="file-icon" style="background:#f0fdf4"><i class="bi bi-file-earmark-spreadsheet" style="color:#16a34a"></i></div>sales-data-march.xlsx</div></td>
+              <td><span class="file-size">380 KB</span></td>
+              <td><span class="badge pbadge badge-aws">AWS S3</span></td>
+              <td>
+                <button class="btn btn-outline-primary btn-act me-1" onclick="dlToast('sales-data-march.xlsx')"><i class="bi bi-download me-1"></i>Download</button>
+                <button class="btn btn-outline-danger btn-act" onclick="delConfirm('sales-data-march.xlsx','aws')"><i class="bi bi-trash me-1"></i>Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="file-name"><div class="file-icon" style="background:#eff6ff"><i class="bi bi-file-earmark-slides" style="color:#3b82f6"></i></div>presentation-v3.pptx</div></td>
+              <td><span class="file-size">8.5 MB</span></td>
+              <td><span class="badge pbadge badge-azure">Azure Blob</span></td>
+              <td>
+                <button class="btn btn-outline-primary btn-act me-1" onclick="dlToast('presentation-v3.pptx')"><i class="bi bi-download me-1"></i>Download</button>
+                <button class="btn btn-outline-danger btn-act" onclick="delConfirm('presentation-v3.pptx','azure')"><i class="bi bi-trash me-1"></i>Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="file-name"><div class="file-icon" style="background:#fdf4ff"><i class="bi bi-file-earmark-zip" style="color:#a855f7"></i></div>db-backup-2026-05-28.sql</div></td>
+              <td><span class="file-size">43.5 MB</span></td>
+              <td><span class="badge pbadge badge-gcs">GCS</span></td>
+              <td>
+                <button class="btn btn-outline-primary btn-act me-1" onclick="dlToast('db-backup-2026-05-28.sql')"><i class="bi bi-download me-1"></i>Download</button>
+                <button class="btn btn-outline-danger btn-act" onclick="delConfirm('db-backup-2026-05-28.sql','gcs')"><i class="bi bi-trash me-1"></i>Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="file-name"><div class="file-icon" style="background:#fefce8"><i class="bi bi-file-earmark-image" style="color:#eab308"></i></div>logo-final.svg</div></td>
+              <td><span class="file-size">22.9 KB</span></td>
+              <td><span class="badge pbadge badge-aws">AWS S3</span></td>
+              <td>
+                <button class="btn btn-outline-primary btn-act me-1" onclick="dlToast('logo-final.svg')"><i class="bi bi-download me-1"></i>Download</button>
+                <button class="btn btn-outline-danger btn-act" onclick="delConfirm('logo-final.svg','aws')"><i class="bi bi-trash me-1"></i>Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Sync section -->
+    <div class="card border-0 rounded-3" style="box-shadow:0 2px 8px rgba(0,0,0,.06)">
+      <div class="card-header bg-white border-bottom d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left-right text-primary"></i>
+        <span class="fw-semibold" style="font-size:.9rem">File Sync</span>
+        <span class="badge bg-secondary ms-1" style="font-size:.63rem">Admin only</span>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">Copy files from one cloud provider to another. Files already on the target are skipped automatically.</p>
+        <div class="d-flex align-items-end gap-3 flex-wrap">
+          <div>
+            <label class="form-label small fw-semibold">Source</label>
+            <select class="form-select form-select-sm" style="width:180px">
+              <option>AWS S3</option><option>Azure Blob Storage</option><option>Google Cloud</option>
+            </select>
+          </div>
+          <div class="pb-1"><i class="bi bi-arrow-right text-muted fs-5"></i></div>
+          <div>
+            <label class="form-label small fw-semibold">Target</label>
+            <select class="form-select form-select-sm" style="width:180px">
+              <option>Azure Blob Storage</option><option>AWS S3</option><option>Google Cloud</option>
+            </select>
+          </div>
+          <button class="btn btn-outline-primary btn-sm fw-semibold" onclick="go('sync-panel')"><i class="bi bi-play-fill me-1"></i>Run Sync</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S06 · FILES — EMPTY
+══════════════════════════════════════════ -->
+<div id="s-files-empty" class="screen" style="display:none">
+  <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+    <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="role-pill role-admin">admin</span><span style="color:#cbd5e1;font-size:.85rem">admin</span>
+      <button class="btn btn-sm" style="border-color:#334155;color:#cbd5e1" onclick="go('login-default')"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div><h5 class="fw-bold mb-0">Files</h5><p class="text-muted small mb-0">0 files</p></div>
+      <div class="d-flex gap-2">
+        <select class="form-select form-select-sm" style="width:auto"><option>AWS S3</option></select>
+        <button class="btn btn-primary btn-sm fw-semibold" onclick="go('upload-default')"><i class="bi bi-cloud-upload me-1"></i>Upload</button>
+      </div>
+    </div>
+    <div class="card files-card">
+      <div class="card-body">
+        <div class="empty-state">
+          <i class="bi bi-cloud-slash"></i>
+          <h6 class="fw-semibold text-secondary">No files found</h6>
+          <p class="text-muted small mb-4">This provider is empty. Upload your first file to get started.</p>
+          <button class="btn btn-primary btn-sm" onclick="go('upload-default')"><i class="bi bi-cloud-upload me-1"></i>Upload your first file</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S07 · UPLOAD — DEFAULT (modal over blurred bg)
+══════════════════════════════════════════ -->
+<div id="s-upload-default" class="screen" style="display:none">
+  <div class="bg-blur">
+    <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+      <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+    </nav>
+    <div class="content" style="height:300px"></div>
+  </div>
+  <div class="modal-backdrop" onclick="if(event.target===this)go('files-admin')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="mh">
+        <div><h5 class="fw-bold mb-0"><i class="bi bi-cloud-upload me-2 text-primary"></i>Upload File</h5><p class="text-muted small mb-0">Choose a file and destination provider</p></div>
+        <button class="btn-close" onclick="go('files-admin')"></button>
+      </div>
+      <div class="p-4">
+        <div class="mb-3">
+          <label class="form-label fw-semibold small">File</label>
+          <div class="dropzone" onclick="go('upload-ready')">
+            <i class="bi bi-cloud-arrow-up fs-2 text-muted d-block mb-2"></i>
+            <p class="text-muted small mb-1">Click to choose a file</p>
+            <p class="text-muted mb-0" style="font-size:.74rem">Any file type · Max 100 MB</p>
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-semibold small">Upload to</label>
+          <div class="p-opt sel"><div class="p-dot" style="background:#FF9900"></div><span class="small fw-semibold">AWS S3</span><i class="bi bi-check-circle-fill ms-auto text-primary"></i></div>
+          <div class="p-opt" onclick=""><div class="p-dot" style="background:#0078D4"></div><span class="small fw-semibold">Azure Blob Storage</span></div>
+          <div class="p-opt" onclick=""><div class="p-dot" style="background:#34A853"></div><span class="small fw-semibold">Google Cloud Storage</span></div>
+          <div class="p-opt" style="border-style:dashed" onclick="go('upload-ready')" title="Selects All Providers">
+            <div class="d-flex gap-1"><div class="p-dot" style="background:#FF9900;width:9px;height:9px;margin-top:2px"></div><div class="p-dot" style="background:#0078D4;width:9px;height:9px;margin-top:2px"></div><div class="p-dot" style="background:#34A853;width:9px;height:9px;margin-top:2px"></div></div>
+            <span class="small fw-semibold">All Providers</span>
+            <span class="badge bg-secondary ms-2" style="font-size:.62rem">Redundant</span>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary flex-fill" onclick="go('files-admin')">Cancel</button>
+          <button class="btn btn-primary flex-fill fw-semibold" disabled>
+            <i class="bi bi-cloud-upload me-1"></i>Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S08 · UPLOAD — FILE SELECTED
+══════════════════════════════════════════ -->
+<div id="s-upload-ready" class="screen" style="display:none">
+  <div class="bg-blur">
+    <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+      <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+    </nav>
+    <div class="content" style="height:300px"></div>
+  </div>
+  <div class="modal-backdrop" onclick="if(event.target===this)go('files-admin')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="mh">
+        <div><h5 class="fw-bold mb-0"><i class="bi bi-cloud-upload me-2 text-primary"></i>Upload File</h5><p class="text-muted small mb-0">Choose a file and destination provider</p></div>
+        <button class="btn-close" onclick="go('files-admin')"></button>
+      </div>
+      <div class="p-4">
+        <div class="mb-3">
+          <label class="form-label fw-semibold small">File</label>
+          <div class="file-chip">
+            <div class="file-icon" style="background:#eff6ff;box-shadow:0 1px 4px rgba(0,0,0,.1)"><i class="bi bi-file-earmark-pdf text-danger"></i></div>
+            <div class="flex-grow-1">
+              <div class="fw-semibold small">quarterly-report-Q2-2026.pdf</div>
+              <div class="text-muted" style="font-size:.74rem">1.8 MB &nbsp;·&nbsp; PDF Document</div>
+            </div>
+            <button class="btn btn-sm btn-outline-danger" style="font-size:.74rem" onclick="go('upload-default')"><i class="bi bi-x"></i></button>
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-semibold small">Upload to</label>
+          <div class="p-opt sel"><div class="p-dot" style="background:#FF9900"></div><span class="small fw-semibold">AWS S3</span><i class="bi bi-check-circle-fill ms-auto text-primary"></i></div>
+          <div class="p-opt"><div class="p-dot" style="background:#0078D4"></div><span class="small fw-semibold">Azure Blob Storage</span></div>
+          <div class="p-opt"><div class="p-dot" style="background:#34A853"></div><span class="small fw-semibold">Google Cloud Storage</span></div>
+          <div class="p-opt" style="border-style:dashed">
+            <div class="d-flex gap-1"><div class="p-dot" style="background:#FF9900;width:9px;height:9px;margin-top:2px"></div><div class="p-dot" style="background:#0078D4;width:9px;height:9px;margin-top:2px"></div><div class="p-dot" style="background:#34A853;width:9px;height:9px;margin-top:2px"></div></div>
+            <span class="small fw-semibold">All Providers</span>
+            <span class="badge bg-secondary ms-2" style="font-size:.62rem">Redundant</span>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary flex-fill" onclick="go('files-admin')">Cancel</button>
+          <button class="btn btn-primary flex-fill fw-semibold" onclick="go('upload-uploading')">
+            <i class="bi bi-cloud-upload me-1"></i>Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S09 · UPLOAD — UPLOADING (spinner)
+══════════════════════════════════════════ -->
+<div id="s-upload-uploading" class="screen" style="display:none">
+  <div class="bg-blur">
+    <nav class="navbar app-navbar py-0 px-3"><a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a></nav>
+    <div class="content" style="height:300px"></div>
+  </div>
+  <div class="modal-backdrop">
+    <div class="modal-box">
+      <div class="mh"><div><h5 class="fw-bold mb-0"><i class="bi bi-cloud-upload me-2 text-primary"></i>Upload File</h5></div></div>
+      <div class="p-4 text-center">
+        <div style="width:72px;height:72px;background:#eff6ff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <div class="spinner-border text-primary" style="width:2rem;height:2rem"></div>
+        </div>
+        <h6 class="fw-bold mb-1">Uploading…</h6>
+        <p class="text-muted small mb-3">quarterly-report-Q2-2026.pdf → AWS S3</p>
+        <div class="progress mb-3" style="height:6px">
+          <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" style="width:68%"></div>
+        </div>
+        <p class="text-muted mb-4" style="font-size:.78rem">1.2 MB of 1.8 MB · Uploading…</p>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary flex-fill" disabled>Cancel</button>
+          <button class="btn btn-primary flex-fill fw-semibold" disabled>
+            <span class="spinner-border spinner-border-sm me-2"></span>Uploading…
+          </button>
+        </div>
+        <div class="mt-3">
+          <button class="btn btn-sm btn-link text-muted" onclick="go('upload-success')" style="font-size:.74rem">→ Jump to success state</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S10 · UPLOAD — SINGLE SUCCESS
+══════════════════════════════════════════ -->
+<div id="s-upload-success" class="screen" style="display:none">
+  <div class="bg-blur">
+    <nav class="navbar app-navbar py-0 px-3"><a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a></nav>
+    <div class="content" style="height:300px"></div>
+  </div>
+  <div class="modal-backdrop" onclick="if(event.target===this)go('files-admin')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="mh"><div><h5 class="fw-bold mb-0"><i class="bi bi-cloud-upload me-2 text-primary"></i>Upload File</h5></div><button class="btn-close" onclick="go('files-admin')"></button></div>
+      <div class="p-4 text-center">
+        <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
+          <i class="bi bi-check-lg text-success fs-3"></i>
+        </div>
+        <h6 class="fw-bold mb-1">Upload Successful</h6>
+        <p class="text-muted small mb-3">Your file has been uploaded to AWS S3.</p>
+        <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-4 text-start" style="background:#f0fdf4;border:1px solid #bbf7d0">
+          <div class="file-icon" style="background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1)"><i class="bi bi-file-earmark-pdf text-danger"></i></div>
+          <div>
+            <div class="fw-semibold small">quarterly-report-Q2-2026.pdf</div>
+            <div style="font-size:.74rem;color:#16a34a"><i class="bi bi-check-circle-fill me-1"></i>AWS S3 &nbsp;·&nbsp; 1.8 MB</div>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary flex-fill" onclick="go('files-admin')">Close</button>
+          <button class="btn btn-primary flex-fill" onclick="go('upload-default')"><i class="bi bi-cloud-upload me-1"></i>Upload Another</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S11 · UPLOAD — ALL 3 PROVIDERS SUCCESS
+══════════════════════════════════════════ -->
+<div id="s-upload-redundant" class="screen" style="display:none">
+  <div class="bg-blur">
+    <nav class="navbar app-navbar py-0 px-3"><a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a></nav>
+    <div class="content" style="height:300px"></div>
+  </div>
+  <div class="modal-backdrop" onclick="if(event.target===this)go('files-admin')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="mh">
+        <div><h5 class="fw-bold mb-0"><i class="bi bi-cloud-upload me-2 text-primary"></i>Upload File</h5><p class="text-muted small mb-0">Redundant upload — All Providers</p></div>
+        <button class="btn-close" onclick="go('files-admin')"></button>
+      </div>
+      <div class="p-4">
+        <div class="text-center mb-3">
+          <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+            <i class="bi bi-check-lg text-success fs-3"></i>
+          </div>
+          <h6 class="fw-bold mb-0">Redundant Upload Complete</h6>
+          <p class="text-muted small mb-0">quarterly-report-Q2-2026.pdf &nbsp;·&nbsp; 1.8 MB</p>
+        </div>
+        <div class="border rounded-3 mb-4 overflow-hidden">
+          <div class="p-result"><span class="badge pbadge badge-aws" style="min-width:80px">AWS S3</span><span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Uploaded successfully</span></div>
+          <div class="p-result"><span class="badge pbadge badge-azure" style="min-width:80px">Azure Blob</span><span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Uploaded successfully</span></div>
+          <div class="p-result"><span class="badge pbadge badge-gcs" style="min-width:80px">GCS</span><span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Uploaded successfully</span></div>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary flex-fill" onclick="go('files-admin')">Close</button>
+          <button class="btn btn-primary flex-fill" onclick="go('upload-default')">Upload Another</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S12 · UPLOAD — PARTIAL FAILURE
+══════════════════════════════════════════ -->
+<div id="s-upload-partial" class="screen" style="display:none">
+  <div class="bg-blur">
+    <nav class="navbar app-navbar py-0 px-3"><a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a></nav>
+    <div class="content" style="height:300px"></div>
+  </div>
+  <div class="modal-backdrop" onclick="if(event.target===this)go('files-admin')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="mh">
+        <div><h5 class="fw-bold mb-0"><i class="bi bi-cloud-upload me-2 text-warning"></i>Upload File</h5><p class="text-muted small mb-0">Redundant upload — All Providers</p></div>
+        <button class="btn-close" onclick="go('files-admin')"></button>
+      </div>
+      <div class="p-4">
+        <div class="text-center mb-3">
+          <div style="width:64px;height:64px;background:#fef9c3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+            <i class="bi bi-exclamation-triangle text-warning fs-3"></i>
+          </div>
+          <h6 class="fw-bold mb-0">Partial Upload</h6>
+          <p class="text-muted small mb-0">2 of 3 providers succeeded</p>
+        </div>
+        <div class="border rounded-3 mb-3 overflow-hidden">
+          <div class="p-result"><span class="badge pbadge badge-aws" style="min-width:80px">AWS S3</span><span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Uploaded successfully</span></div>
+          <div class="p-result"><span class="badge pbadge badge-azure" style="min-width:80px">Azure Blob</span><span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Uploaded successfully</span></div>
+          <div class="p-result"><span class="badge pbadge badge-gcs" style="min-width:80px">GCS</span><span class="text-danger small fw-semibold"><i class="bi bi-x-circle-fill me-1"></i>Failed — Connection timeout</span></div>
+        </div>
+        <div class="alert alert-warning py-2 small mb-4"><i class="bi bi-info-circle me-1"></i>File is safe on AWS S3 and Azure Blob. You can retry GCS separately.</div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-secondary flex-fill" onclick="go('files-admin')">Close</button>
+          <button class="btn btn-warning flex-fill fw-semibold" onclick="go('upload-ready')"><i class="bi bi-arrow-clockwise me-1"></i>Retry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S13 · SYNC PANEL (result shown)
+══════════════════════════════════════════ -->
+<div id="s-sync-panel" class="screen" style="display:none">
+  <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+    <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="role-pill role-admin">admin</span><span style="color:#cbd5e1;font-size:.85rem">admin</span>
+      <button class="btn btn-sm" style="border-color:#334155;color:#cbd5e1" onclick="go('login-default')"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <button class="btn btn-sm btn-outline-secondary" onclick="go('files-admin')"><i class="bi bi-arrow-left me-1"></i>Back</button>
+      <h5 class="fw-bold mb-0 ms-1"><i class="bi bi-arrow-left-right me-2 text-primary"></i>File Sync</h5>
+    </div>
+    <div class="card border-0 rounded-3 mb-4" style="box-shadow:0 2px 8px rgba(0,0,0,.06)">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-end gap-3 flex-wrap mb-4">
+          <div><label class="form-label small fw-semibold">Source</label>
+            <select class="form-select form-select-sm" style="width:200px"><option selected>AWS S3</option><option>Azure Blob</option><option>Google Cloud</option></select></div>
+          <div class="pb-2"><i class="bi bi-arrow-right text-muted fs-5"></i></div>
+          <div><label class="form-label small fw-semibold">Target</label>
+            <select class="form-select form-select-sm" style="width:200px"><option selected>Azure Blob Storage</option><option>AWS S3</option><option>Google Cloud</option></select></div>
+          <button class="btn btn-primary btn-sm fw-semibold"><i class="bi bi-play-fill me-1"></i>Run Sync</button>
+        </div>
+
+        <!-- Result -->
+        <div class="rounded-3 p-3 mb-3" style="background:#f0fdf4;border:1px solid #bbf7d0">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            <span class="fw-semibold small">Sync completed &nbsp;·&nbsp; AWS S3 → Azure Blob Storage</span>
+            <span class="text-muted small ms-auto">just now</span>
+          </div>
+          <div class="row g-3 text-center">
+            <div class="col-4"><div class="sync-num text-success">3</div><div class="sync-lbl">Copied</div></div>
+            <div class="col-4"><div class="sync-num text-secondary">2</div><div class="sync-lbl">Skipped (exist)</div></div>
+            <div class="col-4"><div class="sync-num text-danger">0</div><div class="sync-lbl">Failed</div></div>
+          </div>
+        </div>
+        <p class="text-muted mb-0" style="font-size:.78rem"><i class="bi bi-info-circle me-1"></i>Running sync again will produce 0 copied, 5 skipped — sync is idempotent.</p>
+      </div>
+    </div>
+
+    <!-- API response preview -->
+    <div class="card border-0 rounded-3" style="box-shadow:0 2px 6px rgba(0,0,0,.05)">
+      <div class="card-body">
+        <p class="fw-semibold small mb-2">POST /api/sync — Response</p>
+        <pre class="mb-0 small" style="background:#1e293b;color:#e2e8f0;padding:14px;border-radius:8px">{ "copied": 3, "skipped": 2, "failed": 0, "failedFiles": [] }</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S14-ERR · FILES — ERROR STATE
+══════════════════════════════════════════ -->
+<div id="s-files-error" class="screen" style="display:none">
+  <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+    <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="health-dot dot-err"></span><span style="color:#fca5a5;font-size:.8rem">Degraded</span>
+      <span class="role-pill role-admin">admin</span><span style="color:#cbd5e1;font-size:.85rem">admin</span>
+      <button class="btn btn-sm" style="border-color:#334155;color:#cbd5e1" onclick="go('login-default')"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div><h5 class="fw-bold mb-0">Files</h5><p class="text-muted small mb-0">Could not load</p></div>
+      <div class="d-flex gap-2">
+        <select class="form-select form-select-sm" style="width:auto"><option>AWS S3</option></select>
+        <button class="btn btn-primary btn-sm fw-semibold" onclick="go('upload-default')"><i class="bi bi-cloud-upload me-1"></i>Upload</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="go('files-loading')"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+    </div>
+    <div class="alert alert-danger d-flex align-items-start gap-3 mb-3">
+      <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+      <div>
+        <div class="fw-semibold mb-1">Failed to load files</div>
+        <div style="font-size:.85rem">Could not connect to AWS S3: Connection refused. Check provider credentials and network access.</div>
+        <button class="btn btn-sm btn-danger mt-2" onclick="go('files-loading')"><i class="bi bi-arrow-clockwise me-1"></i>Retry</button>
+      </div>
+    </div>
+    <div class="card files-card">
+      <div class="card-body">
+        <div class="empty-state">
+          <i class="bi bi-exclamation-circle text-danger"></i>
+          <h6 class="fw-semibold" style="color:#dc2626">Provider Unavailable</h6>
+          <p class="text-muted small mb-3">AWS S3 is not responding. Check the health dashboard for details.</p>
+          <button class="btn btn-sm btn-outline-secondary me-2" onclick="go('health-degraded')"><i class="bi bi-activity me-1"></i>View Health</button>
+          <button class="btn btn-sm btn-outline-primary" onclick="go('files-loading')"><i class="bi bi-arrow-clockwise me-1"></i>Retry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S14 · FILES — READONLY
+══════════════════════════════════════════ -->
+<div id="s-files-readonly" class="screen" style="display:none">
+  <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+    <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="health-dot dot-ok"></span><span style="color:#94a3b8;font-size:.8rem">All systems OK</span>
+      <span class="role-pill role-readonly">readonly</span><span style="color:#cbd5e1;font-size:.85rem">viewer</span>
+      <button class="btn btn-sm" style="border-color:#334155;color:#cbd5e1" onclick="go('login-default')"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="alert d-flex align-items-center gap-2 mb-3" style="background:#eff6ff;border-color:#bfdbfe;color:#1e40af;font-size:.85rem">
+      <i class="bi bi-info-circle-fill"></i>
+      <span>Signed in as <strong>viewer</strong> (read-only). You can download files but cannot upload, delete, or sync.</span>
+    </div>
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div><h5 class="fw-bold mb-0">Files</h5><p class="text-muted small mb-0">7 files across 3 providers</p></div>
+      <div class="d-flex gap-2">
+        <select class="form-select form-select-sm" style="width:auto"><option>All Providers</option><option>AWS S3</option><option>Azure Blob</option><option>Google Cloud</option></select>
+        <button class="btn btn-outline-secondary btn-sm" title="Refresh"><i class="bi bi-arrow-clockwise"></i></button>
+        <!-- No Upload button -->
+      </div>
+    </div>
+    <div class="card files-card">
+      <div class="card-header d-flex justify-content-between">
+        <span class="fw-semibold" style="font-size:.9rem">All Files</span>
+        <span class="text-muted" style="font-size:.8rem">7 items</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Name</th><th>Size</th><th>Provider</th><th style="width:130px">Actions</th></tr></thead>
+          <tbody>
+            <tr><td><div class="file-name"><div class="file-icon" style="background:#fef2f2"><i class="bi bi-file-earmark-pdf" style="color:#ef4444"></i></div>quarterly-report-Q1-2026.pdf</div></td><td><span class="file-size">2.3 MB</span></td><td><span class="badge pbadge badge-aws">AWS S3</span></td><td><button class="btn btn-outline-primary btn-act" onclick="dlToast('quarterly-report-Q1-2026.pdf')"><i class="bi bi-download me-1"></i>Download</button></td></tr>
+            <tr><td><div class="file-name"><div class="file-icon" style="background:#f0fdf4"><i class="bi bi-file-earmark-image" style="color:#22c55e"></i></div>team-photo.png</div></td><td><span class="file-size">825 KB</span></td><td><span class="badge pbadge badge-azure">Azure Blob</span></td><td><button class="btn btn-outline-primary btn-act" onclick="dlToast('team-photo.png')"><i class="bi bi-download me-1"></i>Download</button></td></tr>
+            <tr><td><div class="file-name"><div class="file-icon" style="background:#fff7ed"><i class="bi bi-file-earmark-code" style="color:#f97316"></i></div>backup-config.json</div></td><td><span class="file-size">1.2 KB</span></td><td><span class="badge pbadge badge-gcs">GCS</span></td><td><button class="btn btn-outline-primary btn-act" onclick="dlToast('backup-config.json')"><i class="bi bi-download me-1"></i>Download</button></td></tr>
+            <tr><td><div class="file-name"><div class="file-icon" style="background:#f0fdf4"><i class="bi bi-file-earmark-spreadsheet" style="color:#16a34a"></i></div>sales-data-march.xlsx</div></td><td><span class="file-size">380 KB</span></td><td><span class="badge pbadge badge-aws">AWS S3</span></td><td><button class="btn btn-outline-primary btn-act" onclick="dlToast('sales-data-march.xlsx')"><i class="bi bi-download me-1"></i>Download</button></td></tr>
+            <tr><td><div class="file-name"><div class="file-icon" style="background:#eff6ff"><i class="bi bi-file-earmark-slides" style="color:#3b82f6"></i></div>presentation-v3.pptx</div></td><td><span class="file-size">8.5 MB</span></td><td><span class="badge pbadge badge-azure">Azure Blob</span></td><td><button class="btn btn-outline-primary btn-act" onclick="dlToast('presentation-v3.pptx')"><i class="bi bi-download me-1"></i>Download</button></td></tr>
+            <tr><td><div class="file-name"><div class="file-icon" style="background:#fdf4ff"><i class="bi bi-file-earmark-zip" style="color:#a855f7"></i></div>db-backup-2026-05-28.sql</div></td><td><span class="file-size">43.5 MB</span></td><td><span class="badge pbadge badge-gcs">GCS</span></td><td><button class="btn btn-outline-primary btn-act" onclick="dlToast('db-backup-2026-05-28.sql')"><i class="bi bi-download me-1"></i>Download</button></td></tr>
+            <tr><td><div class="file-name"><div class="file-icon" style="background:#fefce8"><i class="bi bi-file-earmark-image" style="color:#eab308"></i></div>logo-final.svg</div></td><td><span class="file-size">22.9 KB</span></td><td><span class="badge pbadge badge-aws">AWS S3</span></td><td><button class="btn btn-outline-primary btn-act" onclick="dlToast('logo-final.svg')"><i class="bi bi-download me-1"></i>Download</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S15 · READONLY 403 (attempt to upload)
+══════════════════════════════════════════ -->
+<div id="s-readonly-403" class="screen" style="display:none">
+  <div class="bg-blur">
+    <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+      <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+      <div class="d-flex gap-2 align-items-center"><span class="role-pill role-readonly">readonly</span></div>
+    </nav>
+    <div class="content" style="height:200px"></div>
+  </div>
+  <div class="modal-backdrop" onclick="if(event.target===this)go('files-readonly')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="mh">
+        <div><h5 class="fw-bold mb-0 text-danger"><i class="bi bi-shield-x me-2"></i>Access Denied</h5></div>
+        <button class="btn-close" onclick="go('files-readonly')"></button>
+      </div>
+      <div class="p-4 text-center">
+        <div style="width:72px;height:72px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <i class="bi bi-lock-fill text-danger fs-3"></i>
+        </div>
+        <h6 class="fw-bold mb-1">403 — Forbidden</h6>
+        <p class="text-muted small mb-3">Your account has <strong>read-only</strong> access. Upload, delete, and sync operations require the <strong>admin</strong> role.</p>
+        <div class="rounded-3 p-3 mb-4" style="background:#f8fafc;border:1px solid #e2e8f0;text-align:left">
+          <p class="fw-bold mb-2" style="font-size:.75rem;color:#64748b;text-transform:uppercase;letter-spacing:.06em">API Response</p>
+          <code style="font-size:.8rem;color:#ef4444">{ "error": "Forbidden: admin role required" }</code>
+        </div>
+        <button class="btn btn-outline-secondary" onclick="go('files-readonly')">Back to Files</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S16 · HEALTH — ALL OK
+══════════════════════════════════════════ -->
+<div id="s-health-ok" class="screen" style="display:none">
+  <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+    <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="health-dot dot-ok"></span><span style="color:#94a3b8;font-size:.8rem">All systems OK</span>
+      <span class="role-pill role-admin">admin</span><span style="color:#cbd5e1;font-size:.85rem">admin</span>
+      <button class="btn btn-sm" style="border-color:#334155;color:#cbd5e1" onclick="go('login-default')"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div><h5 class="fw-bold mb-0"><i class="bi bi-activity me-2 text-primary"></i>System Health</h5><p class="text-muted small mb-0">GET /api/health &nbsp;·&nbsp; checked just now</p></div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-danger" onclick="go('health-degraded')">Simulate failure →</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="go('files-admin')"><i class="bi bi-arrow-left me-1"></i>Back</button>
+      </div>
+    </div>
+    <div class="alert d-flex align-items-center gap-3 mb-4" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534">
+      <div style="width:44px;height:44px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="bi bi-check-lg text-white fs-5"></i></div>
+      <div><div class="fw-bold">All Systems Operational</div><div style="font-size:.85rem">All 3 cloud providers are reachable and responding normally.</div></div>
+    </div>
+    <div class="health-grid mb-4">
+      <div class="health-card"><div class="health-icon" style="background:#fff8ed"><i class="bi bi-cloud-fill" style="color:#FF9900"></i></div><h6 class="fw-bold mb-1">AWS S3</h6><p class="text-muted small mb-2">us-east-1</p><span class="h-pill h-ok"><span class="health-dot dot-ok"></span>Operational</span><p class="text-muted mt-2 mb-0" style="font-size:.74rem">124 ms</p></div>
+      <div class="health-card"><div class="health-icon" style="background:#eff6ff"><i class="bi bi-cloud-fill" style="color:#0078D4"></i></div><h6 class="fw-bold mb-1">Azure Blob</h6><p class="text-muted small mb-2">East US</p><span class="h-pill h-ok"><span class="health-dot dot-ok"></span>Operational</span><p class="text-muted mt-2 mb-0" style="font-size:.74rem">189 ms</p></div>
+      <div class="health-card"><div class="health-icon" style="background:#f0fdf4"><i class="bi bi-cloud-fill" style="color:#34A853"></i></div><h6 class="fw-bold mb-1">Google Cloud</h6><p class="text-muted small mb-2">us-central1</p><span class="h-pill h-ok"><span class="health-dot dot-ok"></span>Operational</span><p class="text-muted mt-2 mb-0" style="font-size:.74rem">211 ms</p></div>
+    </div>
+    <div class="card border-0 rounded-3" style="box-shadow:0 2px 6px rgba(0,0,0,.05)">
+      <div class="card-body"><p class="fw-semibold small mb-2">API Response</p>
+        <pre class="mb-0 small" style="background:#1e293b;color:#e2e8f0;padding:14px;border-radius:8px">{
+  "status": "ok",
+  "providers": { "aws": "ok", "azure": "ok", "gcs": "ok" }
+}</pre></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     S17 · HEALTH — DEGRADED
+══════════════════════════════════════════ -->
+<div id="s-health-degraded" class="screen" style="display:none">
+  <nav class="navbar app-navbar py-0 px-3 d-flex align-items-center justify-content-between">
+    <a class="nav-brand"><div class="brand-icon"><i class="bi bi-clouds-fill text-white" style="font-size:.9rem"></i></div>Multi-Cloud Storage</a>
+    <div class="d-flex align-items-center gap-3">
+      <span class="health-dot dot-err"></span><span style="color:#fca5a5;font-size:.8rem">Degraded</span>
+      <span class="role-pill role-admin">admin</span><span style="color:#cbd5e1;font-size:.85rem">admin</span>
+      <button class="btn btn-sm" style="border-color:#334155;color:#cbd5e1" onclick="go('login-default')"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div><h5 class="fw-bold mb-0 text-danger"><i class="bi bi-activity me-2"></i>System Health</h5><p class="text-muted small mb-0">GET /api/health &nbsp;·&nbsp; checked just now</p></div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-success" onclick="go('health-ok')">← Simulate recovery</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="go('files-admin')"><i class="bi bi-arrow-left me-1"></i>Back</button>
+      </div>
+    </div>
+    <div class="alert d-flex align-items-center gap-3 mb-4" style="background:#fef2f2;border-color:#fecaca;color:#991b1b">
+      <div style="width:44px;height:44px;background:#ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="bi bi-exclamation-triangle text-white fs-5"></i></div>
+      <div><div class="fw-bold">System Degraded</div><div style="font-size:.85rem">1 of 3 providers is down. Azure Blob operations will fail until restored.</div></div>
+    </div>
+    <div class="health-grid mb-4">
+      <div class="health-card"><div class="health-icon" style="background:#fff8ed"><i class="bi bi-cloud-fill" style="color:#FF9900"></i></div><h6 class="fw-bold mb-1">AWS S3</h6><p class="text-muted small mb-2">us-east-1</p><span class="h-pill h-ok"><span class="health-dot dot-ok"></span>Operational</span><p class="text-muted mt-2 mb-0" style="font-size:.74rem">124 ms</p></div>
+      <div class="health-card" style="border-color:#fecaca;background:#fef2f2"><div class="health-icon" style="background:#fee2e2"><i class="bi bi-cloud-fill" style="color:#ef4444"></i></div><h6 class="fw-bold mb-1">Azure Blob</h6><p class="text-muted small mb-2">East US</p><span class="h-pill h-err"><span class="health-dot dot-err"></span>Error</span><p class="text-danger mt-2 mb-0" style="font-size:.74rem">Connection refused</p></div>
+      <div class="health-card"><div class="health-icon" style="background:#f0fdf4"><i class="bi bi-cloud-fill" style="color:#34A853"></i></div><h6 class="fw-bold mb-1">Google Cloud</h6><p class="text-muted small mb-2">us-central1</p><span class="h-pill h-ok"><span class="health-dot dot-ok"></span>Operational</span><p class="text-muted mt-2 mb-0" style="font-size:.74rem">211 ms</p></div>
+    </div>
+    <div class="card border-0 rounded-3" style="box-shadow:0 2px 6px rgba(0,0,0,.05)">
+      <div class="card-body"><p class="fw-semibold small mb-2">API Response</p>
+        <pre class="mb-0 small" style="background:#1e293b;color:#e2e8f0;padding:14px;border-radius:8px">{
+  "status": "degraded",
+  "providers": {
+    "aws":   "ok",
+    "azure": "error: Connection refused",
+    "gcs":   "ok"
+  }
+}</pre></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TOAST container
+══════════════════════════════════════════ -->
+<div id="toast-area" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9997;pointer-events:none"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const labels = {
+  'login-default':'Login — Default','login-submitting':'Login — Submitting','login-error':'Login — Error',
+  'files-loading':'Files — Loading','files-admin':'Files — Admin (Loaded)','files-empty':'Files — Empty','files-error':'Files — Error State',
+  'upload-default':'Upload — Default','upload-ready':'Upload — File Selected',
+  'upload-uploading':'Upload — Uploading','upload-success':'Upload — Single Success',
+  'upload-redundant':'Upload — All Providers OK','upload-partial':'Upload — Partial Failure',
+  'sync-panel':'Sync — Result','files-readonly':'Files — Readonly',
+  'readonly-403':'403 Forbidden','health-ok':'Health — All OK','health-degraded':'Health — Degraded'
+};
+
+function go(name) {
+  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+  const el = document.getElementById('s-' + name);
+  if (el) el.style.display = 'block';
+  document.getElementById('screenLabel').textContent = labels[name] || name;
+  document.querySelectorAll('.pb').forEach(b => {
+    b.classList.remove('active');
+    const oc = b.getAttribute('onclick') || '';
+    if (oc.includes("'" + name + "'")) b.classList.add('active');
+  });
+  window.scrollTo(0, 0);
+}
+
+function toast(msg, type) {
+  const t = document.createElement('div');
+  const bg = type === 'success' ? '#22c55e' : type === 'warning' ? '#f59e0b' : '#ef4444';
+  t.innerHTML = `<div style="background:${bg};color:#fff;padding:10px 20px;border-radius:8px;font-size:.85rem;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.25);display:flex;align-items:center;gap:8px;pointer-events:auto">
+    <i class="bi bi-${type==='success'?'check-circle-fill':type==='warning'?'exclamation-triangle-fill':'x-circle-fill'}"></i>${msg}</div>`;
+  document.getElementById('toast-area').appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+function dlToast(name) { toast(`Downloading "${name}"…`, 'success'); }
+
+function delConfirm(name, provider) {
+  if (window.confirm(`Delete "${name}" from ${provider}?\nThis cannot be undone.`)) {
+    toast(`"${name}" deleted from ${provider}.`, 'success');
+  }
+}
+</script>
+</body>
+</html>

@@ -6,17 +6,17 @@
 
 ## Working Day Reality and Buffer Strategy
 
-| Phase | Calendar dates | Working days | Buffer note |
-|-------|---------------|-------------|-------------|
-| Pre-work | May 27–29 | 3 | Zero slack — must be done by May 29 |
-| M1 — API Integration | June 1–5 | 5 | Jun 4 = last coding day; Jun 5 = gate + presentation |
-| M2 — Unified Interface | June 8–10 | 3 | Jun 9 = last coding day; Jun 10 = gate; Jun 11 = presentation (buffer day) |
-| M3 — UI + Go-Live | June 11–16 | 4 | Jun 15 = checklist + E2E only; Jun 16 = go-live + presentation |
-| **Total** | | **15 working days** | **~2 days buffer (13%) built into M2 and M3** |
+| Phase | Calendar dates | Working days | Dev hrs available | Buffer note |
+|-------|---------------|-------------|-------------------|-------------|
+| Pre-work | May 27–29 | 3 | ~7.5 hrs | Zero slack — must be done by May 29 |
+| M1 — API Integration | June 1–5 | 5 | ~12.5 hrs | Jun 4 = last coding day + start 2.1/2.2; Jun 5 = gate + presentation |
+| M2 — Unified Interface | June 8–10 | 3 | ~7.5 hrs | Jun 9 = last coding day; Jun 10 = gate; Jun 11 = presentation (buffer day) |
+| M3 — UI + Go-Live | June 12–16 | 3 coding + 1 checklist | ~7.5 hrs coding | Jun 15 = checklist + E2E only; Jun 16 = go-live + presentation |
+| **Total** | | **15 working days** | **~35 hrs dev** | **Scope calibrated to 2–3 hrs/day — see decisions_log.md Planning Session 3** |
 
-**Where the plan is tightest:** M3 has 4 working days for auth, RBAC, full web UI, deployment, and testing. Deployment infrastructure (server provisioning) must be decided at end of M2 and started on Jun 12, not Jun 15.
+**Where the plan is tightest:** M2 (3 days, ~7.5h) and M3 (3 coding days, ~7.5h) are both under-capacity even after scope reduction. M2 risk is mitigated by starting 2.1/2.2 at end of M1 week (Jun 4). M3 risk is mitigated by starting 3.1/3.2 in M2 week. See R11 and R12 in risk_log.md.
 
-**Slip contingency:** If M2 slips past Jun 11, the M3 scope must be cut — flag to manager immediately. The minimum viable M3 is: auth + file list + upload + deploy. Sync panel and admin panel are deferrable to post-go-live.
+**Slip contingency:** 3.13 (sync panel), 3.14 (admin panel), and 3.15 (RBAC UI hiding) are **formally deferred** to post go-live — not conditional on a slip. If M2 slips into M3 week, move sync (2.5/2.6) to M3 start and deliver unified interface + redundancy as M2 pass. Minimum viable M3 is now the **default plan**: auth + login UI + file list + upload + download + delete + deploy.
 
 ---
 
@@ -75,12 +75,12 @@ PM and Dev run concurrent tracks. This is not optional — it is how 15 working 
 
 | # | Task | Track | Owner | Effort | Status |
 |---|------|-------|-------|--------|--------|
-| 1.1 | AWS S3 module: upload, download, list (paginated with continuation tokens), delete; auth via IAM key+secret from .env; error handling for auth failure, file not found, network error | Dev | Dev | L | Open |
-| 1.2 | AWS S3 unit tests: happy path for all 4 ops; auth failure case; file not found case; uses mock client — no real API calls | Dev | Dev | M | Open |
-| 1.3 | Azure Blob module: upload, download, list (paginated with markers), delete; auth via connection string from .env; same error handling standard as 1.1 | Dev | Dev | L | Open |
-| 1.4 | Azure Blob unit tests: same coverage standard as 1.2 | Dev | Dev | M | Open |
-| 1.5 | GCS module: upload, download, list (paginated with page tokens), delete; auth via service account JSON path from .env; same error handling | Dev | Dev | L | Open |
-| 1.6 | GCS unit tests: same coverage standard as 1.2 | Dev | Dev | M | Open |
+| 1.1 | AWS S3 module: upload, download, list (basic — no pagination), delete; auth via IAM key+secret from .env; generic error return with message | Dev | Dev | M | Open |
+| 1.2 | AWS S3 unit tests: happy path only — 1 test per operation; mock client — no real API calls | Dev | Dev | S | Open |
+| 1.3 | Azure Blob module: upload, download, list (basic — no pagination), delete; auth via connection string from .env; same reduced scope as 1.1 | Dev | Dev | M | Open |
+| 1.4 | Azure Blob unit tests: happy path only — same reduced scope as 1.2 | Dev | Dev | S | Open |
+| 1.5 | GCS module: upload, download, list (basic — no pagination), delete; auth via service account JSON path from .env; same reduced scope as 1.1 | Dev | Dev | M | Open |
+| 1.6 | GCS unit tests: happy path only — same reduced scope as 1.2 | Dev | Dev | S | Open |
 | 1.7 | **[PM PARALLEL]** UI wireframe — begin designing 5 screens: login, file list, upload modal, delete confirmation, sync panel | PM | PM | M | Open |
 | 1.8 | M1 presentation prep: slide deck + live demo rehearsal (upload same file to S3, then Azure Blob, then GCS sequentially) | PM | PM | S | Open |
 | 1.9 | M1 internal gate check: run M1 pass criteria against live code with developer (Jun 4) | Both | PM | S | Open |
@@ -90,6 +90,7 @@ PM and Dev run concurrent tracks. This is not optional — it is how 15 working 
 - 1.1+1.2 → 1.3+1.4 → 1.5+1.6 are sequential pairs: write module, immediately write its tests
 - 1.7 and 1.8 run entirely in parallel on the PM track — dev does not wait for wireframe
 - GCS (1.5) needs most time due to service account auth complexity — if behind by Day 3, invoke R04 contingency (allocate extra half-day)
+- **Jun 4 action:** Start 2.1 (interface contract) + 2.2 (D-003 decision) + 2.9 (D-005 deployment decision) at end of M1 week — protects M2's 3 coding days
 
 **M1 Pass Criteria (Jun 5)**
 - [ ] Real file upload, download, list, delete works on all 3 providers — live demo, not described
@@ -110,12 +111,12 @@ PM and Dev run concurrent tracks. This is not optional — it is how 15 working 
 |---|------|-------|-------|--------|--------|
 | 2.1 | Define StorageProvider interface contract: upload(file, filename), download(filename), list(), delete(filename) — exact signatures agreed before coding | Dev | Dev | S | Open |
 | 2.2 | D-003: Document chosen design pattern (Strategy / Adapter / Factory) in decisions_log.md with rationale | Dev | Dev | S | Open |
-| 2.3 | Unified interface implementation: factory or strategy selects provider from ACTIVE_PROVIDER config; all 4 ops work through single interface | Dev | Dev | L | Open |
+| 2.3 | Unified interface implementation: factory or strategy selects provider from ACTIVE_PROVIDER config; all 4 ops work through single interface | Dev | Dev | M | Open |
 | 2.4 | Config swap verification: change ACTIVE_PROVIDER in .env → rerun same test → confirms different provider used, zero code change | Both | Dev + PM | S | Open |
-| 2.5 | File sync: compare source and target provider by filename + file size; copy files missing on target; return {copied: N, skipped: N, failed: N} report | Dev | Dev | L | Open |
-| 2.6 | Sync idempotency: running sync twice produces same result — no duplicates, counts match | Dev | Dev | M | Open |
+| 2.5 | File sync: compare source and target by filename only; copy files missing on target; return {copied: N, skipped: N, failed: N} report | Dev | Dev | M | Open |
+| 2.6 | Sync idempotency: verify sync twice produces same result — natural property of filename comparison; manual check only | Dev | Dev | S | Open |
 | 2.7 | Redundant upload: single call writes to 2+ providers; partial failure explicitly reported — which providers succeeded, which failed; no silent swallowing | Dev | Dev | M | Open |
-| 2.8 | Integration tests: all 4 unified ops against real APIs; provider swap test; sync test (missing file appears, unchanged file skipped); redundant upload + partial failure test | Dev | Dev | M | Open |
+| 2.8 | Integration validation: Anand runs Postman tests against real APIs — all 4 unified ops, provider swap, sync, redundant upload + partial failure | Dev | Anand | S | Open |
 | 2.9 | D-005: Confirm and log deployment target before M2 ends — M3 planning depends on this | Both | Dev + PM | S | Open |
 | 2.10 | **[PM PARALLEL]** Complete UI wireframe: finalize all 5 screens with empty states and error states; review with developer; hand over by Jun 8 start | PM | PM | M | Open |
 | 2.11 | M2 presentation prep: architecture diagram + provider-swap live demo script + wireframe walkthrough | PM | PM | S | Open |
@@ -123,9 +124,11 @@ PM and Dev run concurrent tracks. This is not optional — it is how 15 working 
 | 2.13 | M2 presentation to manager (Jun 11 — 1 buffer day from internal gate) | Both | PM | S | Open |
 
 **Parallel notes:**
+- 2.1 and 2.2 should already be done (started Jun 4 at end of M1 week) — M2 coding starts directly with 2.3
 - 2.10 is PM-only — wireframe must be fully complete and in dev's hands by Jun 8 (M2 start)
-- 2.9 (D-005) can happen on any day in M2 — don't let it slip to M3
+- 2.9 (D-005) ideally decided in M1 week — do not let it slip to M3
 - 2.4 is the critical gate test — PM should personally verify this, not just accept developer's word
+- **M2 week action:** Start D-004 (auth approach) + 3.2 (deployment infra) before M3 begins — protects M3's 3 coding days
 
 **M2 Pass Criteria (Jun 10 gate / Jun 11 presentation)**
 - [ ] ACTIVE_PROVIDER config change swaps provider — no code change required — PM has verified this live
@@ -148,6 +151,8 @@ PM and Dev run concurrent tracks. This is not optional — it is how 15 working 
 
 **Critical note:** Jun 15 is checklist and E2E day only — no new features on Jun 15. Jun 16 is go-live and presentation day. All code must be deployed by Jun 15 morning.
 
+**Formally deferred (not conditional on slip):** 3.13 (sync panel), 3.14 (admin panel), 3.15 (RBAC UI hiding). These do not appear in M3 pass criteria. Default plan = auth + login UI + file list + upload + download + delete + deploy.
+
 | # | Task | Track | Owner | Effort | Status |
 |---|------|-------|-------|--------|--------|
 | 3.1 | D-004: Decide auth approach (JWT vs session); log in decisions_log.md | Both | Dev + PM | S | Open |
@@ -156,15 +161,15 @@ PM and Dev run concurrent tracks. This is not optional — it is how 15 working 
 | 3.4 | Auth endpoints: POST /auth/login → token + role; POST /auth/logout; GET /auth/me | Dev | Dev | M | Open |
 | 3.5 | Auth middleware: all /files and /sync endpoints require valid token; return 401 if missing or invalid | Dev | Dev | M | Open |
 | 3.6 | RBAC middleware: admin vs readonly enforced at API layer; admin-only: upload, delete, sync, admin panel; return 403 for unauthorized operations | Dev | Dev | M | Open |
-| 3.7 | REST API — file endpoints: GET /files (with ?provider filter), POST /files/upload (multipart, provider param), GET /files/download, DELETE /files | Dev | Dev | L | Open |
-| 3.8 | REST API — remaining: POST /sync, GET /admin/users, POST /admin/users, PUT /admin/users/:id, GET /health | Dev | Dev | M | Open |
+| 3.7 | REST API — file endpoints: GET /files, POST /files/upload (multipart, provider param), GET /files/download, DELETE /files | Dev | Dev | M | Open |
+| 3.8 | REST API — sync + health: POST /sync, GET /health | Dev | Dev | S | Open |
 | 3.9 | Web UI — Login screen: username + password fields, error state for invalid credentials, redirect to file list on success | Dev | Dev | M | Open |
-| 3.10 | Web UI — File list: table with filename, size, provider badge (AWS=orange, Azure=blue, GCP=green), upload date, download + delete actions; provider filter tabs; empty state; loading state | Dev | Dev | L | Open |
-| 3.11 | Web UI — Upload modal: file picker + drag-drop zone, provider selector (AWS / Azure / GCP / All Providers), upload button, progress indicator, success/error states | Dev | Dev | L | Open |
-| 3.12 | Web UI — Delete confirmation dialog: filename + provider shown, confirm (red) + cancel, "cannot be undone" warning | Dev | Dev | S | Open |
-| 3.13 | Web UI — Sync panel: source + target provider selectors, Run Sync button, result card with counts (copied / skipped / failed) | Dev | Dev | M | Open |
-| 3.14 | Web UI — Admin panel: user list with roles, Add User form (username, email, password, role), role change; admin-only access | Dev | Dev | M | Open |
-| 3.15 | RBAC in UI: upload button and delete icon hidden for read-only users; sync and admin panel hidden; enforcement at API layer remains regardless | Dev | Dev | S | Open |
+| 3.10 | Web UI — File list: table with filename, size, provider badge (AWS=orange, Azure=blue, GCP=green), download + delete actions; empty state | Dev | Dev | M | Open |
+| 3.11 | Web UI — Upload modal: file picker + provider selector (AWS / Azure / GCP / All Providers), upload button, success/error states | Dev | Dev | M | Open |
+| 3.12 | Web UI — Delete confirmation: browser native confirm() dialog with filename shown; no custom modal | Dev | Dev | S | Open |
+| 3.13 | Web UI — Sync panel: source + target provider selectors, Run Sync button, result card with counts (copied / skipped / failed) | Dev | Dev | M | **Deferred** |
+| 3.14 | Web UI — Admin panel: user list with roles, Add User form (username, email, password, role), role change; admin-only access | Dev | Dev | M | **Deferred** |
+| 3.15 | RBAC in UI: upload button and delete icon hidden for read-only users; sync and admin panel hidden; enforcement at API layer remains regardless | Dev | Dev | S | **Deferred** |
 | 3.16 | Confirm cloud credentials not in browser: PM checks network tab on live app — no API keys, connection strings, or service account data in any response | Both | PM + Dev | S | Open |
 | 3.17 | Security review: credentials only in .env on server, HTTPS enforced or documented exception, error messages do not expose stack traces or internal paths | Both | PM + Dev | M | Open |
 | 3.18 | Deploy to production: app starts cleanly on server; accessible from outside dev machine at confirmed URL | Dev | Dev | M | Open |
@@ -179,7 +184,7 @@ PM and Dev run concurrent tracks. This is not optional — it is how 15 working 
 - 3.2 (deployment infra) starts Jun 12 in parallel with 3.3–3.6 (auth) — do not wait until code is done
 - 3.9–3.15 (Web UI) can only start after 3.5 and 3.6 (auth + RBAC middleware) are working
 - 3.22 (presentation prep) is PM-only; runs in parallel with dev's final testing and fixes
-- **Deferrable if time runs short:** 3.13 (sync panel), 3.14 (admin panel) — minimum viable M3 is login + file list + upload + download + delete + deploy
+- **Formally deferred (not conditional):** 3.13 (sync panel), 3.14 (admin panel), 3.15 (RBAC UI hiding) — default plan is login + file list + upload + download + delete + deploy
 
 **M3 Pass Criteria (Jun 16)**
 - [ ] Login and logout work; invalid credentials return 401 in API and error message in UI

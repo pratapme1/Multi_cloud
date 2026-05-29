@@ -186,20 +186,22 @@ Either way, document what you heard, what you interpreted, and flag it in the ch
 
 | # | Question | Answer |
 |---|----------|--------|
-| K01 | Is this project 100% of your time for the 20 days, or do you have other work alongside it? | |
-| K02 | Are there any days in the May 28 – June 16 window where you're unavailable (travel, leave, other obligations)? | |
-| K03 | What hours do you typically work — and when are you best reached if something is urgent? | |
+| K01 | Is this project 100% of your time for the 20 days, or do you have other work alongside it? | **2–3 hours/day only** — not full-time. ⚠️ Timeline was built assuming 5–6 hrs/day. |
+| K02 | Are there any days in the May 28 – June 16 window where you're unavailable (travel, leave, other obligations)? | Not captured — follow up |
+| K03 | What hours do you typically work — and when are you best reached if something is urgent? | Not captured — follow up |
 
 ---
 
 ## Experience and Background
 
+> **Note:** Team confirmed as 3 people — Anushman (full-stack dev) + Anand (QA/validation). Answers below per person where relevant.
+
 | # | Question | Answer |
 |---|----------|--------|
-| K04 | Have you worked with any of the three cloud providers before — AWS S3, Azure Blob, or GCS? Which one(s)? | |
-| K05 | Do you have a strong language preference for this project, or are you neutral on D-001? | |
-| K06 | Have you built a web API or backend service before? What stack? | |
-| K07 | Have you deployed an application to a live server before (not just localhost)? | |
+| K04 | Have you worked with any of the three cloud providers before — AWS S3, Azure Blob, or GCS? Which one(s)? | Anushman: minimal AWS only, no Azure/GCP. Anand: REST API testing via Postman — no cloud SDK experience. |
+| K05 | Do you have a strong language preference for this project, or are you neutral on D-001? | Anushman: .NET (C#), Core Java, React. No Spring Boot. D-001 not formally closed. |
+| K06 | Have you built a web API or backend service before? What stack? | Anushman: Yes — .NET backend (5 yrs, Signify/Philips Lighting, device platform team). Full-stack confirmed. ✅ R09 resolved. |
+| K07 | Have you deployed an application to a live server before (not just localhost)? | Not captured — follow up |
 
 ---
 
@@ -207,10 +209,10 @@ Either way, document what you heard, what you interpreted, and flag it in the ch
 
 | # | Question | Answer |
 |---|----------|--------|
-| K08 | How do you prefer to receive task context — written in the backlog is enough, or do you want a brief verbal walkthrough? | |
-| K09 | How do you want to communicate status — daily check-in, async message, or something else? | |
-| K10 | When you're blocked, what's your default — work around it yourself, message me immediately, or wait for our next check-in? | |
-| K11 | Do you want to be involved in milestone presentation prep, or is that fully my responsibility? | |
+| K08 | How do you prefer to receive task context — written in the backlog is enough, or do you want a brief verbal walkthrough? | Chat: Teams. Documentation format: PM decides. |
+| K09 | How do you want to communicate status — daily check-in, async message, or something else? | Daily standup. Sprint review call at end of each milestone. Group retest if needed. Demo to leaders on final milestone day. |
+| K10 | When you're blocked, what's your default — work around it yourself, message me immediately, or wait for our next check-in? | Not captured — follow up ⚠️ |
+| K11 | Do you want to be involved in milestone presentation prep, or is that fully my responsibility? | Not captured — follow up |
 
 ---
 
@@ -218,9 +220,18 @@ Either way, document what you heard, what you interpreted, and flag it in the ch
 
 | # | Question | Answer |
 |---|----------|--------|
-| K12 | What's your honest first reaction to this project — anything that excites you or concerns you? | |
-| K13 | Is there anything in the scope that you think is underestimated or that we should de-risk early? | |
-| K14 | Is there anything you're hoping to learn or practice from this project specifically? | |
+| K12 | What's your honest first reaction to this project — anything that excites you or concerns you? | Not captured — follow up |
+| K13 | Is there anything in the scope that you think is underestimated or that we should de-risk early? | Not captured — follow up |
+| K14 | Is there anything you're hoping to learn or practice from this project specifically? | Not captured — follow up |
+
+---
+
+## Team Roster — Confirmed at Kickoff (2026-05-28)
+
+| Person | Role | Background | Cloud Experience |
+|--------|------|-----------|-----------------|
+| Anushman | Full-stack Developer | .NET (C#), Core Java, React — 5 yrs; Signify (Philips Lighting), .NET device platform, support/services | Minimal AWS only; no Azure, no GCP |
+| Anand | QA / Validation | 11 yrs; hardware + software validation, Dell Technologies; server validation, GPU/DPU platform; manual + integration testing; Postman | No cloud SDK experience |
 
 ---
 

@@ -16,18 +16,20 @@
 
 ## 2. Team
 
-| Role | Responsibilities |
-|------|-----------------|
-| PM / PO | Scope, priorities, milestone gates, sessions with Claude, **UX wireframes + screen design (Designer)**, E2E acceptance testing |
-| Developer | Architecture, implementation, **unit + integration tests (QA)**, deployment |
+| Role | Name | Responsibilities |
+|------|------|-----------------|
+| PM / PO | **Vishnu** | Scope, priorities, milestone gates, sessions with Claude, **UX wireframes + screen design (Designer)**, E2E acceptance testing |
+| Developer (Full-stack) | Anushman | Architecture, implementation, unit tests alongside each module, deployment. Stack: .NET (C#) / Core Java + React. |
+| QA / Validation | Anand | Integration testing, manual testing, API validation (Postman). 11 yrs hardware + software validation. |
 
-**Role overlap decisions:**
-- PM = Designer. PM owns all wireframes and screen definitions. No dedicated designer on the team.
-- Developer = QA. Developer writes unit tests alongside each module and integration tests in M2. No dedicated QA on the team.
-- PM acts as independent tester for E2E on production (task 3.19) and co-leads security review (task 3.17).
-- If developer is backend-only: frontend developer may be added for M3 (see R09 in risk_log.md).
+**Role decisions (confirmed 2026-05-28):**
+- Vishnu = PM + Designer. Owns all wireframes and screen definitions.
+- Anushman = Developer + unit test author. Full-stack confirmed (React frontend + .NET backend).
+- Anand = dedicated QA. Runs integration and manual tests. Not a coder — validation specialist.
+- Vishnu acts as independent E2E tester on production (task 3.19) and co-leads security review (task 3.17).
+- R09 closed — no additional frontend developer needed.
 
-PM drives Claude sessions. Developer owns all implementation decisions unless explicitly asking for suggestions.
+Vishnu drives Claude sessions. Anushman owns all implementation decisions unless explicitly asking for suggestions.
 
 ---
 
@@ -59,7 +61,9 @@ PM drives Claude sessions. Developer owns all implementation decisions unless ex
 ## 5. Current Focus
 
 **Active Milestone:** Pre-work — Initiation & Planning
-**Current Goal:** Finalize charter, decide tech stack (D-001), confirm team names
+**Current Goal:** Complete manager kickoff (P.1); provision cloud accounts (P.6–P.8); repo init (P.5)
+**Blockers:** Manager kickoff (P.1) not yet done; K02/K10/K12–K14 not captured from developer kickoff
+**Decisions closed today (2026-05-29):** D-001 (tech stack), D-002 (credentials), D-005 (deployment)
 
 > Update this section format at each milestone:
 > Active Milestone: M1 / M2 / M3

@@ -23,26 +23,28 @@
 ---
 
 ### D-001 — Tech Stack
-- **Date:** *(fill in)*
-- **Decision:** *(fill in)*
+- **Date:** 2026-05-29
+- **Decision:** C# (.NET 8) backend + React (Vite) frontend + SQLite database
 - **Options considered:**
-  - Python — boto3, azure-storage-blob, google-cloud-storage. Mature SDKs, strong cloud tooling ecosystem, easy to read.
-  - Node.js / TypeScript — aws-sdk v3, @azure/storage-blob, @google-cloud/storage. Good async model, strong typing with TS.
-  - Go — high performance, strong concurrency, but steeper ramp if team isn't familiar.
-- **Chosen because:** *(fill in)*
-- **Consequences:** *(fill in — what becomes easier, what becomes harder)*
+  - Python — boto3, azure-storage-blob, google-cloud-storage. Mature SDKs, strong cloud tooling ecosystem, easy to read. Developer unfamiliar.
+  - Node.js / TypeScript — aws-sdk v3, @azure/storage-blob, @google-cloud/storage. Good async model. Developer unfamiliar.
+  - Go — high performance, strong concurrency, but steep ramp. Developer unfamiliar.
+  - **C# / .NET 8 + React** — Anushman's 5-year primary stack. ASP.NET Core Web API for REST endpoints. All 3 cloud providers have official first-class .NET SDKs. React for frontend (Anushman has built React features before).
+- **Chosen because:** Developer's strongest stack — productivity over PM preference. All 3 cloud SDKs have official .NET support (AWSSDK.S3, Azure.Storage.Blobs, Google.Cloud.Storage.V1). ASP.NET Core is purpose-built for REST APIs. Switching to another stack wastes ramp-up days we do not have at 2–3 hrs/day capacity. Java is explicitly off the table — .NET only.
+- **Consequences:** React app built and served from ASP.NET Core wwwroot (single deployment unit). Azure App Service free tier natively supports .NET — simplifies D-005. xUnit + Moq for unit tests. Entity Framework Core + SQLite for user data — no separate database server.
 - **Decided by:** Dev + PM
 
 ---
 
 ### D-002 — Credential Management
-- **Date:** *(fill in)*
-- **Decision:** *(fill in)*
+- **Date:** 2026-05-29
+- **Decision:** `.env` file (local dev) + Azure App Service Application Settings (production)
 - **Options considered:**
-  - `.env` file + library (python-dotenv / dotenv) — simple, must be in `.gitignore`
+  - `.env` file + library (dotenv.net) — simple, must be in `.gitignore`
   - Environment variables only — no file, injected per environment
-  - Cloud secrets manager (AWS Secrets Manager, Azure Key Vault, GCP Secret Manager) — most secure, adds complexity
-- **Chosen because:** *(fill in)*
+  - Cloud secrets manager (AWS Secrets Manager, Azure Key Vault, GCP Secret Manager) — most secure, significant added complexity
+- **Chosen because:** .env is the simplest local approach and keeps all keys in one place for the developer. In production, Azure App Service Application Settings inject all env vars directly — no .env file on the server, no secrets in any file. Secrets manager is overkill for a 20-day project on free tier.
+- **Consequences:** `.env` must be in `.gitignore` from Day 1. `.env.example` with all key names (no values) must be committed. On Azure App Service, each key in `.env.example` becomes an Application Setting.
 - **Decided by:** Dev
 
 ---
@@ -72,15 +74,76 @@
 ---
 
 ### D-005 — Deployment Target
-- **Date:** *(fill in — by end of M2 week)*
-- **Decision:** *(fill in)*
+- **Date:** 2026-05-29
+- **Decision:** Azure App Service (free tier F1)
 - **Options considered:**
-  - Docker + VPS (DigitalOcean, Linode, EC2) — full control, low cost
-  - PaaS (Railway, Render, Heroku) — fast deploy, no infra management
-  - Cloud-native (Elastic Beanstalk / App Service / Cloud Run) — stays in existing cloud accounts
-  - Local server — no public URL; only viable if internal use
-- **Chosen because:** *(fill in)*
+  - Docker + VPS (DigitalOcean, Linode, EC2) — full control, low cost; requires infra management
+  - PaaS (Railway, Render, Heroku) — fast deploy, no infra management; extra account setup
+  - **Azure App Service (free tier F1)** — stays in the Azure account already needed for Azure Blob module; native .NET support; Application Settings replace .env in production
+  - Local server — no public URL; does not satisfy charter criterion 7
+- **Chosen because:** Azure account is already being provisioned for P.7 (Azure Blob Storage). Free tier F1 supports .NET 8 natively. No new account or billing setup. Application Settings eliminate the need for any secrets file on the server. Single deployment unit: React built into wwwroot, served by ASP.NET Core.
+- **Consequences:** Azure account provisioning (P.7) and deployment (3.2) share the same account — delay in P.7 delays deployment setup. GitHub Actions or zip deploy — Anushman decides the CI/CD mechanism.
 - **Decided by:** Dev + PM
+
+---
+
+## Planning Session 3 — 2026-05-29 (Capacity-Driven Scope Reduction)
+
+**What happened:** Full capacity audit completed. Backlog and roadmap recalibrated from 8-hr/day assumptions to 2–3 hrs/day reality.
+
+**Capacity math (before changes):**
+- M1 available: ~12.5 hrs dev | was estimated ~27 hrs (2.2× over)
+- M2 available: ~7.5 hrs dev | was estimated ~25 hrs (3.3× over)
+- M3 available: ~7.5 hrs coding | was estimated ~55 hrs (7.3× over)
+
+**Scope changes applied:**
+- 1.1, 1.3, 1.5 (cloud modules): L → M — removed pagination; generic error return only
+- 1.2, 1.4, 1.6 (unit tests): M → S — happy path only; error cases moved to Anand's Postman validation
+- 2.3 (unified interface implementation): L → M — simpler once modules share consistent structure
+- 2.5 (file sync): L → M — filename comparison only; no file-size check
+- 2.6 (sync idempotency): M → S — natural property of filename match; not a separate test suite
+- 2.8 (integration tests): M → S — replaced with Anand's Postman manual validation (real API calls)
+- 3.7 (REST API file endpoints): L → M — simplified error handling; no provider filter param
+- 3.8 (REST API sync/admin/health): M → S — removed admin user CRUD; POST /sync + GET /health only; seed 1 admin + 1 readonly user at deploy
+- 3.10 (file list UI): L → M — removed date column, loading state, provider filter tabs
+- 3.11 (upload modal): L → M — file picker only; no drag-drop
+- 3.12 (delete confirmation): custom modal → browser native confirm()
+- 3.13 (sync panel UI): **Formally deferred** — post go-live; sync available via API
+- 3.14 (admin panel UI): **Formally deferred** — post go-live; users seeded at deploy
+- 3.15 (RBAC UI hiding): **Formally deferred** — API enforcement (3.5, 3.6) satisfies charter criterion 5
+
+**Sequencing adjustments:**
+- 2.1 (interface contract) + 2.2 (D-003) + 2.9 (D-005): start at end of M1 week (Jun 4) — not M2 start
+- 3.1 (D-004 auth decision) + 3.2 (deployment infra): start in M2 week — not M3 start
+
+**New risks logged:** R11 (M2 coding window — score 9), R12 (M3 coding window — score 9)
+
+**Residual risk:** Even after these reductions, M2 and M3 remain the tightest phases. All 7 charter success criteria are still fully targeted. If M2 slips, sync moves to M3 start. If M3 slips, minimum viable delivery is auth + login + file list + upload + download + delete + deploy.
+
+**Artifacts updated:** backlog.md, roadmap.md, risk_log.md, decisions_log.md, meetings_prep.md
+
+---
+
+## Developer Kickoff — 2026-05-28
+
+**What happened:** Team kickoff call completed with Anushman and Anand.
+
+**Key findings:**
+- Team is 3 people (PM + Anushman + Anand) — not 2. Charter and backlog updated.
+- Anushman: full-stack (.NET C# backend + React frontend, 5 yrs, Signify/Philips Lighting). R09 closed.
+- Anand: QA/validation specialist (11 yrs, Dell Technologies, hardware + software validation). Dedicated QA role confirmed.
+- Availability: 2–3 hrs/day each — not full-time. Timeline built on 5–6 hrs/day assumption. R08 elevated to Critical (score 9).
+- Cloud experience gap confirmed: Anushman has minimal AWS only, no Azure/GCP. R04 elevated (score 6).
+- Stack lean: .NET + React. No Spring Boot. D-001 still open — close by 2026-05-29 morning.
+- Check-in: daily standup + sprint review at each milestone end + demo to leaders on final day.
+
+**Still open after kickoff:**
+- D-001 (tech stack) — close tomorrow; PM makes unilateral call if not resolved
+- K02, K10, K12–K14 — not captured; ask in next check-in
+- "Core Java — what framework?" — must clarify before D-001 closes (see R10)
+- PM evaluating additional help (design / tech stack)
+
+**Artifacts updated:** charter.md, backlog.md, risk_log.md, discovery.md, meetings_prep.md
 
 ---
 
