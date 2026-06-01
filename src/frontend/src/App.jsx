@@ -7,6 +7,7 @@ import Rail from './components/Rail.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignUpPage from './pages/SignUpPage.jsx';
 import FilesPage from './pages/FilesPage.jsx';
+import RolesPage from './pages/RolesPage.jsx';
 
 function ProtectedRoute() {
   const { user } = useAuth();
@@ -39,14 +40,20 @@ function AppShell() {
     <div className="app">
       <Rail activeDrawer={drawer} onDrawer={openDrawer} onLogoClick={handleLogoClick} />
       <main className="main">
-        <FilesPage
-          drawer={drawer}
-          selIdx={selIdx}
-          onDrawer={openDrawer}
-          onSelectFile={selectFile}
-          onCloseDrawer={closeDrawer}
-          refreshKey={refreshKey}
-        />
+        <Routes>
+          <Route path="files" element={
+            <FilesPage
+              drawer={drawer}
+              selIdx={selIdx}
+              onDrawer={openDrawer}
+              onSelectFile={selectFile}
+              onCloseDrawer={closeDrawer}
+              refreshKey={refreshKey}
+            />
+          } />
+          <Route path="roles" element={<RolesPage />} />
+          <Route path="*" element={<Navigate to="/app/files" replace />} />
+        </Routes>
       </main>
     </div>
   );

@@ -4,9 +4,8 @@ import { deleteFile, downloadFile } from '../api/index.js';
 import { FileTypeIcon, ProviderIcons } from './FileIcons.jsx';
 
 export default function FileList({ files, selectedIdx, onSelect, onRefresh, sortBy, sortDir, onSort }) {
-  const { user } = useAuth();
+  const { can } = useAuth();
   const toast = useToast();
-  const isAdmin = user?.role === 'admin';
 
   const handleDelete = async (e, file) => {
     e.stopPropagation();
@@ -86,7 +85,7 @@ export default function FileList({ files, selectedIdx, onSelect, onRefresh, sort
                 <path d="M7 2v7M4 7l3 3 3-3M2 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
-            {isAdmin && (
+            {can('delete') && (
               <button className="icb" title="Delete" style={{ color: 'var(--er)' }} onClick={e => handleDelete(e, f)}>
                 <svg viewBox="0 0 14 14" width="13" height="13" fill="none">
                   <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M5.5 6v4M8.5 6v4M3 3.5l.7 8a.5.5 0 00.5.5h5.6a.5.5 0 00.5-.5l.7-8"

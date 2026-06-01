@@ -10,9 +10,8 @@ const CARD_COLORS = {
 };
 
 export default function FileGrid({ files, onSelect, onRefresh }) {
-  const { user } = useAuth();
+  const { can } = useAuth();
   const toast = useToast();
-  const isAdmin = user?.role === 'admin';
 
   const handleDelete = async (e, file) => {
     e.stopPropagation();
@@ -61,7 +60,7 @@ export default function FileGrid({ files, onSelect, onRefresh }) {
                 </svg>
                 Download
               </button>
-              {isAdmin && (
+              {can('delete') && (
                 <button
                   style={{ borderRadius: 8, background: 'var(--sur2)', border: '1.5px solid var(--bd)', padding: '5px 9px', fontSize: 11, cursor: 'pointer', color: 'var(--er)', fontFamily: 'inherit' }}
                   onClick={e => handleDelete(e, f)}

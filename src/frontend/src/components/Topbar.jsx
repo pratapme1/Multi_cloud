@@ -1,8 +1,7 @@
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Topbar({ pageState, onDrawer, onUpload, search, onSearch, healthDeg }) {
-  const { user } = useAuth();
-  const isAdmin    = user?.role === 'admin';
+  const { user, can, roleLabel } = useAuth();
   const isError    = pageState === 'error';
   const isLoading  = pageState === 'loading';
   const isReadonly = user?.role === 'viewer';
@@ -28,10 +27,10 @@ export default function Topbar({ pageState, onDrawer, onUpload, search, onSearch
       <div className="tb-right">
         {isReadonly && (
           <span style={{ fontSize: 12, color: 'var(--tx3)', padding: '0 4px', fontWeight: 600 }}>
-            Read-only
+            {roleLabel(user?.role)}
           </span>
         )}
-        {!isLoading && !isError && !isReadonly && (
+        {!isLoading && !isError && can('sync') && (
           <button className="btn btn-s btn-sm" onClick={() => onDrawer('sync')}>
             <svg viewBox="0 0 16 16" width="13" height="13" fill="none" style={{ flexShrink: 0 }}>
               <path d="M2.5 8A5.5 5.5 0 018 2.5a5.5 5.5 0 015.1 3.5M13.5 8A5.5 5.5 0 018 13.5 5.5 5.5 0 012.9 10"
@@ -57,7 +56,7 @@ export default function Topbar({ pageState, onDrawer, onUpload, search, onSearch
             Health
           </span>
         </button>
-        {isAdmin && !isLoading && (
+        {can('upload') && !isLoading && (
           <button className="btn btn-p btn-sm" onClick={onUpload} disabled={isLoading}>
             <svg viewBox="0 0 16 16" width="12" height="12" fill="none">
               <path d="M8 11V3M4 7l4-4 4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>

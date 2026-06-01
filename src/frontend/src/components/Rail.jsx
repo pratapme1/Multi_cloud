@@ -1,14 +1,16 @@
 import { useTheme } from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Rail({ activeDrawer, onDrawer, onLogoClick }) {
   const { dark, toggleTheme } = useTheme();
-  const { user, signOut } = useAuth();
+  const { user, signOut, can } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const isFilesActive = !activeDrawer;
+  const isFilesActive = location.pathname.includes('/app/files') && !activeDrawer;
   const isSyncActive  = activeDrawer === 'sync';
+  const isRolesActive = location.pathname.includes('/app/roles');
 
   return (
     <aside className="rail">
@@ -31,18 +33,33 @@ export default function Rail({ activeDrawer, onDrawer, onLogoClick }) {
 
       <div className="rail-sep" />
 
-      <button
-        className={`ri${isSyncActive ? ' on' : ''}`}
-        data-tip="Sync"
-        onClick={() => onDrawer('sync')}
-      >
-        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
-          <path d="M4 10a6 6 0 016-6 6 6 0 015.66 4M16 10a6 6 0 01-6 6 6 6 0 01-5.66-4"
-            stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-          <path d="M14.5 8l1.66-4 1.84 4M3.5 12l-1.66 4-1.84-4"
-            stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
+      {can('sync') && (
+        <button
+          className={`ri${isSyncActive ? ' on' : ''}`}
+          data-tip="Sync"
+          onClick={() => { navigate('/app/files'); onDrawer('sync'); }}
+        >
+          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
+            <path d="M4 10a6 6 0 016-6 6 6 0 015.66 4M16 10a6 6 0 01-6 6 6 6 0 01-5.66-4"
+              stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+            <path d="M14.5 8l1.66-4 1.84 4M3.5 12l-1.66 4-1.84-4"
+              stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      )}
+
+      {can('manage_roles') && (
+        <button
+          className={`ri${isRolesActive ? ' on' : ''}`}
+          data-tip="Roles"
+          onClick={() => { onDrawer(null); navigate('/app/roles'); }}
+        >
+          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
+            <path d="M7 9a3 3 0 100-6 3 3 0 000 6zM2.5 17a4.5 4.5 0 019 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+            <path d="M14.5 8.5a2.5 2.5 0 100-5M13 17a3.8 3.8 0 014.5-3.7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+          </svg>
+        </button>
+      )}
 
       <div className="rail-btm">
         <button

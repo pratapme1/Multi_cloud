@@ -1,3 +1,5 @@
+import { getStoredUser, getUsers, getInvite, markInviteUsed, saveUser } from '../roles.js';
+
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 const token = () => localStorage.getItem('mc_token') ?? '';
@@ -12,15 +14,12 @@ const handleRes = async res => {
 };
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
-// Users registered via sign-up are kept in memory for this session.
-// Persistent user management is deferred to M3 (JWT + DB).
-const SESSION_USERS = {};
-
 export const login = async (username, password) => {
-  if (SESSION_USERS[username]) {
+  const storedUser = getStoredUser(username);
+  if (storedUser) {
     await new Promise(r => setTimeout(r, 400));
-    if (SESSION_USERS[username].password !== password) throw new Error('Invalid credentials');
-    return { token: 'mock-viewer-token', role: 'viewer', username };
+    if (storedUser.password !== password) throw new Error('Invalid credentials');
+    return { token: `mock-${storedUser.role}-token`, role: storedUser.role, username };
   }
   const res = await fetch(`${BASE}/auth/login`, {
     method: 'POST',
@@ -30,20 +29,23 @@ export const login = async (username, password) => {
   return handleRes(res);
 };
 
-export const register = async ({ username, email, password }) => {
+export const register = async ({ username, email, password, inviteToken }) => {
   await new Promise(r => setTimeout(r, 800));
   if (!username || username.length < 3)
     throw Object.assign(new Error('Username must be at least 3 characters.'), { field: 'username' });
   if (!/^[a-zA-Z0-9_]+$/.test(username))
     throw Object.assign(new Error('Username may only contain letters, numbers, and underscores.'), { field: 'username' });
-  if (username === 'admin' || username === 'viewer' || SESSION_USERS[username])
+  if (getUsers().some(user => user.username === username))
     throw Object.assign(new Error('Username is already taken.'), { field: 'username' });
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     throw Object.assign(new Error('Enter a valid email address.'), { field: 'email' });
   if (!password || password.length < 6)
     throw Object.assign(new Error('Password must be at least 6 characters.'), { field: 'password' });
-  SESSION_USERS[username] = { password, role: 'viewer', email };
-  return { username, role: 'viewer' };
+  const invite = getInvite(inviteToken);
+  const role = invite?.role ?? 'viewer';
+  saveUser({ username, email, password, role });
+  if (invite) markInviteUsed(invite.token, username);
+  return { username, role };
 };
 
 // ── Files ─────────────────────────────────────────────────────────────────────
@@ -56,6 +58,10 @@ export const getFiles = async (provider = 'all') => {
 
 export const uploadFile = async (file, providers) => {
   const provArray = Array.isArray(providers) ? providers : [providers];
+  if (window.location.hostname.endsWith('vercel.app') || import.meta.env.VITE_DIRECT_UPLOADS === 'true') {
+    return uploadFileDirect(file, provArray);
+  }
+
   const form = new FormData();
   form.append('file', file);
   form.append('providers', JSON.stringify(provArray));
@@ -66,6 +72,45 @@ export const uploadFile = async (file, providers) => {
     body: form,
   });
   return handleRes(res);
+};
+
+export const uploadFileDirect = async (file, providers) => {
+  const res = await fetch(`${BASE}/files/upload-url`, {
+    method: 'POST',
+    headers: { ...authHeader(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: file.name,
+      contentType: file.type || 'application/octet-stream',
+      providers,
+    }),
+  });
+  const data = await handleRes(res);
+
+  const results = {};
+  await Promise.all(providers.map(async provider => {
+    const target = data.urls?.[provider];
+    if (!target) {
+      results[provider] = { status: 'error', message: data.errors?.[provider] ?? 'No upload URL returned' };
+      return;
+    }
+
+    const uploadRes = await fetch(target.url, {
+      method: target.method ?? 'PUT',
+      headers: target.headers ?? {},
+      body: file,
+    });
+
+    results[provider] = uploadRes.ok
+      ? { status: 'ok' }
+      : { status: 'error', message: `Direct upload failed: HTTP ${uploadRes.status}` };
+  }));
+
+  return {
+    name: file.name,
+    sizeBytes: file.size,
+    providers,
+    results,
+  };
 };
 
 export const deleteFile = async (name, providers = ['aws']) => {

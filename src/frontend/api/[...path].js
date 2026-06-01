@@ -32,7 +32,7 @@ const requireAdmin = (req, res, next) => {
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body ?? {};
   if (username === 'admin' && password === 'Admin@123') {
-    return res.json({ token: 'mock-admin-token', role: 'admin', username });
+    return res.json({ token: 'mock-super_admin-token', role: 'super_admin', username });
   }
   if (username === 'viewer' && password === 'View@123') {
     return res.json({ token: 'mock-viewer-token', role: 'viewer', username });

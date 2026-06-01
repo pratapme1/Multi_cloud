@@ -92,10 +92,10 @@ export default function UploadModal({ onClose, onSuccess }) {
                   </label>
                 ) : (
                   <div style={{ padding: '14px 0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--sur2)', border: '1.5px solid var(--bd)', borderRadius: 12 }}>
+                    <div className="selected-file">
                       <FileTypeIcon type={fileType} size={40} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</div>
+                      <div className="file-meta">
+                        <div className="file-name-1" title={file.name}>{file.name}</div>
                         <div style={{ fontSize: '11.5px', color: 'var(--tx3)', marginTop: 2 }}>{formatSize(file.size)}</div>
                       </div>
                       <button
@@ -185,7 +185,7 @@ export default function UploadModal({ onClose, onSuccess }) {
                 <span className="spin">↻</span>
               </div>
               <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>Uploading to {selected.length} provider{selected.length > 1 ? 's' : ''}…</div>
-              <div style={{ fontSize: '12.5px', color: 'var(--tx3)', marginBottom: 16 }}>{file?.name}</div>
+              <div className="file-name-2 muted" title={file?.name}>{file?.name}</div>
               <div className="ph"><div className="pf" /></div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 12 }}>
                 {selected.map(k => {
@@ -215,7 +215,7 @@ export default function UploadModal({ onClose, onSuccess }) {
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
                 <div style={{ width: 58, height: 58, background: 'var(--okb)', border: '2px solid var(--okd)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', fontSize: '1.5rem', color: 'var(--ok)' }}>✓</div>
                 <div style={{ fontSize: 15, fontWeight: 800 }}>Upload Successful</div>
-                <div style={{ fontSize: '12.5px', color: 'var(--tx3)', marginTop: 3 }}>{file?.name}</div>
+                <div className="file-name-2 muted" title={file?.name}>{file?.name}</div>
               </div>
               {selected.map(k => {
                 const p   = PROV_OPTIONS.find(x => x.key === k);

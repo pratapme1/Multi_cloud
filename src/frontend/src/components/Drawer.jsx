@@ -28,7 +28,7 @@ function FileDetail({ file, onClose }) {
       <div className="dw-body">
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '6px 0 16px' }}>
           <FileTypeIcon type={file.type} size={52} />
-          <div style={{ fontSize: 15, fontWeight: 800, margin: '12px 0 3px', wordBreak: 'break-all', letterSpacing: '-.01em' }}>{file.name}</div>
+          <div className="drawer-file-name" title={file.name}>{file.name}</div>
           <div style={{ fontSize: 12, color: 'var(--tx3)', marginBottom: 8 }}>{file.size}</div>
           <ProviderIcons providers={file.providers} size={16} />
           <div style={{ fontSize: 11, color: 'var(--tx3)', marginTop: 5 }}>

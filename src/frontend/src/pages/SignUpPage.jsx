@@ -1,9 +1,13 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { register } from '../api/index.js';
+import { getInvite, roleLabel } from '../roles.js';
 
 export default function SignUpPage() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const inviteToken = params.get('invite');
+  const invite = inviteToken ? getInvite(inviteToken) : null;
   const [form, setForm] = useState({ username: '', email: '', password: '', confirm: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -28,7 +32,7 @@ export default function SignUpPage() {
     setErrors({});
     setLoading(true);
     try {
-      await register({ username: form.username, email: form.email, password: form.password });
+      await register({ username: form.username, email: form.email, password: form.password, inviteToken });
       setSuccess(true);
       setTimeout(() => navigate('/login', { state: { registered: form.username } }), 1800);
     } catch (err) {
@@ -49,6 +53,18 @@ export default function SignUpPage() {
             <span>Multi-Cloud Storage · Self-service</span>
           </div>
         </div>
+
+        {inviteToken && !invite && (
+          <div className="alert a-err" style={{ marginBottom: 12 }}>
+            Invalid invite link. You can still create a Viewer account.
+          </div>
+        )}
+
+        {invite && !success && (
+          <div className="alert a-inf" style={{ marginBottom: 12 }}>
+            This invite grants <strong>{roleLabel(invite.role)}</strong> access after signup.
+          </div>
+        )}
 
         {success ? (
           <div className="alert a-ok" style={{ marginBottom: 0 }}>
@@ -120,7 +136,7 @@ export default function SignUpPage() {
             </form>
 
             <div className="demob" style={{ textAlign: 'center', marginTop: 13 }}>
-              New accounts are granted <strong>viewer</strong> role by default.
+              New accounts are granted <strong>{invite ? roleLabel(invite.role) : 'Viewer'}</strong> role.
               <br />
               Already have an account?{' '}
               <Link to="/login" style={{ color: 'var(--ac)', fontWeight: 700, textDecoration: 'none' }}>
