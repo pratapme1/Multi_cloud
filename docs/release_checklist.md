@@ -19,7 +19,7 @@
 ### Authentication & Access Control
 - [ ] Login accepts valid credentials and rejects invalid ones
 - [ ] Admin role can upload, download, delete
-- [ ] Read-only role cannot upload or delete (UI controls disabled + API returns 403)
+- [ ] Read-only role cannot upload or delete; API returns 403
 - [ ] All API endpoints return 401 for unauthenticated requests
 - [ ] Logout works and session is invalidated
 
@@ -53,6 +53,7 @@
 ## P2 — Deferred to Post-Launch
 
 - [ ] Granular RBAC beyond admin / read-only
+- [ ] RBAC UI hiding / disabled controls for read-only users
 - [ ] Audit log of user actions
 - [ ] File versioning across providers
 - [ ] Cost / usage monitoring per provider

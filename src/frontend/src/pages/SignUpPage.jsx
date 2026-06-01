@@ -1,0 +1,135 @@
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { register } from '../api/index.js';
+
+export default function SignUpPage() {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ username: '', email: '', password: '', confirm: '' });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const set = field => e => setForm(f => ({ ...f, [field]: e.target.value }));
+
+  const validate = () => {
+    const errs = {};
+    if (!form.username) errs.username = 'Username is required.';
+    if (!form.email)    errs.email    = 'Email is required.';
+    if (!form.password) errs.password = 'Password is required.';
+    if (form.password && form.password !== form.confirm)
+      errs.confirm = 'Passwords do not match.';
+    return errs;
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setErrors({});
+    setLoading(true);
+    try {
+      await register({ username: form.username, email: form.email, password: form.password });
+      setSuccess(true);
+      setTimeout(() => navigate('/login', { state: { registered: form.username } }), 1800);
+    } catch (err) {
+      if (err.field) setErrors({ [err.field]: err.message });
+      else setErrors({ global: err.message || 'Registration failed.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="lwrap">
+      <div className="lcard">
+        <div className="lbrand">
+          <div className="lmark" />
+          <div>
+            <h2>Create account</h2>
+            <span>Multi-Cloud Storage · Self-service</span>
+          </div>
+        </div>
+
+        {success ? (
+          <div className="alert a-ok" style={{ marginBottom: 0 }}>
+            ✓ Account created! Redirecting to sign in…
+          </div>
+        ) : (
+          <>
+            {errors.global && (
+              <div className="alert a-err" style={{ marginBottom: 12 }}>⚠ {errors.global}</div>
+            )}
+
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="fg">
+                <label>Username</label>
+                <input
+                  type="text"
+                  placeholder="e.g. johndoe"
+                  value={form.username}
+                  onChange={set('username')}
+                  className={errors.username ? 'err' : ''}
+                  autoFocus
+                  autoComplete="username"
+                />
+                {errors.username && <div style={{ fontSize: 11.5, color: 'var(--er)', marginTop: 4 }}>{errors.username}</div>}
+              </div>
+
+              <div className="fg">
+                <label>Email</label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={form.email}
+                  onChange={set('email')}
+                  className={errors.email ? 'err' : ''}
+                  autoComplete="email"
+                />
+                {errors.email && <div style={{ fontSize: 11.5, color: 'var(--er)', marginTop: 4 }}>{errors.email}</div>}
+              </div>
+
+              <div className="fg">
+                <label>Password</label>
+                <input
+                  type="password"
+                  placeholder="Min. 6 characters"
+                  value={form.password}
+                  onChange={set('password')}
+                  className={errors.password ? 'err' : ''}
+                  autoComplete="new-password"
+                />
+                {errors.password && <div style={{ fontSize: 11.5, color: 'var(--er)', marginTop: 4 }}>{errors.password}</div>}
+              </div>
+
+              <div className="fg" style={{ marginBottom: 16 }}>
+                <label>Confirm password</label>
+                <input
+                  type="password"
+                  placeholder="Re-enter your password"
+                  value={form.confirm}
+                  onChange={set('confirm')}
+                  className={errors.confirm ? 'err' : ''}
+                  autoComplete="new-password"
+                />
+                {errors.confirm && <div style={{ fontSize: 11.5, color: 'var(--er)', marginTop: 4 }}>{errors.confirm}</div>}
+              </div>
+
+              <button className="btn btn-p btn-full btn-lg" type="submit" disabled={loading}>
+                {loading ? 'Creating account…' : 'Create account →'}
+              </button>
+            </form>
+
+            <div className="demob" style={{ textAlign: 'center', marginTop: 13 }}>
+              New accounts are granted <strong>viewer</strong> role by default.
+              <br />
+              Already have an account?{' '}
+              <Link to="/login" style={{ color: 'var(--ac)', fontWeight: 700, textDecoration: 'none' }}>
+                Sign in
+              </Link>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -2,9 +2,27 @@
 .env
 .env.*
 *.env
+!.env.example
+secrets/
+*.json
+!package.json
+!package-lock.json
+!**/package.json
+!**/package-lock.json
 credentials.json
 *.pem
 *.key
+
+# Build artifacts
+bin/
+obj/
+*.user
+
+# Node / React
+node_modules/
+dist/
+.vite/
+e2e_screenshots/
 
 # Python
 __pycache__/
@@ -28,8 +46,7 @@ htmlcov/
 .coverage
 coverage.xml
 
-# Node / JS (if frontend is added)
-node_modules/
+# Node / JS logs and package-manager state
 npm-debug.log*
 yarn-error.log*
 .pnp/

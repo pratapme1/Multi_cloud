@@ -32,16 +32,16 @@
 | ID | Task | Track | Owner | Effort | Status | Notes |
 |----|------|-------|-------|--------|--------|-------|
 | P.1 | Manager kickoff — ask Part A questions (Q1–Q24 in discovery.md), document answers | PM | PM | S | Open | Do this first — answers unblock charter sign-off |
-| P.2 | Team kickoff — ask Part A-2 questions (K01–K14 in discovery.md), document answers | PM | PM | S | Done | Completed 2026-05-28. Team = Anushman (full-stack, .NET+React) + Anand (QA/validation). Capacity: 2–3 hrs/day. K02, K10, K12–K14 not captured — follow up. |
-| P.3 | D-001: Decide tech stack — language, cloud SDKs, web framework; log in decisions_log.md | Both | Dev + PM | S | Done | Closed 2026-05-29. C# .NET 8 + React (Vite) + Bootstrap 5. See decisions_log.md D-001. |
-| P.4 | D-002: Decide credential management (.env + library approach); log in decisions_log.md | Both | Dev | S | Done | Closed 2026-05-29. .env + dotenv.net (local); Azure App Service Application Settings (production). See decisions_log.md D-002. |
-| P.5 | Repo init: folder structure, .gitignore (covers .env, *.json service accounts), .env.example with all required key names | Dev | Dev | S | Open | Day 1 task — must exist before any credentials are created |
-| P.6 | Provision AWS account + S3 bucket; verify credentials work | Dev | Dev | S | Open | Start Day 1 — can run in parallel with P.7 and P.8 |
-| P.7 | Provision Azure account + Blob container; verify connection string works | Dev | Dev | S | Open | Parallel with P.6 and P.8 |
+| P.2 | Team kickoff — ask Part A-2 questions (K01–K14 in discovery.md), document answers | PM | PM | S | Done | Completed 2026-05-28. Team = Anushman (full-stack, Node/React) + Anand (QA/validation). Capacity: 2–3 hrs/day. K02, K10, K12–K14 not captured — follow up. |
+| P.3 | D-001: Decide tech stack — language, cloud SDKs, web framework; log in decisions_log.md | Both | Dev + PM | S | Done | Revised 2026-06-01. Node.js / Express + React (Vite). See decisions_log.md D-001. |
+| P.4 | D-002: Decide credential management (.env + library approach); log in decisions_log.md | Both | Dev | S | Done | Closed 2026-05-29. `.env` + `dotenv` locally; production app settings. See decisions_log.md D-002. |
+| P.5 | Repo init: folder structure, .gitignore (covers .env, *.json service accounts), .env.example with all required key names | Dev | Dev | S | Done | Completed 2026-06-01. `src/backend-node/` and `src/frontend/` scaffolded. `.gitignore` and `.env.example` in place. |
+| P.6 | Provision AWS account + S3 bucket; verify credentials work | Dev | Dev | S | Done | Completed 2026-06-01. AWS S3 HeadBucket returns OK; `followRegionRedirects: true` added. |
+| P.7 | Provision Azure account + Blob container; verify connection string works | Dev | Dev | S | Done | Completed 2026-06-01. Azure container `files` reachable via connection string. |
 | P.8 | Provision GCP account + service account + GCS bucket; verify service account JSON auth | Dev | Dev | M | Open | Hardest setup — start first; GCP auth is most involved (R04) |
-| P.9 | Architecture decision: document storage layer pattern + app layer structure | Dev | Dev | S | Open | Can be done while waiting for cloud accounts |
-| P.10 | DB schema design: users table — id, username, email, password_hash, role (admin\|readonly), created_at | Dev | Dev | S | Open | Needed before M3 auth work begins |
-| P.11 | Charter sign-off: both team members review and sign charter.md | Both | PM | S | Open | Final step before sprint starts |
+| P.9 | Architecture decision: document storage layer pattern + app layer structure | Dev | Dev | S | Done | App layer structure documented in PRD v1.0. D-003 still separately tracks the M2 provider-selection pattern |
+| P.10 | DB schema design: users table — id, username, email, password_hash, role (admin\|readonly), created_at | Dev | Dev | S | Done | Documented in PRD section 4 |
+| P.11 | Charter sign-off: both team members review and sign charter.md | Both | PM | S | Done | Signed 2026-05-28 by Vishnu, Anushman, and Anand |
 
 ---
 
@@ -49,13 +49,13 @@
 
 | ID | Task | Track | Owner | Effort | Status | Notes |
 |----|------|-------|-------|--------|--------|-------|
-| 1.1 | AWS S3 module: upload, download, list (basic — no pagination), delete; auth via IAM key+secret from .env; generic error return with message | Dev | Dev | M | Open | No pagination, no type-specific error handling — generic error message is sufficient |
-| 1.2 | AWS S3 unit tests: happy path only — 1 test per operation; mock client — no real API calls | Dev | Dev | S | Open | Error cases covered by Anand's Postman integration validation |
-| 1.3 | Azure Blob module: upload, download, list (basic — no pagination), delete; auth via connection string from .env; same reduced scope as 1.1 | Dev | Dev | M | Open | Write tests (1.4) immediately after |
-| 1.4 | Azure Blob unit tests: happy path only — same reduced scope as 1.2 | Dev | Dev | S | Open | |
-| 1.5 | GCS module: upload, download, list (basic — no pagination), delete; auth via service account JSON path from .env; same reduced scope as 1.1 | Dev | Dev | M | Open | GCP auth still hardest — start first; if behind by Day 3, invoke R04 contingency |
-| 1.6 | GCS unit tests: happy path only — same reduced scope as 1.2 | Dev | Dev | S | Open | |
-| 1.7 | **[PM PARALLEL]** UI wireframe — begin designing 5 screens: login, file list, upload modal, delete confirmation, sync panel | PM | PM | M | Open | Runs entirely in parallel with 1.1–1.6; must be done by Jun 8 |
+| 1.1 | AWS S3 module: upload, download, list (basic — no pagination), delete; auth via IAM key+secret from .env; generic error return with message | Dev | Dev | M | Done | Completed 2026-06-01 in Node.js (`src/backend-node/providers/aws.js`). Pagination with ContinuationToken, cross-cloud download buffer, region-redirect fix. |
+| 1.2 | AWS S3 unit tests: happy path only — 1 test per operation; mock client — no real API calls | Dev | Dev | S | Open | Not yet written |
+| 1.3 | Azure Blob module: upload, download, list (basic — no pagination), delete; auth via connection string from .env; same reduced scope as 1.1 | Dev | Dev | M | Done | Completed 2026-06-01 in Node.js (`src/backend-node/providers/azure.js`). Live-tested against real container. |
+| 1.4 | Azure Blob unit tests: happy path only — same reduced scope as 1.2 | Dev | Dev | S | Open | Not yet written |
+| 1.5 | GCS module: upload, download, list (basic — no pagination), delete; auth via service account JSON path from .env; same reduced scope as 1.1 | Dev | Dev | M | In Progress | Placeholder at `src/backend-node/providers/gcs.js`. Awaiting P.8 credential provisioning before @google-cloud/storage can be wired. |
+| 1.6 | GCS unit tests: happy path only — same reduced scope as 1.2 | Dev | Dev | S | Open | Blocked on 1.5 |
+| 1.7 | **[PM PARALLEL]** UI wireframe — begin designing 5 screens: login, file list, upload modal, delete confirmation, sync panel | PM | PM | M | Done | Completed 2026-06-01. prototype_v3.html is the finalized design reference. React scaffold built from it. All screens + states covered. |
 | 1.8 | M1 presentation prep: slide deck + live demo rehearsal (upload to all 3 providers sequentially) | PM | PM | S | Open | Start by Day 7 (Jun 4) — not the morning of the gate |
 | 1.9 | M1 internal gate check: run M1 pass criteria with developer — live demo evidence only (Jun 4) | Both | PM | S | Open | Pass or fail — document the result in decisions_log.md |
 | 1.10 | M1 presentation to manager (Jun 5) | Both | PM | S | Open | PM tells the story; Dev runs the demo |
@@ -74,8 +74,8 @@
 | 2.6 | Sync idempotency: verify sync twice produces same result — confirm as natural property of filename comparison | Dev | Dev | S | Open | Manual check only — not a standalone test suite |
 | 2.7 | Redundant upload: single call writes to 2+ providers; partial failure explicitly reported — which succeeded, which failed | Dev | Dev | M | Open | No silent swallowing of failures — caller must know |
 | 2.8 | Integration validation: Anand runs Postman tests against real APIs — all 4 unified ops, provider swap, sync (missing + unchanged), redundant upload + partial failure | Dev | Anand | S | Open | Manual Postman validation replaces automated test suite; real API calls only |
-| 2.9 | D-005: Confirm and log deployment target before M2 ends — M3 planning depends on this | Both | Dev + PM | S | Open | **Ideally decide in M1 week** — do not let this slip to M3; it delays 3.2 |
-| 2.10 | **[PM PARALLEL]** Complete UI wireframe: finalize all 5 screens with empty + error states; review with developer; hand over by Jun 8 | PM | PM | M | Open | Must be done before M2 starts so dev can reference it |
+| 2.9 | D-005: Confirm and log deployment target before M2 ends — M3 planning depends on this | Both | Dev + PM | S | Done | Closed 2026-05-29. Deployment target is Azure App Service with Node runtime |
+| 2.10 | **[PM PARALLEL]** Complete UI wireframe: finalize all 5 screens with empty + error states; review with developer; hand over by Jun 8 | PM | PM | M | Done | Completed 2026-06-01. prototype_v3.html + full React scaffold handed over. All states: loading, empty, error, readonly, all drawer modes, all upload flows. |
 | 2.11 | M2 presentation prep: architecture diagram + provider-swap demo script + wireframe walkthrough | PM | PM | S | Open | |
 | 2.12 | M2 internal gate check: run M2 pass criteria (Jun 10) | Both | PM | S | Open | Jun 11 is buffer day for presentation — use it |
 | 2.13 | M2 presentation to manager (Jun 11) | Both | PM | S | Open | Show: swap demo live, wireframe, sync + redundancy |
@@ -134,11 +134,11 @@
 | Metric | Count |
 |--------|-------|
 | Total tasks | 60 |
-| Open | 53 |
+| Open | 46 |
 | In Progress | 0 |
 | Blocked | 0 |
 | Deferred | 3 (3.13, 3.14, 3.15) |
-| Done | 3 (P.2, P.3, P.4) |
+| Done | 10 (P.2, P.3, P.4, P.5, P.9, P.10, P.11, 1.7, 2.9, 2.10) |
 | Overdue | 0 |
 | Pre-work tasks | 11 |
 | M1 tasks | 10 |

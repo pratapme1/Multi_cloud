@@ -66,9 +66,9 @@ AZURE_CONNECTION_STRING=
 AZURE_CONTAINER_NAME=
 
 # Google Cloud Storage
-GCP_PROJECT_ID=
-GCP_BUCKET_NAME=
-GOOGLE_APPLICATION_CREDENTIALS=./backend/secrets/gcp-service-account.json
+GCS_PROJECT_ID=
+GCS_BUCKET_NAME=
+GCS_SERVICE_ACCOUNT_JSON_PATH=./backend/secrets/gcp-service-account.json
 
 # Database (M3)
 DB_CONNECTION_STRING=
@@ -188,7 +188,7 @@ A service account is how the application authenticates to GCP — it is not a hu
 In a terminal, set the environment variable and list buckets to confirm auth works:
 
 ```bash
-export GOOGLE_APPLICATION_CREDENTIALS="./backend/secrets/gcp-service-account.json"
+export GCS_SERVICE_ACCOUNT_JSON_PATH="./backend/secrets/gcp-service-account.json"
 ```
 
 Then from a test script or the SDK, call `ListBuckets` for the project. The bucket `multicloud-dev-[yourname]` should appear in the response.
@@ -198,9 +198,9 @@ Then from a test script or the SDK, call `ListBuckets` for the project. The buck
 ### 1.8 — Record in `.env`
 
 ```env
-GCP_PROJECT_ID=multi-cloud-integration-123456
-GCP_BUCKET_NAME=multicloud-dev-yourname
-GOOGLE_APPLICATION_CREDENTIALS=./backend/secrets/gcp-service-account.json
+GCS_PROJECT_ID=multi-cloud-integration-123456
+GCS_BUCKET_NAME=multicloud-dev-yourname
+GCS_SERVICE_ACCOUNT_JSON_PATH=./backend/secrets/gcp-service-account.json
 ```
 
 ---
@@ -211,7 +211,7 @@ GOOGLE_APPLICATION_CREDENTIALS=./backend/secrets/gcp-service-account.json
 |---------|-----|
 | "Permission denied" when calling GCS | Check the service account has `Storage Admin` role, not just `Storage Object Viewer` |
 | "Bucket name already exists" | Bucket names are globally unique across all GCP users — add more characters to the name |
-| JSON key not found at runtime | Check that `GOOGLE_APPLICATION_CREDENTIALS` path in `.env` matches the actual file location relative to where the process starts |
+| JSON key not found at runtime | Check that `GCS_SERVICE_ACCOUNT_JSON_PATH` in `.env` matches the actual file location relative to where the process starts |
 | "API not enabled" error | Go back to APIs & Services → Library and confirm Cloud Storage JSON API is enabled |
 
 ---

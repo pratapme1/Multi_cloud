@@ -51,15 +51,15 @@ When there's tension between "what" and "how" — PM holds "what", Dev holds "ho
 
 ## 3. The Full Project Timeline — What PM Does Week by Week
 
-### Pre-Work (May 27–28) — 2 days
+### Pre-Work (May 27-29) — 3 days
 **Goal:** Everything in place before Sprint 1 starts.
 
 - [ ] Read discovery.md Part A and Part B — understand the problem
 - [ ] Ask manager the Part A questions — document answers in discovery.md
 - [ ] Run team kickoff with developer — ask Part A-2 questions, document answers
 - [ ] Get charter signed off by both team members
-- [ ] D-001 (tech stack) decided and logged in decisions_log.md
-- [ ] D-002 (credential management) agreed — `.env` strategy confirmed
+- [x] D-001 (tech stack) decided and logged in decisions_log.md
+- [x] D-002 (credential management) agreed — `.env` strategy confirmed
 - [ ] Confirm developer has started on cloud account provisioning (tasks 1.1, 1.2, 1.3)
 - [ ] Confirm developer understands M1 scope and which tasks are theirs
 
@@ -74,7 +74,7 @@ When there's tension between "what" and "how" — PM holds "what", Dev holds "ho
 3. Is pace right? 9 tasks in 8 days = roughly 1+ per day average
 
 **Your PM tasks during M1:**
-- [ ] D-001 and D-002 logged in decisions_log.md on Day 1
+- [x] D-001 and D-002 logged in decisions_log.md
 - [ ] Confirm `.gitignore` contains `.env` on Day 1 — don't wait for a breach
 - [ ] Watch R01 (account provisioning) — if any account is delayed by Day 2, escalate
 - [ ] Check specifically on GCS progress by Day 4 — GCP auth is the highest-complexity task (R04)
@@ -297,11 +297,11 @@ A decision with no rationale documented is the same as no decision — the next 
 
 | ID | Decision | Deadline | Who decides |
 |----|----------|----------|-------------|
-| D-001 | Tech stack — language + SDKs | 2026-05-28 | Dev + PM |
-| D-002 | Credential management strategy | 2026-05-28 | Dev |
+| D-001 | Tech stack — language + SDKs | Closed 2026-05-29 | Dev + PM |
+| D-002 | Credential management strategy | Closed 2026-05-29 | Dev |
 | D-003 | Unified interface design pattern | M2 start | Dev |
 | D-004 | Authentication approach for web UI | M3 start | Dev + PM |
-| D-005 | Deployment target | End of M2 week | Dev + PM |
+| D-005 | Deployment target | Closed 2026-05-29 | Dev + PM |
 
 If D-001 or D-002 are not resolved by May 28, invoke the contingency: Python stack (R05), `.env` + dotenv (R02 mitigation). Log it as PM's unilateral call.
 

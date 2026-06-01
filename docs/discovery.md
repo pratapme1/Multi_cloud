@@ -199,7 +199,7 @@ Either way, document what you heard, what you interpreted, and flag it in the ch
 | # | Question | Answer |
 |---|----------|--------|
 | K04 | Have you worked with any of the three cloud providers before — AWS S3, Azure Blob, or GCS? Which one(s)? | Anushman: minimal AWS only, no Azure/GCP. Anand: REST API testing via Postman — no cloud SDK experience. |
-| K05 | Do you have a strong language preference for this project, or are you neutral on D-001? | Anushman: .NET (C#), Core Java, React. No Spring Boot. D-001 not formally closed. |
+| K05 | Do you have a strong language preference for this project, or are you neutral on D-001? | Anushman: .NET (C#), Core Java, React. No Spring Boot. D-001 closed 2026-05-29 as .NET 8 + React + SQLite. |
 | K06 | Have you built a web API or backend service before? What stack? | Anushman: Yes — .NET backend (5 yrs, Signify/Philips Lighting, device platform team). Full-stack confirmed. ✅ R09 resolved. |
 | K07 | Have you deployed an application to a live server before (not just localhost)? | Not captured — follow up |
 
@@ -401,7 +401,7 @@ Based on the milestones and research on cloud capstone evaluation criteria, here
 | A06 | The milestone presentations are the primary evaluation moments | High | Q6, Q7 |
 | A07 | GCP setup will take longer than AWS or Azure — buffer needed in Sprint 1 | High | (research-based, no question needed) |
 | A08 | The web UI is for demo purposes only — not production-scale | High | Q4 |
-| A09 | Both team members are full-time on this project for 20 days | Medium | Q17 |
+| A09 | Both team members are full-time on this project for 20 days | Invalidated | Team kickoff confirmed 2-3 hrs/day capacity; backlog recalibrated 2026-05-29 |
 | A10 | The manager audience includes at least one technical evaluator | Medium | Q9 |
 
 ---

@@ -10,8 +10,8 @@
 
 | ID | Risk | L | I | Score | Mitigation | Contingency | Owner | Status |
 |----|------|---|---|-------|-----------|-------------|-------|--------|
-| R01 | Cloud account provisioning delayed (identity verification, billing) | 2 | 3 | **6** | Start all 3 accounts on Day 1; have backup personal accounts ready | Use existing personal/educational accounts | Dev | Open |
-| R02 | Credentials accidentally committed to version control | 2 | 3 | **6** | `.env` + `.gitignore` from Day 1; add pre-commit hook to scan for secrets | Rotate all exposed keys immediately; audit git history | Dev | Open |
+| R01 | Cloud account provisioning delayed (identity verification, billing) | 2 | 3 | **6** | Start all 3 accounts immediately; have backup personal accounts ready | Use existing personal/educational accounts | Dev | Open - still pending as of 2026-06-01 |
+| R02 | Credentials accidentally committed to version control | 2 | 3 | **6** | `.env` + `.gitignore` from Day 1; add pre-commit hook to scan for secrets; use committed `.env.example` as the template | Rotate all exposed keys immediately; audit git history | Dev | Open - `.gitignore` and `.env.example` now exist |
 | R03 | UI scope expands beyond what M3 time allows | 2 | 2 | **4** | 3.13/3.14/3.15 formally deferred 2026-05-29; UI capped to login + file list + upload + download + delete (browser confirm) | Go-live with API-only access; ship UI as follow-up | PM | **Partially mitigated — 2026-05-29** |
 | R04 | No Azure or GCP experience on team — **confirmed at kickoff**: Anushman has minimal AWS only; Anand has no cloud SDK experience | 3 | 2 | **6** | Start P.8 (GCP) before P.6/P.7; budget first 2 days of M1 for cloud account setup; Anand validates via Postman | Allocate extra half-day per cloud provider; PM assists with documentation lookup | Dev | **Elevated 2026-05-28** |
 | R05 | Tech stack (D-001) not decided — was due 2026-05-28, now overdue | 2 | 3 | **6** | Close D-001 by 2026-05-29 morning; leans .NET + React but not confirmed | PM makes unilateral call if not closed by 2026-05-29 | PM | **Closed 2026-05-29** |

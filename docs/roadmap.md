@@ -35,21 +35,21 @@ PM and Dev run concurrent tracks. This is not optional — it is how 15 working 
 
 ## Pre-Work (May 27–29) — 3 working days
 
-**Goal:** Everything in place before any coding begins. No module work starts until P.6–P.8 (cloud accounts) are accessible.
+**Goal:** Everything in place before any coding begins. As of 2026-06-01, planning decisions are closed but repo scaffolding and cloud account provisioning still need to be completed before provider module work can be fully verified.
 
 | # | Task | Track | Owner | Effort | Status |
 |---|------|-------|-------|--------|--------|
 | P.1 | Manager kickoff — ask Part A questions (Q1–Q24 in discovery.md), document all answers | PM | PM | S | Open |
-| P.2 | Team kickoff — ask Part A-2 questions (K01–K14 in discovery.md), document all answers | PM | PM | S | Open |
-| P.3 | D-001: Decide tech stack — language, cloud SDKs, web framework; log decision in decisions_log.md | Both | Dev + PM | S | Open |
-| P.4 | D-002: Decide credential management — confirm .env + library approach; log in decisions_log.md | Both | Dev | S | Open |
+| P.2 | Team kickoff — ask Part A-2 questions (K01–K14 in discovery.md), document all answers | PM | PM | S | Done |
+| P.3 | D-001: Decide tech stack — language, cloud SDKs, web framework; log decision in decisions_log.md | Both | Dev + PM | S | Done |
+| P.4 | D-002: Decide credential management — confirm .env + library approach; log in decisions_log.md | Both | Dev | S | Done |
 | P.5 | Repo init: folder structure, .gitignore (must include .env, *.json service accounts), .env.example listing all required keys | Dev | Dev | S | Open |
 | P.6 | Provision AWS account + S3 bucket; verify credentials work with a test call | Dev | Dev | S | Open |
 | P.7 | Provision Azure account + Blob container; verify connection string works | Dev | Dev | S | Open |
 | P.8 | Provision GCP account + service account + GCS bucket; verify service account JSON auth | Dev | Dev | M | Open |
-| P.9 | Architecture decision: document storage layer pattern (how 3 providers plug into unified layer) and app layer structure (how web app connects to backend) | Dev | Dev | S | Open |
-| P.10 | DB schema design: users table — id, username, email, password_hash, role (admin\|readonly), created_at | Dev | Dev | S | Open |
-| P.11 | Charter sign-off: both team members read and sign charter.md | Both | PM | S | Open |
+| P.9 | Architecture decision: document storage layer pattern (how 3 providers plug into unified layer) and app layer structure (how web app connects to backend) | Dev | Dev | S | Done |
+| P.10 | DB schema design: users table — id, username, email, password_hash, role (admin\|readonly), created_at | Dev | Dev | S | Done |
+| P.11 | Charter sign-off: both team members read and sign charter.md | Both | PM | S | Done |
 
 **Parallel notes:**
 - P.6, P.7, P.8 run in parallel — start all 3 on Day 1
@@ -94,7 +94,7 @@ PM and Dev run concurrent tracks. This is not optional — it is how 15 working 
 
 **M1 Pass Criteria (Jun 5)**
 - [ ] Real file upload, download, list, delete works on all 3 providers — live demo, not described
-- [ ] Unit tests pass for all 3 modules: happy path + auth failure + file not found in each
+- [ ] Unit tests pass for all 3 modules: happy-path coverage for upload, download, list, and delete
 - [ ] All errors return clean caller-friendly messages — no raw SDK stack traces exposed
 - [ ] No credentials hardcoded in any file; .env in .gitignore; .env.example exists and is accurate
 - [ ] M1 presentation delivered to manager
@@ -117,7 +117,7 @@ PM and Dev run concurrent tracks. This is not optional — it is how 15 working 
 | 2.6 | Sync idempotency: verify sync twice produces same result — natural property of filename comparison; manual check only | Dev | Dev | S | Open |
 | 2.7 | Redundant upload: single call writes to 2+ providers; partial failure explicitly reported — which providers succeeded, which failed; no silent swallowing | Dev | Dev | M | Open |
 | 2.8 | Integration validation: Anand runs Postman tests against real APIs — all 4 unified ops, provider swap, sync, redundant upload + partial failure | Dev | Anand | S | Open |
-| 2.9 | D-005: Confirm and log deployment target before M2 ends — M3 planning depends on this | Both | Dev + PM | S | Open |
+| 2.9 | D-005: Confirm and log deployment target before M2 ends — M3 planning depends on this | Both | Dev + PM | S | Done |
 | 2.10 | **[PM PARALLEL]** Complete UI wireframe: finalize all 5 screens with empty states and error states; review with developer; hand over by Jun 8 start | PM | PM | M | Open |
 | 2.11 | M2 presentation prep: architecture diagram + provider-swap live demo script + wireframe walkthrough | PM | PM | S | Open |
 | 2.12 | M2 internal gate check: run M2 pass criteria (Jun 10) | Both | PM | S | Open |

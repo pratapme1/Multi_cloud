@@ -23,7 +23,7 @@
 | K02 | Are there any days you are unavailable between now and June 16? | discovery K02 | Not captured — follow up |
 | K03 | Can you realistically commit full-time (5–6 hrs/day)? | discovery K03 | No — 2–3 hrs/day only ⚠️ |
 | K04 | What cloud providers have you worked with before? | discovery K04 | Anushman: minimal AWS, no Azure/GCP. Anand: REST API testing via Postman |
-| K05 | What language and framework are you most comfortable with? | discovery K05 + D-001 | Anushman: .NET (backend), Java, React (5 yrs). Stack preference not formally closed — D-001 still open |
+| K05 | What language and framework are you most comfortable with? | discovery K05 + D-001 | Anushman: .NET backend + React frontend. D-001 closed 2026-05-29: .NET 8 + React + SQLite |
 | K06 | **CRITICAL:** Are you full-stack, or primarily backend? | discovery K06 + R09 | Anushman: Full-stack (.NET backend + React frontend) ✅ R09 resolved |
 | K07 | Have you built a web UI before? Which framework? | discovery K07 + R09 | Anushman: Yes — React, built new features |
 | K08 | How do you prefer to get requirements — doc, chat, or verbal? | discovery K08 | Chat: Teams. Documentation format: PM decides |
@@ -96,9 +96,9 @@
 - Day 1 dependencies: Not captured — follow up
 
 **D-001 — Tech Stack Decision:**
-- Stack lean: .NET (C#) backend + React frontend (Anushman's comfort zone)
-- Formally decided: ⬜ Still open — needs explicit closure
-- Follow up by: 2026-05-29 morning
+- Decision: .NET 8 / ASP.NET Core backend + React (Vite) frontend + SQLite
+- Formally decided: Closed 2026-05-29
+- Reference: `docs/decisions_log.md` D-001
 
 ---
 
@@ -108,7 +108,7 @@
 - [ ] Update `docs/charter.md` Team section — team is now PM + Anushman + Anand (3 people)
 - [ ] Update `docs/backlog.md` — reassign QA tasks to Anand; Anushman = Dev; reconsider timeline given 2–3 hrs/day capacity
 - [ ] Update `docs/risk_log.md` — R09 CLOSED (full-stack confirmed); R08 ELEVATED (only 2–3 hrs/day, not 5–6); R04 status update (no Azure/GCP experience)
-- [ ] Close D-001 tomorrow (2026-05-29 morning) — stack leans to .NET + React; decide and log in `docs/decisions_log.md`
+- [x] Close D-001 tomorrow (2026-05-29 morning) — closed 2026-05-29 as .NET 8 + React + SQLite
 - [ ] Follow up: K02 (unavailable days), K10 (blocker communication), K12–K14 (concerns, suggestions, Day 1 needs)
 - [ ] Mark **P.2** (Team Kickoff) as `Done` in `docs/backlog.md`
 - [ ] Send Day 1 task list to Anushman: P.5 (repo init), P.6–P.8 (cloud accounts), P.9 (architecture sketch)
@@ -336,7 +336,7 @@
 
 | Meeting | Date | Status |
 |---------|------|--------|
-| M0-A: Developer Kickoff | 2026-05-28 | ⬜ Today |
+| M0-A: Developer Kickoff | 2026-05-28 | Complete |
 | M0-B: Manager Kickoff | TBD (ASAP) | ⬜ Schedule now |
 | M1 Internal Gate | 2026-06-04 | ⬜ |
 | M1 Manager Presentation | 2026-06-05 | ⬜ |
