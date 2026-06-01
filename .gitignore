@@ -9,6 +9,7 @@ secrets/
 !package-lock.json
 !**/package.json
 !**/package-lock.json
+!vercel.json
 credentials.json
 *.pem
 *.key
