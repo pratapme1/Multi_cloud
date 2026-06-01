@@ -88,21 +88,30 @@ export const uploadFileDirect = async (file, providers) => {
 
   const results = {};
   await Promise.all(providers.map(async provider => {
-    const target = data.urls?.[provider];
-    if (!target) {
-      results[provider] = { status: 'error', message: data.errors?.[provider] ?? 'No upload URL returned' };
-      return;
+    try {
+      const target = data.urls?.[provider];
+      if (!target) {
+        results[provider] = { status: 'error', message: data.errors?.[provider] ?? 'No upload URL returned' };
+        return;
+      }
+
+      const uploadRes = await fetch(target.url, {
+        method: target.method ?? 'PUT',
+        headers: target.headers ?? {},
+        body: file,
+      });
+
+      results[provider] = uploadRes.ok
+        ? { status: 'ok' }
+        : { status: 'error', message: `Direct upload failed: HTTP ${uploadRes.status}` };
+    } catch (err) {
+      results[provider] = {
+        status: 'error',
+        message: err?.message?.includes('Failed to fetch')
+          ? 'Browser blocked direct upload. Check storage CORS for this Vercel domain.'
+          : err.message,
+      };
     }
-
-    const uploadRes = await fetch(target.url, {
-      method: target.method ?? 'PUT',
-      headers: target.headers ?? {},
-      body: file,
-    });
-
-    results[provider] = uploadRes.ok
-      ? { status: 'ok' }
-      : { status: 'error', message: `Direct upload failed: HTTP ${uploadRes.status}` };
   }));
 
   return {

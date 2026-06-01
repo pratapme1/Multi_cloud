@@ -67,9 +67,9 @@ export default function SignUpPage() {
         )}
 
         {success ? (
-          <div className="alert a-ok" style={{ marginBottom: 0 }}>
+          <div className="alert a-ok" style={{ marginBottom: 0 }}><span>
             ✓ Account created! Redirecting to sign in…
-          </div>
+          </span></div>
         ) : (
           <>
             {errors.global && (

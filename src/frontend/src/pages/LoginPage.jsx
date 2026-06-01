@@ -42,9 +42,9 @@ export default function LoginPage() {
           <span className="lchip" style={{ background: 'rgba(52,168,83,.11)', color: '#166534', border: '1px solid rgba(52,168,83,.24)' }}>● GCS</span>
         </div>
         {registeredUser && !error && (
-          <div className="alert a-ok" style={{ marginBottom: 12 }}>
+          <div className="alert a-ok" style={{ marginBottom: 12 }}><span>
             ✓ Account <strong>{registeredUser}</strong> created — sign in to continue.
-          </div>
+          </span></div>
         )}
         {error && (
           <div className="alert a-err" style={{ marginBottom: 12 }}>⚠ Invalid username or password.</div>

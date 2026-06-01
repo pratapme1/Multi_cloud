@@ -42,8 +42,8 @@ export default function UploadModal({ onClose, onSuccess }) {
     try {
       const result = await uploadFile(file, selected);
       setResult(result);
-      setStep('success');
       const ok = Object.values(result.results ?? {}).filter(r => r.status === 'ok').length;
+      setStep(ok === selected.length ? 'success' : 'partial');
       toast(`${file.name} → ${ok}/${selected.length} providers`, 'ok', 'Upload complete');
     } catch (err) {
       if (err?.response?.status === 403) setStep('error403');
@@ -251,7 +251,17 @@ export default function UploadModal({ onClose, onSuccess }) {
               <div style={{ width: 58, height: 58, background: 'var(--wab)', border: '2px solid var(--wad)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', fontSize: '1.5rem', color: 'var(--wa)' }}>⚠</div>
               <div style={{ fontSize: 15, fontWeight: 800 }}>Partial Upload</div>
               <div style={{ fontSize: '12.5px', color: 'var(--tx3)', marginBottom: 14 }}>One or more selected providers failed</div>
-              <div className="alert a-wa" style={{ textAlign: 'left' }}>AWS and Azure are the active local-test providers. GCS is intentionally left as a placeholder.</div>
+              <div className="alert a-wa" style={{ textAlign: 'left' }}>
+                <span>Direct browser uploads need CORS enabled on AWS S3 and Azure Blob for this Vercel domain.</span>
+              </div>
+              {Object.entries(uploadResult?.results ?? {}).map(([key, result]) => (
+                <div key={key} className="upload-result-row">
+                  <strong>{PROV_OPTIONS.find(p => p.key === key)?.label ?? key}</strong>
+                  <span className={result.status === 'ok' ? 'ok' : 'err'}>
+                    {result.status === 'ok' ? 'Uploaded' : result.message}
+                  </span>
+                </div>
+              ))}
             </div>
             <div className="mf">
               <button className="btn btn-s" onClick={onSuccess ?? onClose}>Close</button>
