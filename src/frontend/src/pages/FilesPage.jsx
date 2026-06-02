@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getFiles, getHealth } from '../api/index.js';
+import { getFiles, getHealth, deleteFile } from '../api/index.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import { useToast } from '../context/ToastContext.jsx';
 import Topbar from '../components/Topbar.jsx';
 import Shelf from '../components/Shelf.jsx';
 import FileList from '../components/FileList.jsx';
@@ -10,6 +12,9 @@ import UploadModal from '../components/UploadModal.jsx';
 const PAGE_SIZE = 8;
 
 export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCloseDrawer, refreshKey }) {
+  const { can } = useAuth();
+  const toast = useToast();
+
   const [allFiles, setAllFiles]       = useState([]);
   const [pageState, setPageState]     = useState('loading');
   const [filter, setFilter]           = useState('all');
@@ -23,6 +28,11 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
   const [healthDeg, setHealthDeg]     = useState(false);
   const [healthData, setHealthData]   = useState(null);
   const [healthLoading, setHealthLoading] = useState(true);
+
+  // ── Multi-select ────────────────────────────────────────────────
+  const [selectMode, setSelectMode]       = useState(false);
+  const [selectedNames, setSelectedNames] = useState(new Set());
+  const [bulkDeleting, setBulkDeleting]   = useState(false);
 
   const loadHealth = useCallback(async () => {
     setHealthLoading(true);
@@ -108,6 +118,70 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
   const drawerOpen   = drawer !== null;
   const selectedFile = drawer === 'file' && selIdx >= 0 ? pageFiles[selIdx] : null;
 
+  // ── Select mode handlers ─────────────────────────────────────────
+  const enterSelectMode = () => {
+    setSelectMode(true);
+    setSelectedNames(new Set());
+    onCloseDrawer();
+  };
+
+  const exitSelectMode = () => {
+    setSelectMode(false);
+    setSelectedNames(new Set());
+  };
+
+  const handleFileClick = useCallback(idx => {
+    if (selectMode) {
+      const name = pageFiles[idx]?.name;
+      if (!name) return;
+      setSelectedNames(prev => {
+        const next = new Set(prev);
+        if (next.has(name)) next.delete(name); else next.add(name);
+        return next;
+      });
+    } else {
+      onSelectFile(idx);
+    }
+  }, [selectMode, pageFiles, onSelectFile]);
+
+  const handleSelectAll = () => {
+    const pageNames = pageFiles.map(f => f.name);
+    const allSelected = pageNames.every(n => selectedNames.has(n));
+    setSelectedNames(prev => {
+      const next = new Set(prev);
+      if (allSelected) { pageNames.forEach(n => next.delete(n)); }
+      else             { pageNames.forEach(n => next.add(n)); }
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    const count = selectedNames.size;
+    if (!count) return;
+    if (!window.confirm(`Delete ${count} file${count > 1 ? 's' : ''}?\n\nThis will remove them from all providers and cannot be undone.`)) return;
+
+    setBulkDeleting(true);
+    const names = [...selectedNames];
+    let failed = 0;
+
+    await Promise.all(names.map(async name => {
+      const file = allFiles.find(f => f.name === name);
+      if (!file) return;
+      try { await deleteFile(name, file.providers); }
+      catch { failed++; }
+    }));
+
+    const deleted = names.length - failed;
+    toast(
+      `${deleted} file${deleted !== 1 ? 's' : ''} deleted${failed ? ` · ${failed} failed` : ''}`,
+      failed ? 'wa' : 'ok',
+      'Bulk delete'
+    );
+    setBulkDeleting(false);
+    exitSelectMode();
+    load();
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       <Topbar
@@ -132,6 +206,9 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
         sortBy={sortBy}
         sortDir={sortDir}
         onSort={handleSort}
+        selectMode={selectMode}
+        onToggleSelectMode={selectMode ? exitSelectMode : enterSelectMode}
+        canSelect={can('delete')}
       />
 
       <div className={`cw${drawerOpen ? ' open' : ''}`}>
@@ -151,14 +228,23 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
                 <FileList
                   files={pageFiles}
                   selectedIdx={selIdx}
-                  onSelect={onSelectFile}
+                  onSelect={handleFileClick}
                   onRefresh={load}
                   sortBy={sortBy}
                   sortDir={sortDir}
                   onSort={handleSort}
+                  selectMode={selectMode}
+                  selectedNames={selectedNames}
+                  onSelectAll={handleSelectAll}
                 />
               ) : (
-                <FileGrid files={pageFiles} onSelect={onSelectFile} onRefresh={load} />
+                <FileGrid
+                  files={pageFiles}
+                  onSelect={handleFileClick}
+                  onRefresh={load}
+                  selectMode={selectMode}
+                  selectedNames={selectedNames}
+                />
               )}
 
               {filteredFiles.length > PAGE_SIZE && (
@@ -171,6 +257,41 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
                 />
               )}
             </>
+          )}
+
+          {/* Bulk action bar */}
+          {selectMode && (
+            <div className="bulk-bar">
+              <div className="bulk-bar-info">
+                <div className="bulk-count-badge">{selectedNames.size}</div>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx)' }}>
+                  {selectedNames.size === 0
+                    ? 'No files selected'
+                    : `file${selectedNames.size !== 1 ? 's' : ''} selected`}
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: 7, marginLeft: 'auto', alignItems: 'center' }}>
+                <button className="btn btn-s btn-sm" onClick={exitSelectMode}>Cancel</button>
+                {can('delete') && selectedNames.size > 0 && (
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleting}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                  >
+                    {bulkDeleting ? (
+                      <span className="spin">↻</span>
+                    ) : (
+                      <svg viewBox="0 0 14 14" width="12" height="12" fill="none">
+                        <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M5.5 6v4M8.5 6v4M3 3.5l.7 8a.5.5 0 00.5.5h5.6a.5.5 0 00.5-.5l.7-8"
+                          stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                    Delete {selectedNames.size} file{selectedNames.size !== 1 ? 's' : ''}
+                  </button>
+                )}
+              </div>
+            </div>
           )}
         </div>
 

@@ -150,6 +150,9 @@ button{border:none;cursor:pointer;background:transparent}
 .btn-d{background:var(--er);color:#fff}
 .btn-w{background:var(--wa);color:#fff}
 .btn-sm{padding:0 10px;min-height:28px;font-size:12px;border-radius:7px}
+.btn-danger{background:var(--er);color:#fff;border:none}
+.btn-danger:not(:disabled):hover{background:#b91c1c;box-shadow:0 4px 14px rgba(239,68,68,.35)}
+.btn-select-active{background:var(--acb);color:var(--ac);border:1.5px solid var(--acd)}
 .btn-full{width:100%}
 .btn-lg{padding:0 22px;min-height:42px;font-size:15px}
 .icb{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:7px;background:transparent;color:var(--tx3);font-size:14px;cursor:pointer;transition:background .12s;border:none}
@@ -262,6 +265,22 @@ button{border:none;cursor:pointer;background:transparent}
 .dup-actions .btn{min-width:0;white-space:normal;text-align:center;line-height:1.25;padding-top:7px;padding-bottom:7px}
 .dup-keep-btn{flex-direction:column;gap:2px;overflow:hidden}
 .dup-keep-name{font-size:11px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Bulk selection ──────────────────────────────────────────── */
+.sel-chk{width:17px;height:17px;border-radius:5px;border:2px solid var(--bd);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .12s;background:var(--sur);font-size:10px;font-weight:800;color:transparent}
+.sel-chk:hover{border-color:var(--ac)}
+.sel-chk.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.sel-chk.part{background:var(--acb);border-color:var(--ac);color:var(--ac)}
+.frow.checked{background:var(--acb)}
+.frow.checked:hover{background:var(--acb)}
+.fcard.checked{border-color:var(--ac);box-shadow:0 0 0 2px var(--acd)}
+.fcard-chk-overlay{position:absolute;top:10px;right:10px;z-index:3}
+
+/* Bulk action bar — sticky bottom of farea */
+.bulk-bar{position:sticky;bottom:0;z-index:20;background:var(--sur);border-top:2px solid var(--er);padding:11px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 -6px 24px rgba(239,68,68,.1);animation:slideUpFade .2s cubic-bezier(.22,1,.36,1) both}
+@keyframes slideUpFade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.bulk-bar-info{display:flex;align-items:center;gap:8px}
+.bulk-count-badge{min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:var(--er);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
 
 /* ── Multi-file upload ────────────────────────────────────────── */
 .dz.drag-over{border-color:var(--ac);background:var(--acb);transform:scale(1.015)}

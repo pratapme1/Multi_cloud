@@ -23,7 +23,11 @@ function formatAge(ts) {
   return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-export default function Shelf({ files, filter, view, onFilter, onView, onReload, lastRefreshed, sortBy, sortDir, onSort }) {
+export default function Shelf({
+  files, filter, view, onFilter, onView, onReload, lastRefreshed,
+  sortBy, sortDir, onSort,
+  selectMode, onToggleSelectMode, canSelect,
+}) {
   const counts = {
     all:   files.length,
     aws:   files.filter(f => f.providers.includes('aws')).length,
@@ -68,6 +72,26 @@ export default function Shelf({ files, filter, view, onFilter, onView, onReload,
             {formatAge(lastRefreshed)}
           </span>
         )}
+
+        {canSelect && files.length > 0 && (
+          <button
+            className={`btn btn-sm${selectMode ? ' btn-select-active' : ' btn-s'}`}
+            onClick={onToggleSelectMode}
+            title={selectMode ? 'Exit selection mode' : 'Select files to delete'}
+          >
+            <svg viewBox="0 0 14 14" width="12" height="12" fill="none">
+              <rect x="1.5" y="1.5" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4"/>
+              <rect x="7.5" y="1.5" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4"/>
+              <rect x="1.5" y="7.5" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4"/>
+              {selectMode
+                ? <path d="M8.5 10l1.3 1.5L12 8.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                : <rect x="7.5" y="7.5" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4"/>
+              }
+            </svg>
+            {selectMode ? 'Cancel' : 'Select'}
+          </button>
+        )}
+
         <div className="vtog">
           <button className={`vbtn${view === 'list' ? ' on' : ''}`} onClick={() => onView('list')} title="List view">
             <svg viewBox="0 0 14 14" width="12" height="12" fill="none">
@@ -87,7 +111,6 @@ export default function Shelf({ files, filter, view, onFilter, onView, onReload,
         </div>
         <button className="btn btn-s btn-sm" onClick={onReload} title="Refresh files">
           <svg viewBox="0 0 16 16" width="13" height="13" fill="none">
-            {/* 270° clockwise arc: right → bottom → left → top */}
             <path d="M13.2 5.2A5.8 5.8 0 0 0 3.6 4.1L2.5 5.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
             <path d="M2.5 2.5v2.7h2.7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M2.8 10.8a5.8 5.8 0 0 0 9.6 1.1l1.1-1.1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
