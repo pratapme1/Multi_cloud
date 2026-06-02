@@ -13,7 +13,7 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
   const [allFiles, setAllFiles]       = useState([]);
   const [pageState, setPageState]     = useState('loading');
   const [filter, setFilter]           = useState('all');
-  const [view, setView]               = useState('list');
+  const [view, setView]               = useState('grid');
   const [search, setSearch]           = useState('');
   const [sortBy, setSortBy]           = useState('modified');
   const [sortDir, setSortDir]         = useState('asc');
