@@ -1,14 +1,27 @@
 import { useAuth } from '../context/AuthContext.jsx';
 
-export default function Topbar({ pageState, onDrawer, onUpload, search, onSearch, healthDeg }) {
+export default function Topbar({ pageState, onDrawer, onUpload, search, onSearch, healthDeg, healthData, healthLoading }) {
   const { user, can, roleLabel } = useAuth();
   const isError    = pageState === 'error';
   const isLoading  = pageState === 'loading';
   const isReadonly = user?.role === 'viewer';
 
-  const awsOk   = true;
-  const azureOk = !isError && !healthDeg;
-  const gcsOk   = true;
+  const providerStatus = key => {
+    if (healthLoading) return 'loading';
+    if (healthDeg && key === 'azure') return 'error';
+    return healthData?.providers?.find(provider => provider.key === key)?.status ?? (isError ? 'error' : 'pending');
+  };
+
+  const dotColor = status => {
+    if (status === 'ok') return 'var(--ok)';
+    if (status === 'error') return 'var(--er)';
+    if (status === 'pending') return 'var(--wa)';
+    return 'var(--tx3)';
+  };
+
+  const awsStatus = providerStatus('aws');
+  const azureStatus = providerStatus('azure');
+  const gcsStatus = providerStatus('gcs');
 
   return (
     <header className="topbar">
@@ -49,9 +62,9 @@ export default function Topbar({ pageState, onDrawer, onUpload, search, onSearch
         >
           <span className="hbtn">
             <span className="hbtn-dots">
-              <span className="hdot" style={{ background: awsOk   ? 'var(--ok)' : 'var(--er)' }} title="AWS S3" />
-              <span className="hdot" style={{ background: azureOk ? 'var(--ok)' : 'var(--er)' }} title="Azure Blob" />
-              <span className="hdot" style={{ background: gcsOk   ? 'var(--ok)' : 'var(--er)' }} title="GCS" />
+              <span className="hdot" style={{ background: dotColor(awsStatus) }} title={`AWS S3: ${awsStatus}`} />
+              <span className="hdot" style={{ background: dotColor(azureStatus) }} title={`Azure Blob: ${azureStatus}`} />
+              <span className="hdot" style={{ background: dotColor(gcsStatus) }} title={`GCS: ${gcsStatus}`} />
             </span>
             Health
           </span>

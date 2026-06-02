@@ -51,10 +51,19 @@ export default function UploadModal({ onClose, onSuccess }) {
     }
   };
 
+  const handleLayerClick = e => {
+    if (!e.target.classList.contains('mlayer')) return;
+    if (step === 'uploading') {
+      toast('Upload is still running. Keep this window open until it finishes.', 'inf', 'Upload in progress');
+      return;
+    }
+    onClose();
+  };
+
   const fileType = file?.name.split('.').pop().toUpperCase().slice(0, 4);
 
   return (
-    <div className="mlayer" onClick={e => { if (e.target.classList.contains('mlayer')) onClose(); }}>
+    <div className="mlayer" onClick={handleLayerClick}>
       <div className="modal" onClick={e => e.stopPropagation()}>
 
         {/* ── Default / Ready ── */}
@@ -197,6 +206,7 @@ export default function UploadModal({ onClose, onSuccess }) {
                   );
                 })}
               </div>
+              <div className="upload-keep-open">Upload is active. Closing is disabled until the transfer finishes.</div>
             </div>
           </>
         )}

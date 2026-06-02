@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getFiles } from '../api/index.js';
+import { getFiles, getHealth } from '../api/index.js';
 import Topbar from '../components/Topbar.jsx';
 import Shelf from '../components/Shelf.jsx';
 import FileList from '../components/FileList.jsx';
@@ -21,6 +21,22 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
   const [showUpload, setShowUpload]   = useState(false);
   const [lastRefreshed, setRefreshed] = useState(null);
   const [healthDeg, setHealthDeg]     = useState(false);
+  const [healthData, setHealthData]   = useState(null);
+  const [healthLoading, setHealthLoading] = useState(true);
+
+  const loadHealth = useCallback(async () => {
+    setHealthLoading(true);
+    try {
+      const data = await getHealth();
+      setHealthData(data);
+      setHealthDeg(data.providers?.some(provider => provider.status === 'error') ?? false);
+    } catch {
+      setHealthData(null);
+      setHealthDeg(true);
+    } finally {
+      setHealthLoading(false);
+    }
+  }, []);
 
   const load = useCallback(async () => {
     setPageState('loading');
@@ -29,13 +45,19 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
       setAllFiles(data);
       setRefreshed(Date.now());
       setPageState(data.length === 0 ? 'empty' : 'loaded');
+      loadHealth();
     } catch {
       setPageState('error');
       setHealthDeg(true);
     }
-  }, []);
+  }, [loadHealth]);
 
   useEffect(() => { load(); }, [load, refreshKey]);
+  useEffect(() => {
+    loadHealth();
+    const id = window.setInterval(loadHealth, 60000);
+    return () => window.clearInterval(id);
+  }, [loadHealth]);
 
   const handleFilter = f => {
     setFilter(f);
@@ -95,6 +117,8 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
         search={search}
         onSearch={handleSearch}
         healthDeg={healthDeg}
+        healthData={healthData}
+        healthLoading={healthLoading}
       />
 
       <Shelf

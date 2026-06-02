@@ -96,25 +96,31 @@ export default function RolesPage() {
       </section>
 
       <section className="role-grid">
-        {Object.values(ROLES).map(r => (
+        {Object.values(ROLES).map(r => {
+          const activePerms = PERMISSIONS.filter(permission => canRole(r.key, permission));
+          const visiblePerms = activePerms.slice(0, 4);
+          const extraPerms = Math.max(0, activePerms.length - visiblePerms.length);
+          return (
           <article className={`role-card role-${r.key}`} key={r.key}>
             <div className="role-card-head">
-              <div>
-                <span className="role-dot" />
+              <span className="role-dot" />
+              <div className="role-card-title">
                 <h2>{r.label}</h2>
-                <p>{r.description}</p>
+                <span>{users.filter(u => u.role === r.key).length} users · {activePerms.length} permissions</span>
               </div>
               <span className="role-count">{users.filter(u => u.role === r.key).length}</span>
             </div>
             <div className="perm-list">
-              {PERMISSIONS.map(permission => (
-                <span key={permission} className={canRole(r.key, permission) ? 'perm on' : 'perm'}>
+              {visiblePerms.map(permission => (
+                <span key={permission} className="perm on">
                   {permission.replaceAll('_', ' ')}
                 </span>
               ))}
+              {extraPerms > 0 && <span className="perm more">+{extraPerms} more</span>}
             </div>
           </article>
-        ))}
+          );
+        })}
       </section>
 
       <section className="roles-table-wrap">
