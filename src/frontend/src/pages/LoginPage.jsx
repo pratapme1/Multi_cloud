@@ -75,10 +75,6 @@ export default function LoginPage() {
             {loading ? 'Signing in…' : 'Sign In →'}
           </button>
         </form>
-        <div className="demob">
-          <strong>admin</strong> / Admin@123 — full access<br />
-          <strong>viewer</strong> / View@123 — read-only
-        </div>
         <div style={{ textAlign: 'center', marginTop: 14, fontSize: 13, color: 'var(--tx3)' }}>
           Don't have an account?{' '}
           <Link to="/signup" style={{ color: 'var(--ac)', fontWeight: 700, textDecoration: 'none' }}>
