@@ -263,6 +263,32 @@ button{border:none;cursor:pointer;background:transparent}
 .dup-keep-btn{flex-direction:column;gap:2px;overflow:hidden}
 .dup-keep-name{font-size:11px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+/* ── Multi-file upload ────────────────────────────────────────── */
+.dz.drag-over{border-color:var(--ac);background:var(--acb);transform:scale(1.015)}
+.upload-file-list{max-height:184px;overflow-y:auto;border:1px solid var(--bd);border-radius:10px;background:var(--sur2)}
+.upload-file-row{display:flex;align-items:center;gap:9px;padding:8px 11px;border-bottom:1px solid var(--bd)}
+.upload-file-row:last-child{border-bottom:none}
+
+/* Rainbow animated progress bar */
+.upload-rainbow-wrap{margin-bottom:2px}
+.upload-rainbow-track{position:relative;height:7px;background:var(--sur3);border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.08)}
+.upload-rainbow-bar{position:absolute;inset:0;background:linear-gradient(90deg,#ff6b6b,#ff9500,#ffd93d,#6bcb77,#4d96ff,#a855f7,#ec4899,#ff6b6b);background-size:300% 100%;animation:rainbowSlide 2s linear infinite}
+.upload-rainbow-sheen{position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.45) 50%,transparent 100%);animation:sheenSlide 1.6s ease-in-out infinite}
+@keyframes rainbowSlide{0%{background-position:0% 0%}100%{background-position:300% 0%}}
+@keyframes sheenSlide{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* Per-file upload progress rows */
+.upload-prog-list{display:flex;flex-direction:column;gap:5px;max-height:220px;overflow-y:auto}
+.upload-prog-row{display:flex;align-items:center;gap:9px;padding:8px 11px;background:var(--sur2);border-radius:10px;border:1px solid var(--bd)}
+.upload-mini-bar-wrap{height:3px;background:var(--sur3);border-radius:999px;overflow:hidden;margin-top:5px}
+.upload-mini-bar{height:100%;border-radius:999px;transition:width .35s ease}
+.upload-mini-bar.pending{width:0}
+.upload-mini-bar.uploading{width:70%;background:linear-gradient(90deg,#6366f1,#a855f7,#ec4899,#6366f1);background-size:200% 100%;animation:rainbowSlide 1.8s linear infinite}
+.upload-mini-bar.done{width:100%;background:linear-gradient(90deg,#10b981,#6366f1)}
+.upload-mini-bar.partial{width:100%;background:linear-gradient(90deg,#f59e0b,#ef4444)}
+.upload-mini-bar.error{width:100%;background:#ef4444}
+.upload-prog-icon{width:22px;text-align:center;flex-shrink:0}
+
 /* Toast */
 .toast-wrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:8500;display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none}
 .toast{background:#111827;color:#f9fafb;border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:9px;font-size:13px;pointer-events:all;animation:tIn .2s ease;box-shadow:0 8px 24px rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.06)}
