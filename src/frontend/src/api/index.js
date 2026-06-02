@@ -60,14 +60,15 @@ export const getFiles = async (provider = 'all') => {
   return handleRes(res);
 };
 
-export const uploadFile = async (file, providers) => {
+export const uploadFile = async (file, providers, options = {}) => {
   const provArray = Array.isArray(providers) ? providers : [providers];
+  const uploadName = options.name ?? file.name;
   if (window.location.hostname.endsWith('vercel.app') || import.meta.env.VITE_DIRECT_UPLOADS === 'true') {
-    return uploadFileDirect(file, provArray);
+    return uploadFileDirect(file, provArray, { name: uploadName });
   }
 
   const form = new FormData();
-  form.append('file', file);
+  form.append('file', file, uploadName);
   form.append('providers', JSON.stringify(provArray));
   // No Content-Type header — browser sets multipart/form-data boundary automatically
   const res = await fetch(`${BASE}/files/upload`, {
@@ -78,12 +79,13 @@ export const uploadFile = async (file, providers) => {
   return handleRes(res);
 };
 
-export const uploadFileDirect = async (file, providers) => {
+export const uploadFileDirect = async (file, providers, options = {}) => {
+  const uploadName = options.name ?? file.name;
   const res = await fetch(`${BASE}/files/upload-url`, {
     method: 'POST',
     headers: { ...authHeader(), 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name: file.name,
+      name: uploadName,
       contentType: file.type || 'application/octet-stream',
       providers,
     }),
@@ -119,7 +121,7 @@ export const uploadFileDirect = async (file, providers) => {
   }));
 
   return {
-    name: file.name,
+    name: uploadName,
     sizeBytes: file.size,
     providers,
     results,

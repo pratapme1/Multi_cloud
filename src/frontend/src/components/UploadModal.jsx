@@ -15,12 +15,32 @@ const formatSize = bytes => {
   return `${(bytes / 1048576).toFixed(1)} MB`;
 };
 
-export default function UploadModal({ onClose, onSuccess }) {
+const splitName = name => {
+  const dot = name.lastIndexOf('.');
+  if (dot <= 0) return { base: name, ext: '' };
+  return { base: name.slice(0, dot), ext: name.slice(dot) };
+};
+
+const nextAvailableName = (name, existingNames) => {
+  const { base, ext } = splitName(name);
+  let i = 1;
+  let candidate = `${base} (${i})${ext}`;
+  while (existingNames.has(candidate.toLowerCase())) {
+    i += 1;
+    candidate = `${base} (${i})${ext}`;
+  }
+  return candidate;
+};
+
+export default function UploadModal({ existingFiles = [], onClose, onSuccess }) {
   const toast = useToast();
   const [file, setFile]           = useState(null);
   const [selected, setSelected]   = useState(['aws', 'azure']);
-  const [step, setStep]           = useState('default'); // default|ready|uploading|success|error403|partial
+  const [step, setStep]           = useState('default'); // default|ready|duplicate|uploading|success|error403|partial
   const [uploadResult, setResult] = useState(null);
+  const [duplicateName, setDuplicateName] = useState('');
+  const [uploadName, setUploadName] = useState('');
+  const existingNames = new Set(existingFiles.map(f => f.name).filter(Boolean).map(name => name.toLowerCase()));
 
   const toggle = key => {
     const opt = PROV_OPTIONS.find(p => p.key === key);
@@ -33,23 +53,43 @@ export default function UploadModal({ onClose, onSuccess }) {
 
   const handleFileChange = e => {
     const f = e.target.files?.[0];
-    if (f) { setFile(f); setStep('ready'); }
+    if (f) {
+      setFile(f);
+      setResult(null);
+      setDuplicateName('');
+      setUploadName('');
+      setStep('ready');
+    }
   };
 
-  const handleUpload = async () => {
+  const doUpload = async name => {
     if (!selected.length) { toast('Select at least one provider', 'wa'); return; }
+    setUploadName(name);
     setStep('uploading');
     try {
-      const result = await uploadFile(file, selected);
+      const result = await uploadFile(file, selected, { name });
       setResult(result);
       const ok = Object.values(result.results ?? {}).filter(r => r.status === 'ok').length;
       setStep(ok === selected.length ? 'success' : 'partial');
-      toast(`${file.name} → ${ok}/${selected.length} providers`, 'ok', 'Upload complete');
+      toast(`${name} -> ${ok}/${selected.length} providers`, 'ok', 'Upload complete');
     } catch (err) {
       if (err?.response?.status === 403) setStep('error403');
       else setStep('partial');
     }
   };
+
+  const handleUpload = async () => {
+    if (!file) return;
+    if (existingNames.has(file.name.toLowerCase())) {
+      setDuplicateName(file.name);
+      setStep('duplicate');
+      return;
+    }
+    await doUpload(file.name);
+  };
+
+  const handleReplace = () => doUpload(duplicateName);
+  const handleKeepBoth = () => doUpload(nextAvailableName(duplicateName, existingNames));
 
   const handleLayerClick = e => {
     if (!e.target.classList.contains('mlayer')) return;
@@ -186,6 +226,36 @@ export default function UploadModal({ onClose, onSuccess }) {
         )}
 
         {/* ── Uploading ── */}
+        {step === 'duplicate' && (
+          <>
+            <div className="mh">
+              <div>
+                <div className="mt">File already exists</div>
+                <div className="ms">Choose how to handle this upload</div>
+              </div>
+              <button className="icb" onClick={onClose}>x</button>
+            </div>
+            <div className="mb">
+              <div className="dup-card">
+                <FileTypeIcon type={fileType} size={42} />
+                <div className="file-meta">
+                  <div className="file-name-1" title={duplicateName}>{duplicateName}</div>
+                  <div className="dup-copy">
+                    This filename is already present. Replace overwrites the selected providers; keep both saves a new copy.
+                  </div>
+                </div>
+              </div>
+              <div className="dup-actions">
+                <button className="btn btn-s" onClick={() => setStep('ready')}>Cancel</button>
+                <button className="btn btn-w" onClick={handleReplace}>Replace existing</button>
+                <button className="btn btn-p" onClick={handleKeepBoth}>
+                  Keep both as {nextAvailableName(duplicateName, existingNames)}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
         {step === 'uploading' && (
           <>
             <div className="mh"><div className="mt">Uploading…</div></div>
@@ -194,7 +264,7 @@ export default function UploadModal({ onClose, onSuccess }) {
                 <span className="spin">↻</span>
               </div>
               <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>Uploading to {selected.length} provider{selected.length > 1 ? 's' : ''}…</div>
-              <div className="file-name-2 muted" title={file?.name}>{file?.name}</div>
+              <div className="file-name-2 muted" title={uploadName || file?.name}>{uploadName || file?.name}</div>
               <div className="ph"><div className="pf" /></div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 12 }}>
                 {selected.map(k => {
@@ -225,7 +295,7 @@ export default function UploadModal({ onClose, onSuccess }) {
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
                 <div style={{ width: 58, height: 58, background: 'var(--okb)', border: '2px solid var(--okd)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', fontSize: '1.5rem', color: 'var(--ok)' }}>✓</div>
                 <div style={{ fontSize: 15, fontWeight: 800 }}>Upload Successful</div>
-                <div className="file-name-2 muted" title={file?.name}>{file?.name}</div>
+                <div className="file-name-2 muted" title={uploadResult?.name ?? uploadName ?? file?.name}>{uploadResult?.name ?? uploadName ?? file?.name}</div>
               </div>
               {selected.map(k => {
                 const p   = PROV_OPTIONS.find(x => x.key === k);
@@ -245,7 +315,7 @@ export default function UploadModal({ onClose, onSuccess }) {
             </div>
             <div className="mf">
               <button className="btn btn-s" onClick={onSuccess ?? onClose}>Close</button>
-              <button className="btn btn-p" onClick={() => { setFile(null); setSelected(['aws', 'azure']); setStep('default'); }}>Upload Another</button>
+              <button className="btn btn-p" onClick={() => { setFile(null); setSelected(['aws', 'azure']); setDuplicateName(''); setUploadName(''); setStep('default'); }}>Upload Another</button>
             </div>
           </>
         )}
@@ -275,7 +345,7 @@ export default function UploadModal({ onClose, onSuccess }) {
             </div>
             <div className="mf">
               <button className="btn btn-s" onClick={onSuccess ?? onClose}>Close</button>
-              <button className="btn btn-w" onClick={() => { setFile(null); setStep('default'); }}>↻ Retry</button>
+              <button className="btn btn-w" onClick={() => { setFile(null); setDuplicateName(''); setUploadName(''); setStep('default'); }}>Retry</button>
             </div>
           </>
         )}

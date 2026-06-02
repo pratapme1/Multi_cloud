@@ -186,6 +186,7 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
 
       {showUpload && (
         <UploadModal
+          existingFiles={allFiles}
           onClose={() => setShowUpload(false)}
           onSuccess={() => { setShowUpload(false); load(); }}
         />
