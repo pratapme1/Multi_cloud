@@ -27,6 +27,21 @@ const upload = multer({
   limits: { fileSize: 100 * 1024 * 1024 },
 });
 
+app.use((req, _res, next) => {
+  const url = new URL(req.url, 'https://local.vercel');
+  const rewritePath = url.searchParams.get('path');
+
+  if (rewritePath) {
+    url.searchParams.delete('path');
+    const search = url.searchParams.toString();
+    req.url = `/api/${rewritePath}${search ? `?${search}` : ''}`;
+  } else if (!req.url.startsWith('/api/')) {
+    req.url = `/api${req.url === '/' ? '' : req.url}`;
+  }
+
+  next();
+});
+
 app.use(express.json());
 
 const aws = new AwsProvider();
