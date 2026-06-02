@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "installCommand": "npm install && npm install --prefix src/frontend",
+  "installCommand": "npm install --prefix src/backend-node && npm install --prefix src/frontend",
   "buildCommand": "cd src/frontend && npm run build",
   "outputDirectory": "src/frontend/dist",
   "rewrites": [
