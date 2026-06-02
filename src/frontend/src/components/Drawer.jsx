@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { runSync, syncFile, getHealth } from '../api/index.js';
+import { runSync, syncFile, deleteFile, getHealth } from '../api/index.js';
 import { useToast } from '../context/ToastContext.jsx';
 import { FileTypeIcon, ProviderIcons, PL } from './FileIcons.jsx';
 
@@ -19,10 +19,13 @@ export default function Drawer({ mode, file, onClose, onSimulateDeg, onRefresh }
 
 function FileDetail({ file, onClose, onRefresh }) {
   const toast = useToast();
-  const [syncing, setSyncing] = useState(null);
+  const [syncing, setSyncing]   = useState(null); // provider key being synced
+  const [confirm, setConfirm]   = useState(null); // provider key pending remove confirm, or 'all'
+  const [removing, setRemoving] = useState(null); // provider key being removed
 
   const ALL_PROVIDERS = ['aws', 'azure', 'gcs'];
-  const missing = ALL_PROVIDERS.filter(p => !file.providers.includes(p));
+  const dotColor = p => p === 'aws' ? 'var(--aws)' : p === 'azure' ? 'var(--azure)' : 'var(--gcs)';
+  const busy = syncing !== null || removing !== null;
 
   const handleSyncTo = async targetProvider => {
     const source = file.providers[0];
@@ -45,7 +48,36 @@ function FileDetail({ file, onClose, onRefresh }) {
     }
   };
 
-  const dotColor = p => p === 'aws' ? 'var(--aws)' : p === 'azure' ? 'var(--azure)' : 'var(--gcs)';
+  const handleRemove = async targetProvider => {
+    setConfirm(null);
+    setRemoving(targetProvider);
+    try {
+      await deleteFile(file.name, [targetProvider]);
+      toast(`Removed from ${PL[targetProvider]}`, 'ok');
+      // If last copy removed, close drawer since file no longer exists anywhere
+      if (file.providers.length === 1) onClose();
+      onRefresh?.();
+    } catch (err) {
+      toast(err.message ?? 'Remove failed', 'err');
+    } finally {
+      setRemoving(null);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    setConfirm(null);
+    setRemoving('all');
+    try {
+      await deleteFile(file.name, file.providers);
+      toast(`Deleted from all providers`, 'ok', file.name);
+      onClose();
+      onRefresh?.();
+    } catch (err) {
+      toast(err.message ?? 'Delete failed', 'err');
+    } finally {
+      setRemoving(null);
+    }
+  };
 
   return (
     <>
@@ -82,12 +114,27 @@ function FileDetail({ file, onClose, onRefresh }) {
             </svg>
             Download
           </button>
-          <button className="btn btn-s btn-sm" onClick={() => toast('Delete blocked in prototype', 'inf')}>
-            <svg viewBox="0 0 14 14" width="12" height="12" fill="none" style={{ color: 'var(--er)' }}>
-              <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M5.5 6v4M8.5 6v4M3 3.5l.7 8a.5.5 0 00.5.5h5.6a.5.5 0 00.5-.5l.7-8"
-                stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+
+          {confirm === 'all' ? (
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: 'var(--er)', fontWeight: 600 }}>Delete from all?</span>
+              <button className="btn btn-sm" style={{ fontSize: 11, background: 'var(--er)', color: '#fff', border: 'none', padding: '3px 10px' }}
+                disabled={removing === 'all'} onClick={handleDeleteAll}>
+                {removing === 'all' ? '↻' : 'Yes'}
+              </button>
+              <button className="btn btn-s btn-sm" style={{ fontSize: 11 }} onClick={() => setConfirm(null)}>No</button>
+            </div>
+          ) : (
+            <button className="btn btn-s btn-sm" disabled={busy}
+              style={{ color: 'var(--er)', borderColor: 'var(--erd)' }}
+              title="Delete from all providers"
+              onClick={() => setConfirm('all')}>
+              <svg viewBox="0 0 14 14" width="12" height="12" fill="none">
+                <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M5.5 6v4M8.5 6v4M3 3.5l.7 8a.5.5 0 00.5.5h5.6a.5.5 0 00.5-.5l.7-8"
+                  stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          )}
         </div>
 
         <div className="sep" />
@@ -96,28 +143,51 @@ function FileDetail({ file, onClose, onRefresh }) {
         </div>
 
         {ALL_PROVIDERS.map(p => {
-          const on = file.providers.includes(p);
-          const busy = syncing === p;
+          const on    = file.providers.includes(p);
+          const isBusy = syncing === p || removing === p;
+          const isConfirming = confirm === p;
+
           return (
-            <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 0', borderBottom: '1px solid var(--bd)' }}>
+            <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 0', borderBottom: '1px solid var(--bd)', minHeight: 38 }}>
               <div style={{ width: 9, height: 9, borderRadius: '50%', background: on ? dotColor(p) : 'var(--bd)', flexShrink: 0 }} />
               <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: on ? 'var(--tx)' : 'var(--tx3)' }}>{PL[p]}</span>
-              {on
-                ? <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ok)' }}>✓ Stored</span>
-                : <button
-                    className="btn btn-s btn-sm"
-                    style={{ fontSize: 11, padding: '2px 10px' }}
-                    disabled={busy || syncing !== null}
-                    onClick={() => handleSyncTo(p)}
-                  >
-                    {busy ? '↻' : `Sync →`}
-                  </button>
-              }
+
+              {on ? (
+                isConfirming ? (
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                    <span style={{ fontSize: 11, color: 'var(--er)', fontWeight: 600 }}>
+                      {file.providers.length === 1 ? 'Last copy!' : 'Remove?'}
+                    </span>
+                    <button className="btn btn-sm"
+                      style={{ fontSize: 11, background: 'var(--er)', color: '#fff', border: 'none', padding: '3px 10px' }}
+                      disabled={isBusy} onClick={() => handleRemove(p)}>
+                      {isBusy ? '↻' : 'Yes'}
+                    </button>
+                    <button className="btn btn-s btn-sm" style={{ fontSize: 11 }} onClick={() => setConfirm(null)}>No</button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ok)' }}>✓ Stored</span>
+                    <button className="btn btn-s btn-sm"
+                      style={{ fontSize: 11, padding: '2px 8px', color: 'var(--er)', borderColor: 'var(--erd)' }}
+                      disabled={busy} onClick={() => setConfirm(p)}
+                      title={`Remove from ${PL[p]}`}>
+                      Remove
+                    </button>
+                  </div>
+                )
+              ) : (
+                <button className="btn btn-s btn-sm"
+                  style={{ fontSize: 11, padding: '2px 10px' }}
+                  disabled={busy} onClick={() => handleSyncTo(p)}>
+                  {syncing === p ? '↻' : 'Sync →'}
+                </button>
+              )}
             </div>
           );
         })}
 
-        {missing.length === 0 && (
+        {file.providers.length === 3 && (
           <div style={{ fontSize: 12, color: 'var(--ok)', textAlign: 'center', padding: '8px 0', fontWeight: 600 }}>
             ✓ Fully redundant across all 3 providers
           </div>
