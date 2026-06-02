@@ -248,8 +248,10 @@ export default function UploadModal({ existingFiles = [], onClose, onSuccess }) 
               <div className="dup-actions">
                 <button className="btn btn-s" onClick={() => setStep('ready')}>Cancel</button>
                 <button className="btn btn-w" onClick={handleReplace}>Replace existing</button>
-                <button className="btn btn-p" onClick={handleKeepBoth}>
-                  Keep both as {nextAvailableName(duplicateName, existingNames)}
+                <button className="btn btn-p dup-keep-btn" onClick={handleKeepBoth}
+                  title={`Keep both as ${nextAvailableName(duplicateName, existingNames)}`}>
+                  <span>Keep both as</span>
+                  <span className="dup-keep-name">{nextAvailableName(duplicateName, existingNames)}</span>
                 </button>
               </div>
             </div>
