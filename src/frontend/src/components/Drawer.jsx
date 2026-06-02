@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { runSync, syncFile, deleteFile, downloadFile, getHealth } from '../api/index.js';
 import { useToast } from '../context/ToastContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 import { FileTypeIcon, ProviderIcons, PL } from './FileIcons.jsx';
 
 const PC = { aws: 'pb-aws', azure: 'pb-az', gcs: 'pb-gcs' };
@@ -23,6 +24,7 @@ function nowTime() {
 
 function FileDetail({ file, onClose, onRefresh }) {
   const toast = useToast();
+  const { can } = useAuth();
   const [syncing, setSyncing]         = useState(null);
   const [confirm, setConfirm]         = useState(null);
   const [removing, setRemoving]       = useState(null);
@@ -206,7 +208,7 @@ function FileDetail({ file, onClose, onRefresh }) {
                     {on ? (
                       <>
                         <span style={{ fontSize: 11, fontWeight: 700, color: dotColor(p) }}>✓ Stored</span>
-                        {!isConfirming && (
+                        {!isConfirming && can('delete') && (
                           <button className="btn btn-s btn-sm"
                             style={{ fontSize: 11, padding: '2px 9px', marginLeft: 6, color: 'var(--er)', borderColor: 'var(--erd)', background: 'var(--sur)' }}
                             disabled={busy} onClick={() => setConfirm(p)}>
@@ -215,11 +217,13 @@ function FileDetail({ file, onClose, onRefresh }) {
                         )}
                       </>
                     ) : (
-                      <button className="btn btn-s btn-sm"
-                        style={{ fontSize: 11, padding: '2px 10px' }}
-                        disabled={busy} onClick={() => handleSyncTo(p)}>
-                        {isSyncing ? '↻ Syncing…' : '↗ Sync here'}
-                      </button>
+                      can('sync') && (
+                        <button className="btn btn-s btn-sm"
+                          style={{ fontSize: 11, padding: '2px 10px' }}
+                          disabled={busy} onClick={() => handleSyncTo(p)}>
+                          {isSyncing ? '↻ Syncing…' : '↗ Sync here'}
+                        </button>
+                      )
                     )}
                   </div>
 
@@ -249,34 +253,38 @@ function FileDetail({ file, onClose, onRefresh }) {
               );
             })}
 
-            <div className="sep" />
-            {confirm === 'all' ? (
-              <div style={{ padding: '13px', borderRadius: 10, background: 'var(--erb)', border: '1px solid var(--erd)' }}>
-                <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--er)', marginBottom: 4 }}>
-                  ⚠ Delete from all {file.providers.length} provider{file.providers.length > 1 ? 's' : ''}?
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--tx2)', marginBottom: 10 }}>
-                  Permanently deletes the file everywhere. Cannot be undone.
-                </div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button className="btn btn-s btn-sm" style={{ fontSize: 12 }} onClick={() => setConfirm(null)}>Cancel</button>
-                  <button className="btn btn-sm"
-                    style={{ fontSize: 12, flex: 1, background: 'var(--er)', color: '#fff', border: 'none' }}
-                    disabled={removing === 'all'} onClick={handleDeleteAll}>
-                    {removing === 'all' ? '↻ Deleting…' : 'Yes, delete everywhere'}
+            {can('delete') && (
+              <>
+                <div className="sep" />
+                {confirm === 'all' ? (
+                  <div style={{ padding: '13px', borderRadius: 10, background: 'var(--erb)', border: '1px solid var(--erd)' }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--er)', marginBottom: 4 }}>
+                      ⚠ Delete from all {file.providers.length} provider{file.providers.length > 1 ? 's' : ''}?
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--tx2)', marginBottom: 10 }}>
+                      Permanently deletes the file everywhere. Cannot be undone.
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button className="btn btn-s btn-sm" style={{ fontSize: 12 }} onClick={() => setConfirm(null)}>Cancel</button>
+                      <button className="btn btn-sm"
+                        style={{ fontSize: 12, flex: 1, background: 'var(--er)', color: '#fff', border: 'none' }}
+                        disabled={removing === 'all'} onClick={handleDeleteAll}>
+                        {removing === 'all' ? '↻ Deleting…' : 'Yes, delete everywhere'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button className="btn btn-s btn-full"
+                    style={{ fontSize: 12, color: 'var(--er)', borderColor: 'var(--erd)' }}
+                    disabled={busy} onClick={() => setConfirm('all')}>
+                    <svg viewBox="0 0 14 14" width="11" height="11" fill="none" style={{ marginRight: 5, flexShrink: 0 }}>
+                      <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M5.5 6v4M8.5 6v4M3 3.5l.7 8a.5.5 0 00.5.5h5.6a.5.5 0 00.5-.5l.7-8"
+                        stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Delete from all providers
                   </button>
-                </div>
-              </div>
-            ) : (
-              <button className="btn btn-s btn-full"
-                style={{ fontSize: 12, color: 'var(--er)', borderColor: 'var(--erd)' }}
-                disabled={busy} onClick={() => setConfirm('all')}>
-                <svg viewBox="0 0 14 14" width="11" height="11" fill="none" style={{ marginRight: 5, flexShrink: 0 }}>
-                  <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M5.5 6v4M8.5 6v4M3 3.5l.7 8a.5.5 0 00.5.5h5.6a.5.5 0 00.5-.5l.7-8"
-                    stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Delete from all providers
-              </button>
+                )}
+              </>
             )}
           </>
         )}

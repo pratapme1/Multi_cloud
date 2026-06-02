@@ -39,11 +39,11 @@
 - Database: SQLite via better-sqlite3 (deferred to M3 — not yet wired up)
 - AWS SDK: @aws-sdk/client-s3 (v3)
 - Azure SDK: @azure/storage-blob
-- GCP SDK: @google-cloud/storage (placeholder — not yet implemented)
+- GCP SDK: @google-cloud/storage (fully implemented — list, upload, download, delete, health, signed URLs)
 - Local credentials: `.env` loaded with `dotenv` npm package
-- Production secrets: Azure App Service Application Settings
-- Auth approach: Mock Bearer tokens (admin / viewer) for M1–M2; JWT Bearer tokens in M3 after D-004 closure
-- Deployment target: Azure App Service free tier F1
+- Production secrets: Vercel Environment Variables
+- Auth approach: Supabase JWT Bearer tokens (implemented). Full refresh-token handling deferred to M3.
+- Deployment target: Vercel (Hobby plan, catch-all API function)
 
 ---
 
@@ -60,14 +60,15 @@
 
 ## 5. Current Focus
 
-**Active Milestone:** M1 - API Integration (Gate: 2026-06-05)  
-**Current Goal:** Resolve AWS/Azure CORS and credential rotation blockers, then implement P0 code-review fixes (CR1, CR2). Presentation built and ready for M1 gate demo.  
-**What's running:** Backend at `src/backend-node/` (port 3001) + React frontend at `src/frontend/` (port 5173). All three providers live on Vercel — AWS S3, Azure Blob, GCS all healthy.  
-**Recent completions (2026-06-02 session 2):** File Details UX redesign (hero, provider pills, per-provider sync/remove, confirm panels), live History tab, auto-refresh chain, cinematic 8-slide interactive presentation at `/app/presentation`.  
-**Blockers / watch items:** AWS/Azure CORS not yet configured. Credentials must be rotated (R01). Unit tests not yet written.  
-**Code-review fix queue:** 8 findings logged (2026-06-02). P0: CR1 (unauthenticated `/api/test-credentials`), CR2 (wrong-file drawer). P1: CR3–CR5. P2: CR6–CR8. Full detail in `docs/backlog.md`.  
-**Closed decisions:** D-001 (tech stack — Node.js, revised 2026-06-01), D-002 (credential management), D-003 (provider pattern), D-005 (deployment target), D-006 (direct upload), D-007 (role model).  
-**Open decisions:** D-004 (auth approach — JWT deferred to M3), D-008 (persistent auth design), D-009 (GCS implementation date).
+**All charter milestones: COMPLETE (2026-06-02)**  
+**M1 — API Modules:** AWS, Azure, GCS providers all live — list, upload, download, delete, health, signed URLs.  
+**M2 — Unified Interface:** Cross-cloud sync, redundant multi-provider upload, unified file management dashboard.  
+**M3 — Web UI + Deploy:** React UI, Supabase JWT auth, RBAC (Super Admin/Admin/Viewer), deployed on Vercel.  
+**What's running:** React frontend at `src/frontend/` (port 5173 local / Vercel). API at `api/index.js` (Vercel) / `src/backend-node/server.js` (port 3001 local).  
+**Recent completions (2026-06-02 session 3):** Role-based UI enforcement in Drawer (C23). Backlog, CLAUDE.md, and presentation updated to reflect all charter milestones complete.  
+**Operational watch items (not code):** AWS/Azure CORS config (B1, B2), credential rotation (B3) — cloud-admin tasks.  
+**Optional hardening queue (post-charter, not blocking go-live):** CR1–CR8 code-review findings, unit tests (D3/D4), production E2E (D1). See `docs/backlog.md`.  
+**Closed decisions:** D-001 through D-009 all resolved.
 
 ---
 
