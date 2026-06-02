@@ -187,7 +187,6 @@ const awsUploadUrl = async ({ name, contentType, uploadedBy }) => {
     url: await getSignedUrl(client, command, { expiresIn: 60 * 10 }),
     headers: {
       'Content-Type': contentType ?? 'application/octet-stream',
-      'x-amz-meta-uploadedby': uploadedBy ?? 'Unknown',
     },
   };
 };
