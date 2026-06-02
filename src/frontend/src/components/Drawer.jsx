@@ -37,9 +37,9 @@ function FileDetail({ file, onClose }) {
         </div>
 
         <div className="kv">
-          <div><label>Owner</label><b>{file.owner}</b></div>
+          <div><label>Uploaded by</label><b>{file.uploadedBy ?? file.owner ?? 'Unknown'}</b></div>
           <div><label>Copies</label><b>{file.providers.length} of 3</b></div>
-          <div><label>Role</label><b>{file.owner === 'viewer' ? 'readonly' : 'admin'}</b></div>
+          <div><label>Access</label><b>Role controlled</b></div>
           <div><label>Updated</label><b>{file.modified}</b></div>
         </div>
 
@@ -78,7 +78,7 @@ function FileDetail({ file, onClose }) {
         <div className="sep" />
         <div style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>Audit trail</div>
         <div className="tl">
-          <div className="tev">Uploaded to {file.providers.map(p => PL[p]).join(', ')}<small>{file.modified}</small></div>
+          <div className="tev">Uploaded by {file.uploadedBy ?? file.owner ?? 'Unknown'} to {file.providers.map(p => PL[p]).join(', ')}<small>{file.modified}</small></div>
           <div className="tev">Virus and secret scan passed<small>No credentials exposed</small></div>
           <div className="tev">Sync eligibility checked<small>{file.providers.length} of 3 providers hold this file</small></div>
         </div>

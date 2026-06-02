@@ -17,14 +17,16 @@ export class AzureProvider {
     if (!this.isConfigured) return [];
     const cc = this.#getContainerClient();
     const files = [];
-    for await (const blob of cc.listBlobsFlat()) {
+    for await (const blob of cc.listBlobsFlat({ includeMetadata: true })) {
+      const uploadedBy = blob.metadata?.uploadedby ?? blob.metadata?.uploadedBy ?? 'Unknown';
       files.push({
         name:       blob.name,
         size:       formatSize(blob.properties.contentLength ?? 0),
         sizeBytes:  blob.properties.contentLength ?? 0,
         providers:  ['azure'],
         type:       getFileType(blob.name),
-        owner:      'admin',
+        owner:      uploadedBy,
+        uploadedBy,
         modified:   formatAge(blob.properties.lastModified),
         modifiedTs: blob.properties.lastModified ? new Date(blob.properties.lastModified).getTime() : Date.now(),
       });
@@ -32,12 +34,13 @@ export class AzureProvider {
     return files.sort((a, b) => b.modifiedTs - a.modifiedTs);
   }
 
-  async uploadFile(buffer, name, mimetype) {
+  async uploadFile(buffer, name, mimetype, options = {}) {
     if (!this.isConfigured) throw new Error('Azure not configured');
     const cc         = this.#getContainerClient();
     const blockBlob  = cc.getBlockBlobClient(name);
     await blockBlob.upload(buffer, buffer.length, {
       blobHTTPHeaders: { blobContentType: mimetype ?? 'application/octet-stream' },
+      metadata: { uploadedby: options.uploadedBy ?? 'Unknown' },
     });
   }
 

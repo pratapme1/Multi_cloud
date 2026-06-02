@@ -127,6 +127,10 @@ app.get('/api/files', requireAuth, async (req, res) => {
           if (map.has(file.name)) {
             const existing = map.get(file.name);
             existing.providers = [...new Set([...existing.providers, ...file.providers])];
+            if ((!existing.uploadedBy || existing.uploadedBy === 'Unknown') && file.uploadedBy && file.uploadedBy !== 'Unknown') {
+              existing.uploadedBy = file.uploadedBy;
+              existing.owner = file.uploadedBy;
+            }
           } else {
             map.set(file.name, { ...file });
           }
@@ -160,7 +164,7 @@ const parseAzureConnectionString = connectionString => {
   };
 };
 
-const awsUploadUrl = async ({ name, contentType }) => {
+const awsUploadUrl = async ({ name, contentType, uploadedBy }) => {
   const client = new S3Client({
     region: process.env.AWS_REGION ?? 'us-east-1',
     credentials: {
@@ -174,17 +178,21 @@ const awsUploadUrl = async ({ name, contentType }) => {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: name,
     ContentType: contentType ?? 'application/octet-stream',
+    Metadata: { uploadedBy: uploadedBy ?? 'Unknown' },
   });
 
   return {
     provider: 'aws',
     method: 'PUT',
     url: await getSignedUrl(client, command, { expiresIn: 60 * 10 }),
-    headers: { 'Content-Type': contentType ?? 'application/octet-stream' },
+    headers: {
+      'Content-Type': contentType ?? 'application/octet-stream',
+      'x-amz-meta-uploadedby': uploadedBy ?? 'Unknown',
+    },
   };
 };
 
-const azureUploadUrl = ({ name, contentType }) => {
+const azureUploadUrl = ({ name, contentType, uploadedBy }) => {
   const { accountName, accountKey, endpointSuffix } = parseAzureConnectionString(process.env.AZURE_CONNECTION_STRING ?? '');
   const containerName = process.env.AZURE_CONTAINER_NAME;
   if (!accountName || !accountKey || !containerName) throw new Error('Azure not configured');
@@ -209,6 +217,7 @@ const azureUploadUrl = ({ name, contentType }) => {
     headers: {
       'Content-Type': contentType ?? 'application/octet-stream',
       'x-ms-blob-type': 'BlockBlob',
+      'x-ms-meta-uploadedby': uploadedBy ?? 'Unknown',
     },
   };
 };
@@ -216,13 +225,14 @@ const azureUploadUrl = ({ name, contentType }) => {
 app.post('/api/files/upload-url', requireAuth, requireAdmin, async (req, res) => {
   const { name, contentType, providers = ['aws'] } = req.body ?? {};
   if (!name) return res.status(400).json({ error: 'File name is required' });
+  const uploadedBy = req.user?.username ?? 'Unknown';
 
   const urls = {};
   const errors = {};
   await Promise.allSettled(providers.filter(provider => provider !== 'gcs').map(async provider => {
     try {
-      if (provider === 'aws') urls.aws = await awsUploadUrl({ name, contentType });
-      else if (provider === 'azure') urls.azure = azureUploadUrl({ name, contentType });
+      if (provider === 'aws') urls.aws = await awsUploadUrl({ name, contentType, uploadedBy });
+      else if (provider === 'azure') urls.azure = azureUploadUrl({ name, contentType, uploadedBy });
       else errors[provider] = 'Unknown provider';
     } catch (err) {
       errors[provider] = err.message;
@@ -251,7 +261,9 @@ app.post('/api/files/upload', requireAuth, requireAdmin, upload.single('file'), 
       }
 
       try {
-        await PROVIDERS[key].uploadFile(req.file.buffer, req.file.originalname, req.file.mimetype);
+        await PROVIDERS[key].uploadFile(req.file.buffer, req.file.originalname, req.file.mimetype, {
+          uploadedBy: req.user?.username ?? 'Unknown',
+        });
         providerResults[key] = { status: 'ok' };
       } catch (err) {
         providerResults[key] = { status: 'error', message: err.message };
@@ -337,7 +349,9 @@ app.post('/api/sync', requireAuth, requireAdmin, async (req, res) => {
 
         try {
           const { buffer, contentType } = await PROVIDERS[from].getFileContent(file.name);
-          await PROVIDERS[targetKey].uploadFile(buffer, file.name, contentType);
+          await PROVIDERS[targetKey].uploadFile(buffer, file.name, contentType, {
+            uploadedBy: req.user?.username ?? 'Unknown',
+          });
           copied++;
           details.push({ file: file.name, target: targetKey, status: 'ok' });
         } catch (err) {

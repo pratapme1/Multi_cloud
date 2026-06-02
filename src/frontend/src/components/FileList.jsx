@@ -69,6 +69,9 @@ export default function FileList({ files, selectedIdx, onSelect, onRefresh, sort
               <div className="fr-fn">{f.name}</div>
               <div className="fr-fm">
                 <span>{f.providers.length === 3 ? 'All 3 providers' : `${f.providers.length} provider${f.providers.length > 1 ? 's' : ''}`}</span>
+                <span className="uploaded-by" title={`Uploaded by ${f.uploadedBy ?? f.owner ?? 'Unknown'}`}>
+                  Uploaded by {f.uploadedBy ?? f.owner ?? 'Unknown'}
+                </span>
               </div>
             </div>
           </div>

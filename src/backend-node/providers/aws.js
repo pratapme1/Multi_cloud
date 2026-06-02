@@ -2,6 +2,7 @@ import {
   S3Client,
   ListObjectsV2Command,
   HeadBucketCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
@@ -32,13 +33,22 @@ export class AwsProvider {
       }));
       for (const obj of resp.Contents ?? []) {
         if (obj.Key.endsWith('/')) continue; // skip folder markers
+        let metadata = {};
+        try {
+          const head = await this.client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: obj.Key }));
+          metadata = head.Metadata ?? {};
+        } catch {
+          metadata = {};
+        }
+        const uploadedBy = metadata.uploadedby ?? metadata['uploaded-by'] ?? metadata.uploadedBy ?? 'Unknown';
         files.push({
           name:       obj.Key,
           size:       formatSize(obj.Size ?? 0),
           sizeBytes:  obj.Size ?? 0,
           providers:  ['aws'],
           type:       getFileType(obj.Key),
-          owner:      'admin',
+          owner:      uploadedBy,
+          uploadedBy,
           modified:   formatAge(obj.LastModified),
           modifiedTs: obj.LastModified ? new Date(obj.LastModified).getTime() : Date.now(),
         });
@@ -49,13 +59,14 @@ export class AwsProvider {
     return files.sort((a, b) => b.modifiedTs - a.modifiedTs);
   }
 
-  async uploadFile(buffer, name, mimetype) {
+  async uploadFile(buffer, name, mimetype, options = {}) {
     await this.client.send(new PutObjectCommand({
       Bucket:        this.bucket,
       Key:           name,
       Body:          buffer,
       ContentType:   mimetype ?? 'application/octet-stream',
       ContentLength: buffer.length,
+      Metadata:      { uploadedBy: options.uploadedBy ?? 'Unknown' },
     }));
   }
 

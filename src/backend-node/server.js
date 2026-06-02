@@ -117,6 +117,10 @@ app.get('/api/files', requireAuth, async (req, res) => {
           if (map.has(f.name)) {
             const existing = map.get(f.name);
             existing.providers = [...new Set([...existing.providers, ...f.providers])];
+            if ((!existing.uploadedBy || existing.uploadedBy === 'Unknown') && f.uploadedBy && f.uploadedBy !== 'Unknown') {
+              existing.uploadedBy = f.uploadedBy;
+              existing.owner = f.uploadedBy;
+            }
           } else {
             map.set(f.name, { ...f });
           }
@@ -153,7 +157,9 @@ app.post('/api/files/upload', requireAuth, requireAdmin, upload.single('file'), 
     targets.map(async key => {
       if (!PROVIDERS[key]) { providerResults[key] = { status: 'error', message: 'Unknown provider' }; return; }
       try {
-        await PROVIDERS[key].uploadFile(req.file.buffer, req.file.originalname, req.file.mimetype);
+        await PROVIDERS[key].uploadFile(req.file.buffer, req.file.originalname, req.file.mimetype, {
+          uploadedBy: req.user?.username ?? 'Unknown',
+        });
         providerResults[key] = { status: 'ok' };
       } catch (err) {
         providerResults[key] = { status: 'error', message: err.message };
@@ -238,7 +244,9 @@ app.post('/api/sync', requireAuth, requireAdmin, async (req, res) => {
         } else {
           try {
             const { buffer, contentType } = await PROVIDERS[from].getFileContent(file.name);
-            await PROVIDERS[targetKey].uploadFile(buffer, file.name, contentType);
+            await PROVIDERS[targetKey].uploadFile(buffer, file.name, contentType, {
+              uploadedBy: req.user?.username ?? 'Unknown',
+            });
             copied++;
             details.push({ file: file.name, target: targetKey, status: 'ok' });
           } catch (err) {

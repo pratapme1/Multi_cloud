@@ -42,6 +42,9 @@ export default function FileGrid({ files, onSelect, onRefresh }) {
             </div>
             <div className="fcard-name">{f.name}</div>
             <div className="fcard-meta">{f.size} · {f.modified}</div>
+            <div className="uploaded-by card" title={`Uploaded by ${f.uploadedBy ?? f.owner ?? 'Unknown'}`}>
+              Uploaded by {f.uploadedBy ?? f.owner ?? 'Unknown'}
+            </div>
             <div className="fcard-providers">
               <ProviderIcons providers={f.providers} size={14} />
             </div>
