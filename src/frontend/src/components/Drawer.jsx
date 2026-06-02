@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { runSync, syncFile, deleteFile, getHealth } from '../api/index.js';
+import { runSync, syncFile, deleteFile, downloadFile, getHealth } from '../api/index.js';
 import { useToast } from '../context/ToastContext.jsx';
 import { FileTypeIcon, ProviderIcons, PL } from './FileIcons.jsx';
 
@@ -19,13 +19,25 @@ export default function Drawer({ mode, file, onClose, onSimulateDeg, onRefresh }
 
 function FileDetail({ file, onClose, onRefresh }) {
   const toast = useToast();
-  const [syncing, setSyncing]   = useState(null); // provider key being synced
-  const [confirm, setConfirm]   = useState(null); // provider key pending remove confirm, or 'all'
-  const [removing, setRemoving] = useState(null); // provider key being removed
+  const [syncing, setSyncing]       = useState(null);
+  const [confirm, setConfirm]       = useState(null);
+  const [removing, setRemoving]     = useState(null);
+  const [downloading, setDownloading] = useState(false);
 
   const ALL_PROVIDERS = ['aws', 'azure', 'gcs'];
   const dotColor = p => p === 'aws' ? 'var(--aws)' : p === 'azure' ? 'var(--azure)' : 'var(--gcs)';
   const busy = syncing !== null || removing !== null;
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      await downloadFile(file.name, file.providers[0]);
+    } catch (err) {
+      toast(err.message ?? 'Download failed', 'err');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const handleSyncTo = async targetProvider => {
     const source = file.providers[0];
@@ -107,12 +119,14 @@ function FileDetail({ file, onClose, onRefresh }) {
           <button
             className="btn btn-p btn-sm"
             style={{ flex: 1 }}
-            onClick={() => toast(`Downloading ${file.name}`, 'ok', 'Download started')}
+            disabled={downloading || busy}
+            onClick={handleDownload}
+            title={`Download from ${PL[file.providers[0]]}`}
           >
             <svg viewBox="0 0 14 14" width="12" height="12" fill="none">
               <path d="M7 1v8M4 7l3 3 3-3M1 13h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Download
+            {downloading ? 'Downloading…' : 'Download'}
           </button>
 
           {confirm === 'all' ? (
