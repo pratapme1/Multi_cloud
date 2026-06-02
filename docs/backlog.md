@@ -1,7 +1,7 @@
 # Backlog - Multi-Cloud Storage Integration
 
 **Last updated:** 2026-06-02  
-**Current phase:** AWS/Azure functional prototype + Vercel deployment hardening
+**Current phase:** AWS/Azure functional prototype + Vercel deployment hardening + Code-review fix queue
 
 ## Status Key
 
@@ -57,6 +57,27 @@
 | D9 | Clean up duplicate Vercel API structure | Done | Removed duplicate route trees; one catch-all API function remains. |
 | D10 | Update documentation after full cloud validation | Open | P1 | Mark production upload as done once AWS/Azure/GCS verification is complete. |
 
+## Code Review Fix Queue
+
+Findings from full-codebase code review on 2026-06-02. Ranked by severity; implementation deferred — all items are Open.
+
+| ID | Finding | Severity | Priority | File | Notes |
+|----|---------|----------|----------|------|-------|
+| CR1 | Remove `requireAuth` guard gap on `/api/test-credentials` | Security / High | P0 | `src/backend-node/server.js:286` | Unauthenticated callers get cloud-provider health details incl. bucket names and SDK errors. Add `requireAuth` or gate behind `NODE_ENV !== 'production'`. |
+| CR2 | Fix drawer showing wrong file after sort or search | Correctness / High | P0 | `src/frontend/src/pages/FilesPage.jsx:109` | `selIdx` is page-relative; `handleSearch` and `handleSort` don't call `onCloseDrawer()`, so the drawer silently targets a different file — download and delete both act on the wrong item. |
+| CR3 | Fix `Content-Disposition` header for non-ASCII filenames | Correctness / Medium | P1 | `src/backend-node/server.js:186` | `filename="${encodeURIComponent(...)}"` produces literal `%xx` strings in Firefox/Safari. Replace with RFC 5987 form: `filename*=UTF-8''${encodeURIComponent(filename)}`. |
+| CR4 | Parallelize `HeadObjectCommand` calls in `listFiles()` | Performance / Medium | P1 | `src/backend-node/providers/aws.js:38` | Serial `await` inside `for` loop → O(N) sequential HTTP round-trips. Replace with `Promise.all()`. For 100 files: ~5 s saved per `GET /api/files` call. |
+| CR5 | Fix inverted sort direction for `modified` column | UX / Medium | P1 | `src/frontend/src/pages/FilesPage.jsx:97` | Comparator is `b.modifiedTs - a.modifiedTs` so `asc` = newest-first (opposite of every other column). Arrow label and toggle order are both backwards. Flip the comparator to `a.modifiedTs - b.modifiedTs`. |
+| CR6 | Guard `ensureBootstrapUsers()` with a module-level flag | Performance / Low | P2 | `src/backend-node/auth/supabaseAuth.js:107` | Called on every `signIn()` with no guard — 4 extra Supabase round-trips per login after bootstrap users already exist. Add `let bootstrapped = false` at module scope. |
+| CR7 | Remove dead client-side role escalation code | Cleanup / Low | P2 | `src/frontend/src/context/AuthContext.jsx:26` | `if (username === 'admin' && role === 'admin') role = 'super_admin'` — this branch is permanently unreachable for bootstrap admin (already `super_admin` in DB) but will silently elevate any future user with that username/role combo. Delete the block. |
+| CR8 | Replace hostname-sniff for direct-upload routing with env var only | Reliability / Low | P2 | `src/frontend/src/api/index.js:66` | `hostname.endsWith('vercel.app')` silently breaks on custom domains. Remove the hostname branch; rely solely on `VITE_DIRECT_UPLOADS=true` env flag. |
+
+### Fix Priority Summary
+
+- **P0 (must fix before production):** CR1 (security), CR2 (wrong-file data integrity)
+- **P1 (fix in M2):** CR3 (filename encoding), CR4 (performance), CR5 (sort UX)
+- **P2 (tidy up, low urgency):** CR6 (login latency), CR7 (dead code), CR8 (routing)
+
 ## Current Pending Summary
 
-The main pending items are **AWS/Azure CORS**, **credential rotation**, and **GCS service account setup**. Production E2E automation will run after GCS is configured so the test suite validates the full three-cloud flow.
+The main pending items are **AWS/Azure CORS**, **credential rotation**, **GCS service account setup**, and the **Code Review fix queue above**. P0 fixes (CR1, CR2) must land before the production go-live. Production E2E automation will run after GCS is configured so the test suite validates the full three-cloud flow.

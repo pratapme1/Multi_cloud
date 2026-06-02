@@ -1,43 +1,98 @@
-// TODO: implement when GCS_SERVICE_ACCOUNT_JSON_PATH, GCS_PROJECT_ID, GCS_BUCKET_NAME are set in .env
-// Install when ready: npm install @google-cloud/storage
-//
-// import { Storage } from '@google-cloud/storage';
+import { Storage } from '@google-cloud/storage';
+import { formatSize, getFileType, formatAge } from '../utils.js';
 
 export class GcsProvider {
   get isConfigured() {
-    return !!(process.env.GCS_SERVICE_ACCOUNT_JSON_PATH && process.env.GCS_BUCKET_NAME);
+    return !!(
+      (process.env.GCS_SERVICE_ACCOUNT_JSON || process.env.GCS_SERVICE_ACCOUNT_JSON_PATH) &&
+      process.env.GCS_BUCKET_NAME
+    );
+  }
+
+  #getStorage() {
+    // Vercel: credentials supplied as JSON string in env var
+    // Local dev: credentials read from file path
+    if (process.env.GCS_SERVICE_ACCOUNT_JSON) {
+      return new Storage({
+        credentials: JSON.parse(process.env.GCS_SERVICE_ACCOUNT_JSON),
+        projectId:   process.env.GCS_PROJECT_ID,
+      });
+    }
+    return new Storage({
+      keyFilename: process.env.GCS_SERVICE_ACCOUNT_JSON_PATH,
+      projectId:   process.env.GCS_PROJECT_ID,
+    });
   }
 
   async listFiles() {
     if (!this.isConfigured) return [];
-    // TODO:
-    // const storage = new Storage({ keyFilename: process.env.GCS_SERVICE_ACCOUNT_JSON_PATH, projectId: process.env.GCS_PROJECT_ID });
-    // const [files] = await storage.bucket(process.env.GCS_BUCKET_NAME).getFiles();
-    return [];
+    const [files] = await this.#getStorage().bucket(process.env.GCS_BUCKET_NAME).getFiles();
+    return files
+      .filter(f => !f.name.endsWith('/'))
+      .map(f => {
+        const meta       = f.metadata;
+        const custom     = meta.metadata ?? {};
+        const uploadedBy = custom.uploadedBy ?? custom.uploadedby ?? 'Unknown';
+        const sizeBytes  = parseInt(meta.size ?? '0', 10);
+        return {
+          name:       meta.name,
+          size:       formatSize(sizeBytes),
+          sizeBytes,
+          providers:  ['gcs'],
+          type:       getFileType(meta.name),
+          owner:      uploadedBy,
+          uploadedBy,
+          modified:   formatAge(meta.updated),
+          modifiedTs: meta.updated ? new Date(meta.updated).getTime() : Date.now(),
+        };
+      })
+      .sort((a, b) => b.modifiedTs - a.modifiedTs);
   }
 
-  async uploadFile(_buffer, _name, _mimetype) {
+  async uploadFile(buffer, name, mimetype, options = {}) {
     if (!this.isConfigured) throw new Error('GCS not configured — set GCS_SERVICE_ACCOUNT_JSON_PATH and GCS_BUCKET_NAME');
-    // TODO: bucket.file(name).save(buffer, { contentType: mimetype })
-    throw new Error('GCS upload not yet implemented');
+    const file = this.#getStorage().bucket(process.env.GCS_BUCKET_NAME).file(name);
+    await file.save(buffer, {
+      contentType: mimetype ?? 'application/octet-stream',
+      metadata:    { uploadedBy: options.uploadedBy ?? 'Unknown' },
+    });
   }
 
-  async getFileContent(_name) {
+  async getFileContent(name) {
     if (!this.isConfigured) throw new Error('GCS not configured');
-    // TODO: bucket.file(name).download() → returns [Buffer]
-    throw new Error('GCS getFileContent not yet implemented');
+    const file = this.#getStorage().bucket(process.env.GCS_BUCKET_NAME).file(name);
+    const [[buffer], [meta]] = await Promise.all([file.download(), file.getMetadata()]);
+    return { buffer, contentType: meta.contentType ?? 'application/octet-stream' };
   }
 
-  async deleteFile(_name) {
+  async deleteFile(name) {
     if (!this.isConfigured) throw new Error('GCS not configured');
-    // TODO: bucket.file(name).delete()
-    throw new Error('GCS delete not yet implemented');
+    await this.#getStorage().bucket(process.env.GCS_BUCKET_NAME).file(name).delete();
   }
 
   async health() {
     if (!this.isConfigured) {
       return { name: 'GCS', key: 'gcs', status: 'pending', note: 'GCS_SERVICE_ACCOUNT_JSON_PATH not set', latencyMs: null };
     }
-    return { name: 'GCS', key: 'gcs', status: 'pending', note: 'Credentials present — implementation coming', latencyMs: null };
+    const t = Date.now();
+    try {
+      const [exists] = await this.#getStorage().bucket(process.env.GCS_BUCKET_NAME).exists();
+      if (!exists) throw new Error(`Bucket "${process.env.GCS_BUCKET_NAME}" not found`);
+      return {
+        name:      'GCS',
+        key:       'gcs',
+        status:    'ok',
+        latencyMs: Date.now() - t,
+        note:      `Bucket "${process.env.GCS_BUCKET_NAME}" reachable`,
+      };
+    } catch (err) {
+      return {
+        name:      'GCS',
+        key:       'gcs',
+        status:    'error',
+        latencyMs: Date.now() - t,
+        note:      err.message,
+      };
+    }
   }
 }

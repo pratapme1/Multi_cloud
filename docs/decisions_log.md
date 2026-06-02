@@ -80,3 +80,5 @@ health()
 ### 2026-06-02
 
 AWS/Azure local testing works. Vercel deployment is active with direct upload. Supabase `multi_cloud` schema is applied/exposed and auth is working. AWS/Azure CORS and credential rotation still need final cloud-side confirmation. GCS remains a placeholder until service account details are available. Production E2E automation will run after GCS setup.
+
+Full-codebase code review completed (frontend + backend). 8 findings logged: 4 confirmed bugs, 3 plausible issues, 1 low-risk design smell. Two P0 items added to risk log (R08: unauthenticated test-credentials endpoint; R09: wrong-file drawer after sort/search). Full fix queue in backlog section "Code Review Fix Queue" (CR1–CR8). Implementation deferred; P0 fixes must land before production go-live.

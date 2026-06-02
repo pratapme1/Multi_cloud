@@ -61,11 +61,12 @@
 ## 5. Current Focus
 
 **Active Milestone:** M1 - API Integration (Gate: 2026-06-05)  
-**Current Goal:** Manual testing of the running Node.js + React stack. Next gaps: write unit tests (1.2, 1.4), wire up GCS (1.5/1.6), close D-003 (unified interface decision), and prepare M1 gate demo.  
+**Current Goal:** Resolve AWS/Azure CORS and credential rotation blockers, then implement the P0 code-review fixes (CR1, CR2) before production go-live. Next: unit tests (1.2, 1.4), GCS wiring (1.5/1.6), M1 gate demo.  
 **What's running:** Backend at `src/backend-node/` (port 3001) + React frontend at `src/frontend/` (port 5173). AWS S3 and Azure Blob live; GCS is a placeholder.  
-**Blockers / watch items:** P.1 Manager kickoff still open; P.8 GCS provisioning still open; K02/K10/K12-K14 still need follow-up from developer kickoff. Unit tests (1.2, 1.4, 1.6) not yet written.  
-**Closed decisions:** D-001 (tech stack — Node.js, revised 2026-06-01), D-002 (credential management), D-005 (deployment target).  
-**Open decisions:** D-003 (unified interface pattern — provider strategy is implicit in current code; needs formal decision entry), D-004 (auth approach — JWT deferred to M3).
+**Blockers / watch items:** AWS/Azure CORS not yet configured. Credentials must be rotated (R01). GCS provisioning still open. Unit tests not yet written.  
+**Code-review fix queue:** 8 findings logged (2026-06-02). P0: CR1 (unauthenticated `/api/test-credentials`), CR2 (wrong-file drawer). P1: CR3 (Content-Disposition encoding), CR4 (HeadObject serial), CR5 (sort direction). P2: CR6–CR8. Full detail in `docs/backlog.md`.  
+**Closed decisions:** D-001 (tech stack — Node.js, revised 2026-06-01), D-002 (credential management), D-003 (provider pattern), D-005 (deployment target), D-006 (direct upload), D-007 (role model).  
+**Open decisions:** D-004 (auth approach — JWT deferred to M3), D-008 (persistent auth design), D-009 (GCS implementation date).
 
 ---
 
