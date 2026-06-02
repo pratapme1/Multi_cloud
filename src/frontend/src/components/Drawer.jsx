@@ -91,6 +91,9 @@ function FileDetail({ file, onClose, onRefresh }) {
     }
   };
 
+  const provBg  = p => p === 'aws' ? 'rgba(255,153,0,.08)' : p === 'azure' ? 'rgba(0,120,212,.08)' : 'rgba(52,168,83,.08)';
+  const provBdr  = p => p === 'aws' ? 'rgba(255,153,0,.25)' : p === 'azure' ? 'rgba(0,120,212,.25)' : 'rgba(52,168,83,.25)';
+
   return (
     <>
       <div className="dw-head">
@@ -98,115 +101,107 @@ function FileDetail({ file, onClose, onRefresh }) {
         <button className="icb" onClick={onClose} title="Close">✕</button>
       </div>
       <div className="dw-body">
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '6px 0 16px' }}>
-          <FileTypeIcon type={file.type} size={52} />
-          <div className="drawer-file-name" title={file.name}>{file.name}</div>
-          <div style={{ fontSize: 12, color: 'var(--tx3)', marginBottom: 8 }}>{file.size}</div>
-          <ProviderIcons providers={file.providers} size={16} />
-          <div style={{ fontSize: 11, color: 'var(--tx3)', marginTop: 5 }}>
-            {file.providers.map(p => PL[p]).join(' · ')}
+
+        {/* ── Hero ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '8px 0 16px' }}>
+          <FileTypeIcon type={file.type} size={50} />
+          <div className="drawer-file-name" title={file.name} style={{ marginTop: 10, marginBottom: 3 }}>{file.name}</div>
+          <div style={{ fontSize: 12, color: 'var(--tx3)', marginBottom: 10 }}>{file.size} · {file.modified}</div>
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {file.providers.map(p => (
+              <span key={p} style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 9px', borderRadius: 999, background: provBg(p), color: dotColor(p), border: `1px solid ${provBdr(p)}` }}>
+                {PL[p]}
+              </span>
+            ))}
           </div>
         </div>
 
-        <div className="kv">
+        {/* ── Meta ── */}
+        <div className="kv" style={{ marginBottom: 14 }}>
           <div><label>Uploaded by</label><b>{file.uploadedBy ?? file.owner ?? 'Unknown'}</b></div>
-          <div><label>Copies</label><b>{file.providers.length} of 3</b></div>
+          <div><label>Copies</label><b>{file.providers.length} of 3 providers</b></div>
           <div><label>Access</label><b>Role controlled</b></div>
-          <div><label>Updated</label><b>{file.modified}</b></div>
         </div>
 
-        <div style={{ display: 'flex', gap: 6, marginTop: 14 }}>
-          <button
-            className="btn btn-p btn-sm"
-            style={{ flex: 1 }}
-            disabled={downloading || busy}
-            onClick={handleDownload}
-            title={`Download from ${PL[file.providers[0]]}`}
-          >
-            <svg viewBox="0 0 14 14" width="12" height="12" fill="none">
-              <path d="M7 1v8M4 7l3 3 3-3M1 13h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            {downloading ? 'Downloading…' : 'Download'}
-          </button>
+        {/* ── Download ── */}
+        <button className="btn btn-p btn-full" disabled={downloading || busy} onClick={handleDownload}>
+          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" style={{ marginRight: 6, flexShrink: 0 }}>
+            <path d="M7 1v8M4 7l3 3 3-3M1 13h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          {downloading ? 'Downloading…' : `Download · via ${PL[file.providers[0]]}`}
+        </button>
 
-          {confirm === 'all' ? (
-            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-              <span style={{ fontSize: 11, color: 'var(--er)', fontWeight: 600 }}>Delete from all?</span>
-              <button className="btn btn-sm" style={{ fontSize: 11, background: 'var(--er)', color: '#fff', border: 'none', padding: '3px 10px' }}
-                disabled={removing === 'all'} onClick={handleDeleteAll}>
-                {removing === 'all' ? '↻' : 'Yes'}
-              </button>
-              <button className="btn btn-s btn-sm" style={{ fontSize: 11 }} onClick={() => setConfirm(null)}>No</button>
-            </div>
-          ) : (
-            <button className="btn btn-s btn-sm" disabled={busy}
-              style={{ color: 'var(--er)', borderColor: 'var(--erd)' }}
-              title="Delete from all providers"
-              onClick={() => setConfirm('all')}>
-              <svg viewBox="0 0 14 14" width="12" height="12" fill="none">
-                <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M5.5 6v4M8.5 6v4M3 3.5l.7 8a.5.5 0 00.5.5h5.6a.5.5 0 00.5-.5l.7-8"
-                  stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          )}
-        </div>
-
+        {/* ── Storage cards ── */}
         <div className="sep" />
-        <div style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>
-          Redundancy · {file.providers.length} of 3
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Storage</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: file.providers.length === 3 ? 'var(--ok)' : 'var(--tx3)' }}>
+            {file.providers.length === 3 ? '✓ Fully redundant' : `${file.providers.length} of 3`}
+          </span>
         </div>
 
         {ALL_PROVIDERS.map(p => {
-          const on    = file.providers.includes(p);
-          const isBusy = syncing === p || removing === p;
+          const on           = file.providers.includes(p);
           const isConfirming = confirm === p;
+          const isSyncing    = syncing === p;
+          const isRemoving   = removing === p;
 
           return (
-            <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 0', borderBottom: '1px solid var(--bd)', minHeight: 38 }}>
-              <div style={{ width: 9, height: 9, borderRadius: '50%', background: on ? dotColor(p) : 'var(--bd)', flexShrink: 0 }} />
-              <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: on ? 'var(--tx)' : 'var(--tx3)' }}>{PL[p]}</span>
+            <div key={p} style={{ borderRadius: 10, border: `1px solid ${on ? provBdr(p) : 'var(--bd)'}`, marginBottom: 8, overflow: 'hidden' }}>
 
-              {on ? (
-                isConfirming ? (
-                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                    <span style={{ fontSize: 11, color: 'var(--er)', fontWeight: 600 }}>
-                      {file.providers.length === 1 ? 'Last copy!' : 'Remove?'}
-                    </span>
-                    <button className="btn btn-sm"
-                      style={{ fontSize: 11, background: 'var(--er)', color: '#fff', border: 'none', padding: '3px 10px' }}
-                      disabled={isBusy} onClick={() => handleRemove(p)}>
-                      {isBusy ? '↻' : 'Yes'}
-                    </button>
-                    <button className="btn btn-s btn-sm" style={{ fontSize: 11 }} onClick={() => setConfirm(null)}>No</button>
-                  </div>
+              {/* Card row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 13px', background: on ? provBg(p) : 'var(--sur2)' }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: on ? dotColor(p) : 'var(--bd)', flexShrink: 0 }} />
+                <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: on ? 'var(--tx)' : 'var(--tx3)' }}>{PL[p]}</span>
+
+                {on ? (
+                  <>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: dotColor(p) }}>✓ Stored</span>
+                    {!isConfirming && (
+                      <button className="btn btn-s btn-sm"
+                        style={{ fontSize: 11, padding: '2px 9px', marginLeft: 6, color: 'var(--er)', borderColor: 'var(--erd)', background: 'var(--sur)' }}
+                        disabled={busy} onClick={() => setConfirm(p)}>
+                        {isRemoving ? '↻' : 'Remove'}
+                      </button>
+                    )}
+                  </>
                 ) : (
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ok)' }}>✓ Stored</span>
-                    <button className="btn btn-s btn-sm"
-                      style={{ fontSize: 11, padding: '2px 8px', color: 'var(--er)', borderColor: 'var(--erd)' }}
-                      disabled={busy} onClick={() => setConfirm(p)}
-                      title={`Remove from ${PL[p]}`}>
-                      Remove
+                  <button className="btn btn-s btn-sm"
+                    style={{ fontSize: 11, padding: '2px 10px' }}
+                    disabled={busy} onClick={() => handleSyncTo(p)}>
+                    {isSyncing ? '↻ Syncing…' : '↗ Sync here'}
+                  </button>
+                )}
+              </div>
+
+              {/* Confirm panel — expands below the card row */}
+              {isConfirming && (
+                <div style={{ padding: '12px 13px', background: 'var(--erb)', borderTop: `1px solid var(--erd)` }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--er)', marginBottom: 4 }}>
+                    {file.providers.length === 1
+                      ? '⚠ Last copy — permanently deletes this file'
+                      : `Remove from ${PL[p]}?`}
+                  </div>
+                  {file.providers.length > 1 && (
+                    <div style={{ fontSize: 11.5, color: 'var(--tx2)', marginBottom: 10 }}>
+                      File stays on {file.providers.filter(x => x !== p).map(x => PL[x]).join(' and ')}.
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button className="btn btn-s btn-sm" style={{ fontSize: 12 }} onClick={() => setConfirm(null)}>Cancel</button>
+                    <button className="btn btn-sm"
+                      style={{ fontSize: 12, flex: 1, background: 'var(--er)', color: '#fff', border: 'none' }}
+                      disabled={isRemoving} onClick={() => handleRemove(p)}>
+                      {isRemoving ? '↻ Removing…' : `Remove from ${PL[p]}`}
                     </button>
                   </div>
-                )
-              ) : (
-                <button className="btn btn-s btn-sm"
-                  style={{ fontSize: 11, padding: '2px 10px' }}
-                  disabled={busy} onClick={() => handleSyncTo(p)}>
-                  {syncing === p ? '↻' : 'Sync →'}
-                </button>
+                </div>
               )}
             </div>
           );
         })}
 
-        {file.providers.length === 3 && (
-          <div style={{ fontSize: 12, color: 'var(--ok)', textAlign: 'center', padding: '8px 0', fontWeight: 600 }}>
-            ✓ Fully redundant across all 3 providers
-          </div>
-        )}
-
+        {/* ── Audit trail ── */}
         <div className="sep" />
         <div style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>Audit trail</div>
         <div className="tl">
@@ -214,6 +209,37 @@ function FileDetail({ file, onClose, onRefresh }) {
           <div className="tev">Virus and secret scan passed<small>No credentials exposed</small></div>
           <div className="tev">Sync eligibility checked<small>{file.providers.length} of 3 providers hold this file</small></div>
         </div>
+
+        {/* ── Danger zone ── */}
+        <div className="sep" />
+        {confirm === 'all' ? (
+          <div style={{ padding: '13px', borderRadius: 10, background: 'var(--erb)', border: '1px solid var(--erd)' }}>
+            <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--er)', marginBottom: 4 }}>
+              ⚠ Delete from all {file.providers.length} provider{file.providers.length > 1 ? 's' : ''}?
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--tx2)', marginBottom: 10 }}>
+              Permanently deletes the file everywhere. Cannot be undone.
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button className="btn btn-s btn-sm" style={{ fontSize: 12 }} onClick={() => setConfirm(null)}>Cancel</button>
+              <button className="btn btn-sm"
+                style={{ fontSize: 12, flex: 1, background: 'var(--er)', color: '#fff', border: 'none' }}
+                disabled={removing === 'all'} onClick={handleDeleteAll}>
+                {removing === 'all' ? '↻ Deleting…' : 'Yes, delete everywhere'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button className="btn btn-s btn-full"
+            style={{ fontSize: 12, color: 'var(--er)', borderColor: 'var(--erd)' }}
+            disabled={busy} onClick={() => setConfirm('all')}>
+            <svg viewBox="0 0 14 14" width="11" height="11" fill="none" style={{ marginRight: 5, flexShrink: 0 }}>
+              <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M5.5 6v4M8.5 6v4M3 3.5l.7 8a.5.5 0 00.5.5h5.6a.5.5 0 00.5-.5l.7-8"
+                stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Delete from all providers
+          </button>
+        )}
       </div>
     </>
   );
