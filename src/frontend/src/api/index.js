@@ -156,6 +156,16 @@ export const runSync = async (from, targets) => {
   return handleRes(res);
 };
 
+export const syncFile = async (filename, from, targets) => {
+  const targetList = Array.isArray(targets) ? targets : [targets];
+  const res = await fetch(`${BASE}/sync`, {
+    method: 'POST',
+    headers: { ...authHeader(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from, targets: targetList, filename }),
+  });
+  return handleRes(res);
+};
+
 // ── Download ──────────────────────────────────────────────────────────────────
 export const downloadFile = async (name, provider = 'aws') => {
   const res = await fetch(

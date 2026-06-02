@@ -309,16 +309,15 @@ app.delete('/api/files/:filename', requireAuth, requireAdmin, async (req, res) =
 });
 
 app.post('/api/sync', requireAuth, requireAdmin, async (req, res) => {
-  const { from, targets = [] } = req.body ?? {};
+  const { from, targets = [], filename } = req.body ?? {};
   if (!PROVIDERS[from]) return res.status(400).json({ error: `Unknown source provider: ${from}` });
 
-  let copied = 0;
-  let skipped = 0;
-  let failed = 0;
+  let copied = 0, skipped = 0, failed = 0;
   const details = [];
 
   try {
-    const sourceFiles = await PROVIDERS[from].listFiles();
+    let sourceFiles = await PROVIDERS[from].listFiles();
+    if (filename) sourceFiles = sourceFiles.filter(f => f.name === filename);
 
     for (const targetKey of targets) {
       if (!PROVIDERS[targetKey]) {
@@ -326,7 +325,6 @@ app.post('/api/sync', requireAuth, requireAdmin, async (req, res) => {
         failed++;
         continue;
       }
-
       if (targetKey === from) {
         details.push({ target: targetKey, status: 'skipped', message: 'Source and target are the same' });
         skipped += sourceFiles.length;
@@ -334,19 +332,11 @@ app.post('/api/sync', requireAuth, requireAdmin, async (req, res) => {
       }
 
       let targetFiles = [];
-      try {
-        targetFiles = await PROVIDERS[targetKey].listFiles();
-      } catch {
-        targetFiles = [];
-      }
+      try { targetFiles = await PROVIDERS[targetKey].listFiles(); } catch { targetFiles = []; }
+      const targetNames = new Set(targetFiles.map(f => f.name));
 
-      const targetNames = new Set(targetFiles.map(file => file.name));
       for (const file of sourceFiles) {
-        if (targetNames.has(file.name)) {
-          skipped++;
-          continue;
-        }
-
+        if (targetNames.has(file.name)) { skipped++; continue; }
         try {
           const { buffer, contentType } = await PROVIDERS[from].getFileContent(file.name);
           await PROVIDERS[targetKey].uploadFile(buffer, file.name, contentType, {
@@ -361,7 +351,7 @@ app.post('/api/sync', requireAuth, requireAdmin, async (req, res) => {
       }
     }
 
-    res.json({ from, targets, copied, skipped, failed, details });
+    res.json({ from, targets, filename: filename ?? null, copied, skipped, failed, details });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

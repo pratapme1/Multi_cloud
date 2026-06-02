@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { runSync, getHealth } from '../api/index.js';
+import { runSync, syncFile, getHealth } from '../api/index.js';
 import { useToast } from '../context/ToastContext.jsx';
 import { FileTypeIcon, ProviderIcons, PL } from './FileIcons.jsx';
 
@@ -9,7 +9,7 @@ export default function Drawer({ mode, file, onClose, onSimulateDeg }) {
   return (
     <div className="drawer">
       {mode === 'file' && file && <FileDetail file={file} onClose={onClose} />}
-      {mode === 'sync'          && <SyncPanel onClose={onClose} />}
+      {mode === 'sync'          && <SyncPanel file={file} onClose={onClose} />}
       {(mode === 'health' || mode === 'health-deg') && (
         <HealthPanel degraded={mode === 'health-deg'} onClose={onClose} onSimulateDeg={onSimulateDeg} />
       )}
@@ -19,6 +19,32 @@ export default function Drawer({ mode, file, onClose, onSimulateDeg }) {
 
 function FileDetail({ file, onClose }) {
   const toast = useToast();
+  const [syncing, setSyncing] = useState(null); // provider key being synced
+
+  const ALL_PROVIDERS = ['aws', 'azure', 'gcs'];
+  const missing = ALL_PROVIDERS.filter(p => !file.providers.includes(p));
+
+  const handleSyncTo = async targetProvider => {
+    const source = file.providers[0];
+    setSyncing(targetProvider);
+    try {
+      const r = await syncFile(file.name, source, [targetProvider]);
+      if (r.copied > 0) {
+        toast(`Synced to ${PL[targetProvider]}`, 'ok', `${file.name} is now on ${PL[targetProvider]}`);
+      } else if (r.skipped > 0) {
+        toast(`Already on ${PL[targetProvider]}`, 'inf');
+      } else {
+        toast(`Sync failed`, 'err');
+      }
+    } catch {
+      toast('Sync failed', 'err');
+    } finally {
+      setSyncing(null);
+    }
+  };
+
+  const dotColor = p => p === 'aws' ? 'var(--aws)' : p === 'azure' ? 'var(--azure)' : 'var(--gcs)';
+
   return (
     <>
       <div className="dw-head">
@@ -63,17 +89,37 @@ function FileDetail({ file, onClose }) {
         </div>
 
         <div className="sep" />
-        <div style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>Sync status</div>
-        {['aws', 'azure', 'gcs'].map(p => {
+        <div style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>
+          Redundancy · {file.providers.length} of 3
+        </div>
+
+        {ALL_PROVIDERS.map(p => {
           const on = file.providers.includes(p);
+          const busy = syncing === p;
           return (
             <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 0', borderBottom: '1px solid var(--bd)' }}>
-              <div style={{ width: 9, height: 9, borderRadius: '50%', background: on ? (p === 'aws' ? 'var(--aws)' : p === 'azure' ? 'var(--azure)' : 'var(--gcs)') : 'var(--bd)', flexShrink: 0 }} />
+              <div style={{ width: 9, height: 9, borderRadius: '50%', background: on ? dotColor(p) : 'var(--bd)', flexShrink: 0 }} />
               <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: on ? 'var(--tx)' : 'var(--tx3)' }}>{PL[p]}</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: on ? 'var(--ok)' : 'var(--tx3)' }}>{on ? '✓ Stored' : 'Not synced'}</span>
+              {on
+                ? <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ok)' }}>✓ Stored</span>
+                : <button
+                    className="btn btn-s btn-sm"
+                    style={{ fontSize: 11, padding: '2px 10px' }}
+                    disabled={busy || syncing !== null}
+                    onClick={() => handleSyncTo(p)}
+                  >
+                    {busy ? '↻' : `Sync →`}
+                  </button>
+              }
             </div>
           );
         })}
+
+        {missing.length === 0 && (
+          <div style={{ fontSize: 12, color: 'var(--ok)', textAlign: 'center', padding: '8px 0', fontWeight: 600 }}>
+            ✓ Fully redundant across all 3 providers
+          </div>
+        )}
 
         <div className="sep" />
         <div style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>Audit trail</div>

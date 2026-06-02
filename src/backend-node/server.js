@@ -212,7 +212,7 @@ app.delete('/api/files/:filename', requireAuth, requireAdmin, async (req, res) =
 // Copies files from source provider to one or more destinations.
 // Cross-cloud copy requires both providers to be configured.
 app.post('/api/sync', requireAuth, requireAdmin, async (req, res) => {
-  const { from, targets = [] } = req.body ?? {};
+  const { from, targets = [], filename } = req.body ?? {};
 
   if (!PROVIDERS[from]) return res.status(400).json({ error: `Unknown source provider: ${from}` });
 
@@ -220,7 +220,8 @@ app.post('/api/sync', requireAuth, requireAdmin, async (req, res) => {
   const details = [];
 
   try {
-    const sourceFiles = await PROVIDERS[from].listFiles();
+    let sourceFiles = await PROVIDERS[from].listFiles();
+    if (filename) sourceFiles = sourceFiles.filter(f => f.name === filename);
 
     for (const targetKey of targets) {
       if (!PROVIDERS[targetKey]) {
@@ -235,24 +236,21 @@ app.post('/api/sync', requireAuth, requireAdmin, async (req, res) => {
       }
 
       let targetFiles = [];
-      try { targetFiles = await PROVIDERS[targetKey].listFiles(); } catch { /* placeholder returns [] */ }
+      try { targetFiles = await PROVIDERS[targetKey].listFiles(); } catch { targetFiles = []; }
       const targetNames = new Set(targetFiles.map(f => f.name));
 
       for (const file of sourceFiles) {
-        if (targetNames.has(file.name)) {
-          skipped++;
-        } else {
-          try {
-            const { buffer, contentType } = await PROVIDERS[from].getFileContent(file.name);
-            await PROVIDERS[targetKey].uploadFile(buffer, file.name, contentType, {
-              uploadedBy: req.user?.username ?? 'Unknown',
-            });
-            copied++;
-            details.push({ file: file.name, target: targetKey, status: 'ok' });
-          } catch (err) {
-            failed++;
-            details.push({ file: file.name, target: targetKey, status: 'error', message: err.message });
-          }
+        if (targetNames.has(file.name)) { skipped++; continue; }
+        try {
+          const { buffer, contentType } = await PROVIDERS[from].getFileContent(file.name);
+          await PROVIDERS[targetKey].uploadFile(buffer, file.name, contentType, {
+            uploadedBy: req.user?.username ?? 'Unknown',
+          });
+          copied++;
+          details.push({ file: file.name, target: targetKey, status: 'ok' });
+        } catch (err) {
+          failed++;
+          details.push({ file: file.name, target: targetKey, status: 'error', message: err.message });
         }
       }
     }
@@ -260,7 +258,7 @@ app.post('/api/sync', requireAuth, requireAdmin, async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 
-  res.json({ from, targets, copied, skipped, failed, details });
+  res.json({ from, targets, filename: filename ?? null, copied, skipped, failed, details });
 });
 
 // ── Health ─────────────────────────────────────────────────────────────────────
