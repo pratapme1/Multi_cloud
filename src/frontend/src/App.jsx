@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import SignUpPage from './pages/SignUpPage.jsx';
 import FilesPage from './pages/FilesPage.jsx';
 import RolesPage from './pages/RolesPage.jsx';
+import PresentationPage from './pages/PresentationPage.jsx';
 
 function ProtectedRoute() {
   const { user } = useAuth();
@@ -51,8 +52,9 @@ function AppShell() {
               refreshKey={refreshKey}
             />
           } />
-          <Route path="roles" element={<RolesPage />} />
-          <Route path="*" element={<Navigate to="/app/files" replace />} />
+          <Route path="roles"        element={<RolesPage />} />
+          <Route path="presentation" element={<PresentationPage />} />
+          <Route path="*"            element={<Navigate to="/app/files" replace />} />
         </Routes>
       </main>
     </div>

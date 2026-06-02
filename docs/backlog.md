@@ -1,7 +1,7 @@
 # Backlog - Multi-Cloud Storage Integration
 
-**Last updated:** 2026-06-02  
-**Current phase:** AWS/Azure functional prototype + Vercel deployment hardening + Code-review fix queue
+**Last updated:** 2026-06-02 (session 2)  
+**Current phase:** UX hardening + Presentation layer
 
 ## Status Key
 
@@ -33,6 +33,12 @@
 | C14 | Supabase auth integration | Done | Login/signup now use Supabase Auth tokens instead of mock/local browser users. |
 | C15 | Server-side invite storage | Done | Invite links are stored in `multi_cloud.invites`. |
 | C16 | Supabase schema setup | Done | `multi_cloud` schema is applied, exposed, and working. |
+| C17 | File Details drawer UX redesign | Done | Hero section, colored provider pills, full-width download, expanding confirm panels, danger zone. Commit 4342b38. |
+| C18 | Per-provider sync from file drawer | Done | "Sync here" button per missing provider; per-file sync API filter. |
+| C19 | Per-provider remove from file drawer | Done | "Remove" per stored provider with last-copy guard and expand confirm. |
+| C20 | Auto-refresh after every action | Done | onRefresh chain: FilesPage.load → Drawer → FileDetail/SyncPanel. Upload modal always calls load on close. |
+| C21 | Live History tab in file details | Done | Two tabs (Storage, History) below download button. History appends timestamped events for sync/remove/download in session. |
+| C22 | Cinematic interactive presentation | Done | 8-slide full-screen presentation at /app/presentation. Live API data, SVG architecture animation, countdown timer, keyboard navigation. |
 
 ## Active Blockers
 

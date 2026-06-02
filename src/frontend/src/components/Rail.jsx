@@ -11,6 +11,7 @@ export default function Rail({ activeDrawer, onDrawer, onLogoClick }) {
   const isFilesActive = location.pathname.includes('/app/files') && !activeDrawer;
   const isSyncActive  = activeDrawer === 'sync';
   const isRolesActive = location.pathname.includes('/app/roles');
+  const isPresentationActive = location.pathname.includes('/app/presentation');
 
   return (
     <aside className="rail">
@@ -47,6 +48,18 @@ export default function Rail({ activeDrawer, onDrawer, onLogoClick }) {
           </svg>
         </button>
       )}
+
+      <button
+        className={`ri${isPresentationActive ? ' on' : ''}`}
+        data-tip="Presentation"
+        onClick={() => { onDrawer(null); navigate('/app/presentation'); }}
+      >
+        <svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true">
+          <rect x="2" y="3" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="1.6" fill="none"/>
+          <path d="M7 17h6M10 14v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+          <path d="M7.5 9.5L9.5 7.5l2 2 2-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
 
       {can('manage_roles') && (
         <button

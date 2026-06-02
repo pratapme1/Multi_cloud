@@ -1,0 +1,100 @@
+/* ── Overlay ──────────────────────────────────────────────────── */
+.pres{position:fixed;inset:0;z-index:9999;background:#06091a;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Inter',system-ui,-apple-system,sans-serif;color:#fff;-webkit-font-smoothing:antialiased}
+
+/* ── Background orbs ─────────────────────────────────────────── */
+.pres-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pres-orb{position:absolute;border-radius:50%;filter:blur(100px)}
+.pres-orb-1{width:900px;height:900px;background:radial-gradient(circle,rgba(79,142,255,.18) 0%,transparent 65%);top:-350px;left:-250px;animation:orbDrift1 24s ease-in-out infinite}
+.pres-orb-2{width:750px;height:750px;background:radial-gradient(circle,rgba(168,85,247,.14) 0%,transparent 65%);bottom:-250px;right:-200px;animation:orbDrift2 30s ease-in-out infinite}
+.pres-orb-3{width:600px;height:600px;background:radial-gradient(circle,rgba(16,185,129,.09) 0%,transparent 65%);top:40%;left:50%;transform:translate(-50%,-50%);animation:orbDrift3 20s ease-in-out infinite}
+
+@keyframes orbDrift1{0%,100%{transform:translate(0,0)}33%{transform:translate(120px,80px)}66%{transform:translate(-60px,140px)}}
+@keyframes orbDrift2{0%,100%{transform:translate(0,0)}33%{transform:translate(-90px,-110px)}66%{transform:translate(60px,-55px)}}
+@keyframes orbDrift3{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.7}50%{transform:translate(-50%,-50%) scale(1.5);opacity:1}}
+
+.pres-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:64px 64px}
+
+/* ── Top bar ─────────────────────────────────────────────────── */
+.pres-top-bar{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:16px 24px;pointer-events:none}
+.pres-top-bar>*{pointer-events:auto}
+.pres-brand{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2)}
+.pres-top-right{display:flex;align-items:center;gap:14px}
+.pres-counter-label{font-size:12px;color:rgba(255,255,255,.18);font-variant-numeric:tabular-nums}
+.pres-exit-btn{padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;backdrop-filter:blur(10px);transition:all .2s}
+.pres-exit-btn:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.2)}
+
+/* ── Stage ───────────────────────────────────────────────────── */
+.pres-stage{position:relative;z-index:2;width:100%;max-width:1160px;padding:56px 80px 70px;height:100%;display:flex;align-items:center;justify-content:center}
+.pres-slide-wrap{width:100%;animation:slideReveal .6s cubic-bezier(.22,1,.36,1) both}
+@keyframes slideReveal{from{opacity:0;transform:translateY(28px) scale(.975)}to{opacity:1;transform:none}}
+
+/* ── Nav buttons ─────────────────────────────────────────────── */
+.pres-nav-btn{position:absolute;z-index:6;top:50%;transform:translateY(-50%);width:50px;height:50px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);transition:all .2s;line-height:1}
+.pres-nav-btn:hover:not(:disabled){background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.22)}
+.pres-nav-btn:disabled{opacity:.12;cursor:default}
+.pres-prev{left:18px}
+.pres-next{right:18px}
+
+/* ── Dots ────────────────────────────────────────────────────── */
+.pres-dots{position:absolute;z-index:6;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center}
+.pres-dot{height:6px;width:6px;border-radius:3px;background:rgba(255,255,255,.15);border:none;padding:0;cursor:pointer;transition:all .35s cubic-bezier(.22,1,.36,1)}
+.pres-dot.on{width:28px;background:#4f8eff}
+
+/* ── Typography ──────────────────────────────────────────────── */
+.pt-label{display:block;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#4f8eff;margin-bottom:12px}
+.pt-h1{font-size:clamp(2.6rem,5.5vw,4.8rem);font-weight:900;letter-spacing:-.04em;line-height:1.0;color:#fff;margin:0 0 18px}
+.pt-h2{font-size:clamp(1.7rem,3vw,2.5rem);font-weight:800;letter-spacing:-.035em;color:#fff;margin:0 0 12px;line-height:1.1}
+.pt-body{font-size:clamp(.9rem,1.4vw,1.05rem);color:rgba(255,255,255,.45);line-height:1.65;margin:0 0 22px}
+.pt-grad{background:linear-gradient(120deg,#4f8eff 0%,#a855f7 50%,#10b981 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ── Glass card ──────────────────────────────────────────────── */
+.pg-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;backdrop-filter:blur(16px);padding:22px}
+
+/* ── Stagger animations ──────────────────────────────────────── */
+.sa{opacity:0;animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both}
+.sa-1{animation-delay:.06s}
+.sa-2{animation-delay:.15s}
+.sa-3{animation-delay:.26s}
+.sa-4{animation-delay:.38s}
+.sa-5{animation-delay:.52s}
+.sa-6{animation-delay:.68s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ── Provider badges ─────────────────────────────────────────── */
+.pb{display:inline-flex;align-items:center;gap:7px;padding:6px 16px;border-radius:999px;font-size:13px;font-weight:700;border:1px solid}
+.pb-aws{background:rgba(255,153,0,.1);color:#ff9900;border-color:rgba(255,153,0,.3)}
+.pb-azure{background:rgba(79,159,245,.1);color:#4f9ff5;border-color:rgba(79,159,245,.3)}
+.pb-gcs{background:rgba(52,168,83,.1);color:#34c674;border-color:rgba(52,168,83,.3)}
+.pd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pd-aws{background:#ff9900}
+.pd-azure{background:#4f9ff5}
+.pd-gcs{background:#34c674}
+
+/* ── LIVE badge ──────────────────────────────────────────────── */
+.live-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);color:#ef4444;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.live-badge-dot{width:6px;height:6px;border-radius:50%;background:#ef4444;animation:blinkDot 1s ease-in-out infinite}
+@keyframes blinkDot{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── Gradient separator ──────────────────────────────────────── */
+.grad-sep{height:1px;background:linear-gradient(90deg,transparent,rgba(79,142,255,.35),rgba(168,85,247,.35),transparent);margin:18px 0}
+
+/* ── Bar animation ───────────────────────────────────────────── */
+@keyframes barScale{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.bar-anim{transform-origin:left center;animation:barScale 1.2s cubic-bezier(.22,1,.36,1) .45s both}
+
+/* ── Arrow hint (hero) ───────────────────────────────────────── */
+@keyframes arrowBounce{0%,100%{transform:translateX(0);opacity:.35}50%{transform:translateX(6px);opacity:.8}}
+.arrow-hint{display:inline-block;animation:arrowBounce 1.8s ease-in-out infinite}
+
+/* ── Big number ──────────────────────────────────────────────── */
+.pres-num{font-size:4rem;font-weight:900;letter-spacing:-.05em;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
+
+/* ── Countdown ───────────────────────────────────────────────── */
+.countdown{display:flex;gap:10px;justify-content:center}
+.cd-block{text-align:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 16px;min-width:64px}
+.cd-num{font-size:2rem;font-weight:900;color:#fff;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.cd-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px}
+
+/* ── Stack card ──────────────────────────────────────────────── */
+.stack-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px 14px;text-align:center;transition:all .2s}
+.stack-card:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);transform:translateY(-2px)}
