@@ -1,7 +1,7 @@
 # Backlog - Multi-Cloud Storage Integration
 
-**Last updated:** 2026-06-02 (session 3 — code audit)  
-**Current phase:** M1 complete (code) · M2 pending (tests + fixes)
+**Last updated:** 2026-06-02 (session 4 — UX hardening)  
+**Current phase:** All charter milestones complete · Post-charter UX improvements in progress
 
 ## Status Key
 
@@ -38,8 +38,11 @@
 | C19 | Per-provider remove from file drawer | Done | "Remove" per stored provider with last-copy guard and expand confirm. |
 | C20 | Auto-refresh after every action | Done | onRefresh chain: FilesPage.load → Drawer → FileDetail/SyncPanel. Upload modal always calls load on close. |
 | C21 | Live History tab in file details | Done | Two tabs (Storage, History) below download button. History appends timestamped events for sync/remove/download in session. |
-| C22 | Cinematic interactive presentation | Done | 8-slide full-screen presentation at /app/presentation. Live API data, SVG architecture animation, countdown timer, keyboard navigation. |
+| C22 | Cinematic interactive presentation | Done | 8-slide full-screen presentation at /app/presentation. Live API data, SVG architecture animation, keyboard navigation. Light theme, go-live counter removed 2026-06-02. |
 | C23 | Role-based UI enforcement in file drawer | Done | Drawer FileDetail now uses `useAuth`. Sync, Remove, and Delete-all buttons hidden for Viewer role. Fixed 2026-06-02. |
+| C24 | Multi-file upload with enhanced progress bar | Done | Upload modal accepts multiple files via click or drag-and-drop. Batch duplicate detection (replace / auto-rename). Rainbow animated progress bar with per-file mini bars. Per-file × per-provider results screen. |
+| C25 | Multi-select bulk delete | Done | Select mode toggled from Shelf. Checkboxes on list rows and grid cards. Select-all in list header. Sticky bulk action bar with count badge. Parallel delete with optimistic UI removal. Role-gated (Admin/Super Admin). |
+| C26 | Delete All with typed confirmation | Done | Red Delete All button in Shelf (Admin/Super Admin, hidden when empty). Modal requires typing "delete all" phrase — confirm button disabled until phrase matches. Lists all consequences. Optimistic clear, parallel deletes, reconciles with load(). |
 
 ## Active Blockers
 
@@ -81,6 +84,14 @@ Findings from full-codebase code review on 2026-06-02. None have been fixed yet.
 - **P0 (must fix before production):** CR1 (security — two files), CR2 (wrong-file data integrity)
 - **P1 (fix in M2):** CR3 (filename encoding — two files), CR4 (performance), CR5 (sort UX)
 - **P2 (tidy up):** CR6 (login latency), CR7 (dead code), CR8 (routing reliability)
+
+## Post-Charter UX Fixes (session 4 — 2026-06-02)
+
+| ID | Finding | Status | Notes |
+|----|---------|--------|-------|
+| UX1 | Bulk delete files not disappearing from UI | Fixed | Optimistic removal: files cleared from local state before API calls complete. Provider map snapshotted to avoid stale closure. Added `console.error` logging for failed deletes. |
+| UX2 | Grid trailing empty cells (last page row) | Fixed | PAGE_SIZE increased 8 → 12 (two full rows of 6 cards). Eliminates trailing empty grid cells on most pages. |
+| UX3 | Concurrent upload safety review | Assessed | Production (Vercel) uses direct-upload path — API only signs URLs, file bytes bypass server entirely. No concurrency issue. Local proxy path has no queue but is dev-only. No action required for production. |
 
 ## Milestone Status (original charter scope — code audit 2026-06-02)
 

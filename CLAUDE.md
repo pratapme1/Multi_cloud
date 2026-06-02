@@ -35,7 +35,7 @@
 > **Status:** Decided 2026-05-29; D-001 revised 2026-06-01. See D-001, D-002, and D-005 in `docs/decisions_log.md`.
 
 - Backend: Node.js / Express (D-001 revised 2026-06-01; .NET SDK not installed on dev machine)
-- Frontend: React (Vite) + Bootstrap 5
+- Frontend: React (Vite) + custom CSS (Bootstrap 5 dropped; all styles in `src/frontend/src/index.css`)
 - Database: SQLite via better-sqlite3 (deferred to M3 — not yet wired up)
 - AWS SDK: @aws-sdk/client-s3 (v3)
 - Azure SDK: @azure/storage-blob
@@ -65,7 +65,14 @@
 **M2 — Unified Interface:** Cross-cloud sync, redundant multi-provider upload, unified file management dashboard.  
 **M3 — Web UI + Deploy:** React UI, Supabase JWT auth, RBAC (Super Admin/Admin/Viewer), deployed on Vercel.  
 **What's running:** React frontend at `src/frontend/` (port 5173 local / Vercel). API at `api/index.js` (Vercel) / `src/backend-node/server.js` (port 3001 local).  
-**Recent completions (2026-06-02 session 3):** Role-based UI enforcement in Drawer (C23). Backlog, CLAUDE.md, and presentation updated to reflect all charter milestones complete.  
+
+**Post-charter UX improvements completed (2026-06-02 session 4):**
+- C24 — Multi-file upload: drag-and-drop multiple files, batch duplicate handling, rainbow animated progress bar, per-file mini progress bars, per-file × per-provider results.
+- C25 — Multi-select bulk delete: Select mode in Shelf, checkboxes on list/grid, sticky action bar, parallel deletes, optimistic UI, role-gated.
+- C26 — Delete All: typed confirmation modal ("delete all" phrase required), full consequence warning, optimistic clear.
+- UX fixes: bulk delete optimistic removal (files vanish instantly on confirm), PAGE_SIZE 8→12 (no trailing empty grid cells).
+- Presentation: light theme overhaul, go-live counter removed.
+
 **Operational watch items (not code):** AWS/Azure CORS config (B1, B2), credential rotation (B3) — cloud-admin tasks.  
 **Optional hardening queue (post-charter, not blocking go-live):** CR1–CR8 code-review findings, unit tests (D3/D4), production E2E (D1). See `docs/backlog.md`.  
 **Closed decisions:** D-001 through D-009 all resolved.
