@@ -9,7 +9,7 @@ import FileGrid from '../components/FileGrid.jsx';
 import Drawer from '../components/Drawer.jsx';
 import UploadModal from '../components/UploadModal.jsx';
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 12;
 
 export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCloseDrawer, refreshKey }) {
   const { can } = useAuth();
@@ -160,25 +160,38 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
     if (!count) return;
     if (!window.confirm(`Delete ${count} file${count > 1 ? 's' : ''}?\n\nThis will remove them from all providers and cannot be undone.`)) return;
 
-    setBulkDeleting(true);
     const names = [...selectedNames];
-    let failed = 0;
+
+    // Optimistic: remove from UI immediately so files vanish on confirm
+    setAllFiles(prev => prev.filter(f => !names.includes(f.name)));
+    exitSelectMode();
+    setBulkDeleting(true);
+
+    const failures = [];
+    // Snapshot providers before allFiles state update propagates
+    const providerMap = Object.fromEntries(
+      allFiles.filter(f => names.includes(f.name)).map(f => [f.name, f.providers])
+    );
 
     await Promise.all(names.map(async name => {
-      const file = allFiles.find(f => f.name === name);
-      if (!file) return;
-      try { await deleteFile(name, file.providers); }
-      catch { failed++; }
+      const providers = providerMap[name];
+      if (!providers?.length) return;
+      try {
+        await deleteFile(name, providers);
+      } catch (err) {
+        failures.push(name);
+        console.error(`[bulk-delete] failed for "${name}":`, err?.message ?? err);
+      }
     }));
 
-    const deleted = names.length - failed;
-    toast(
-      `${deleted} file${deleted !== 1 ? 's' : ''} deleted${failed ? ` · ${failed} failed` : ''}`,
-      failed ? 'wa' : 'ok',
-      'Bulk delete'
-    );
+    if (failures.length === 0) {
+      toast(`${names.length} file${names.length !== 1 ? 's' : ''} deleted`, 'ok', 'Bulk delete');
+    } else {
+      toast(`${names.length - failures.length} deleted · ${failures.length} failed`, 'wa', 'Bulk delete');
+    }
+
     setBulkDeleting(false);
-    exitSelectMode();
+    // Reconcile with actual cloud state
     load();
   };
 
@@ -350,7 +363,7 @@ function LoadingState() {
       <div className="fl-head">
         <span>Name</span><span>Stored on</span><span>Size</span><span>Modified</span><span />
       </div>
-      {[...Array(8)].map((_, i) => (
+      {[...Array(12)].map((_, i) => (
         <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 130px 80px 100px 70px', padding: '0 20px', alignItems: 'center', minHeight: 54, borderBottom: '1px solid var(--bd)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
             <div className="shim" style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0 }} />
