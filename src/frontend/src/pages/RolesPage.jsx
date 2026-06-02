@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext.jsx';
 import { ROLES, canRole, roleLabel } from '../roles.js';
 
 const fmt = ts => ts ? new Date(ts).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '-';
+const PERMISSIONS = ['manage_roles', 'invite_users', 'upload', 'sync', 'delete', 'download', 'view_files', 'view_health'];
 
 export default function RolesPage() {
   const { user, can } = useAuth();
@@ -53,6 +54,8 @@ export default function RolesPage() {
     toast('Invite link copied', 'ok');
   };
 
+  const openInvites = invites.filter(invite => !invite.usedBy).length;
+
   return (
     <div className="roles-page">
       <header className="topbar">
@@ -65,32 +68,46 @@ export default function RolesPage() {
       <section className="roles-hero">
         <div>
           <div className="eyebrow">Access model</div>
-          <h1>Invite users into the right role</h1>
-          <p>Create an invite link for Super Admin, Admin, or Viewer. Until email invites are available, copy the link and share it manually.</p>
+          <h1>Control access without slowing the team down</h1>
+          <p>Create role-scoped invite links, review active users, and keep storage permissions clean across Super Admin, Admin, and Viewer access.</p>
+          <div className="roles-stats">
+            <span><b>{users.length}</b> users</span>
+            <span><b>{openInvites}</b> open invites</span>
+            <span><b>{Object.keys(ROLES).length}</b> roles</span>
+          </div>
         </div>
         <div className="invite-panel">
-          <label className="fl">Invite role</label>
+          <div className="invite-panel-head">
+            <div>
+              <strong>Create invite</strong>
+              <span>Copy and share manually</span>
+            </div>
+          </div>
+          <label className="fl">Role</label>
           <select className="sel" value={role} onChange={e => setRole(e.target.value)}>
             {Object.values(ROLES).map(r => (
               <option key={r.key} value={r.key}>{r.label}</option>
             ))}
           </select>
-          <button className="btn btn-p btn-full" onClick={handleCreateInvite}>Create invite link</button>
+          <button className="btn btn-p btn-full" onClick={handleCreateInvite} disabled={loading}>
+            {loading ? 'Loading...' : `Create ${roleLabel(role)} link`}
+          </button>
         </div>
       </section>
 
       <section className="role-grid">
         {Object.values(ROLES).map(r => (
-          <article className="role-card" key={r.key}>
+          <article className={`role-card role-${r.key}`} key={r.key}>
             <div className="role-card-head">
               <div>
+                <span className="role-dot" />
                 <h2>{r.label}</h2>
                 <p>{r.description}</p>
               </div>
               <span className="role-count">{users.filter(u => u.role === r.key).length}</span>
             </div>
             <div className="perm-list">
-              {['manage_roles', 'invite_users', 'upload', 'sync', 'delete', 'download', 'view_files', 'view_health'].map(permission => (
+              {PERMISSIONS.map(permission => (
                 <span key={permission} className={canRole(r.key, permission) ? 'perm on' : 'perm'}>
                   {permission.replaceAll('_', ' ')}
                 </span>
@@ -119,7 +136,9 @@ export default function RolesPage() {
             <div className="rt-row" key={invite.token}>
               <span className="role-pill">{roleLabel(invite.role)}</span>
               <span>{fmt(invite.createdAt)}</span>
-              <span>{invite.usedBy ? `Used by ${invite.usedBy}` : 'Open'}</span>
+              <span className={invite.usedBy ? 'status-pill used' : 'status-pill open'}>
+                {invite.usedBy ? `Used by ${invite.usedBy}` : 'Open'}
+              </span>
               <button className="btn btn-s btn-sm" onClick={() => handleCopy(invite.token)}>
                 {copied === invite.token ? 'Copied' : 'Copy link'}
               </button>
