@@ -73,7 +73,7 @@ health()
 |----|-----------------|-------|-------|
 | D-008 | Persistent auth design | Dev + PM | JWT vs sessions once DB is added. |
 | D-009 | GCS implementation date | Dev + PM | Depends on GCP credentials and bucket. |
-| D-010 | Keep duplicate Vercel API routes or consolidate | Dev | Keep both until Vercel root directory is confirmed. |
+| D-010 | Keep duplicate Vercel API routes or consolidate | Resolved | Consolidated to `api/[...path].js` to avoid Vercel Hobby plan function limits. |
 
 ## Weekly Status
 

@@ -7,7 +7,7 @@ Unified file management across AWS S3 and Azure Blob Storage, with Google Cloud 
 **Date:** 2026-06-02  
 **Active stack:** Node.js / Express + React / Vite  
 **Frontend deployment:** Vercel  
-**Backend deployment path:** Vercel Serverless API routes under `api/` and `src/frontend/api/`
+**Backend deployment path:** Single Vercel catch-all serverless function at `api/[...path].js`
 
 ### What Works
 

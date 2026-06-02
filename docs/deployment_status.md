@@ -10,7 +10,7 @@
 | Deployment platform | Vercel |
 | Recommended Root Directory | `./` |
 | Frontend build output | `src/frontend/dist` |
-| API routes | `api/` and `src/frontend/api/` |
+| API routes | Single catch-all function: `api/[...path].js` |
 
 ## Direct Upload Architecture
 
@@ -21,6 +21,8 @@ Uploads on Vercel do not send the file through the Vercel function body. The bro
 3. Uploads the file directly to AWS S3 and Azure Blob with `PUT`.
 
 This avoids Vercel's function payload limit.
+
+The API is intentionally consolidated into one catch-all serverless function so the app stays under the Vercel Hobby plan limit of 12 functions.
 
 ## Current Blocker
 

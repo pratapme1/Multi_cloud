@@ -25,7 +25,7 @@
 | C6 | GCS placeholder | Done | Visible but disabled for upload/sync. |
 | C7 | Local AWS/Azure end-to-end Playwright flow | Done | 11/11 headed Playwright checks passed before deployment work. |
 | C8 | Vercel frontend deployment config | Done | Root `vercel.json` added. |
-| C9 | Vercel API routes | Done | Explicit routes added under root `api/` and `src/frontend/api/`. |
+| C9 | Vercel API routes | Done | Consolidated into one catch-all function to stay under the Hobby plan function limit. |
 | C10 | Role model | Done | Super Admin, Admin, Viewer. |
 | C11 | Manual invite-link flow | Done | Super Admin creates local invite links; signup inherits role. |
 | C12 | Long filename UI hardening | Done | Modal, table, cards, drawer, upload states guarded. |
@@ -54,7 +54,7 @@
 | D6 | Implement GCS provider | Deferred | P2 | Requires GCP bucket and service account JSON. |
 | D7 | Invite email delivery | Open | P2 | Current invite links are generated and copied manually. |
 | D8 | Add audit trail persistence | Deferred | P2 | Current audit trail is presentational. |
-| D9 | Clean up duplicate Vercel API structure | Open | P2 | Keep both roots until Vercel root setting is confirmed stable. |
+| D9 | Clean up duplicate Vercel API structure | Done | Removed duplicate route trees; one catch-all API function remains. |
 | D10 | Update documentation after CORS validation | Open | P1 | Mark production upload as done once verified. |
 
 ## Current Pending Summary

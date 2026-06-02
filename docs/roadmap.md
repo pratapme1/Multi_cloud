@@ -65,7 +65,7 @@ Role Management -> create Admin invite -> signup -> verify Admin permissions
 
 - Add provider unit tests.
 - Add API/RBAC tests for Supabase token validation and role permissions.
-- Clean up duplicate Vercel API route copies once deployment root is confirmed.
+- Keep the single catch-all Vercel API route healthy as new backend endpoints are added.
 - Update release checklist evidence.
 
 ## Later
