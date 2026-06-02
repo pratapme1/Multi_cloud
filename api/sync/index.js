@@ -2,7 +2,7 @@ import { method, providers, requireAdmin, requireAuth } from '../_shared.js';
 
 export default async function handler(req, res) {
   if (!method(req, res, ['POST'])) return;
-  if (!requireAuth(req, res)) return;
+  if (!(await requireAuth(req, res))) return;
   if (!requireAdmin(req, res)) return;
 
   const { from, targets = [] } = req.body ?? {};

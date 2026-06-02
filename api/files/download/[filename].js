@@ -2,7 +2,7 @@ import { method, providers, requireAuth } from '../../_shared.js';
 
 export default async function handler(req, res) {
   if (!method(req, res, ['GET'])) return;
-  if (!requireAuth(req, res)) return;
+  if (!(await requireAuth(req, res))) return;
 
   const filename = decodeURIComponent(req.query.filename);
   const provider = req.query.provider ?? 'aws';

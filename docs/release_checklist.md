@@ -1,78 +1,63 @@
-# Release Checklist — Go-Live Gate
+# Release Checklist - Go/No-Go
 
-> **Target:** 2026-06-16
-> **Rule:** Every P0 item must be checked before Go/No-Go is called.
-> **Owner:** PM signs off | **Verifier:** Dev confirms each item is true — not assumed.
+**Target:** Prototype validation after CORS is fixed  
+**Last updated:** 2026-06-02
 
----
-
-## P0 — Must Pass (hard gate)
-
-### Functionality
-- [ ] Upload works via web UI to all 3 cloud providers
-- [ ] Download works via web UI from all 3 cloud providers
-- [ ] File list shows all files with correct name, size, provider
-- [ ] Delete removes the correct file and it disappears from the list
-- [ ] File sync replicates files from one provider to another
-- [ ] Redundant upload writes to 2+ providers in a single action
-
-### Authentication & Access Control
-- [ ] Login accepts valid credentials and rejects invalid ones
-- [ ] Admin role can upload, download, delete
-- [ ] Read-only role cannot upload or delete; API returns 403
-- [ ] All API endpoints return 401 for unauthenticated requests
-- [ ] Logout works and session is invalidated
-
-### Security
-- [ ] No cloud credentials (API keys, connection strings, service account JSON) visible in any browser response or frontend source
-- [ ] `.env` (or equivalent secrets file) is in `.gitignore` and not in git history
-- [ ] Error messages do not expose internal paths, stack traces, or config values
-- [ ] HTTPS enforced on production URL — or HTTP explicitly accepted and documented as intentional
+## P0 - Must Pass
 
 ### Deployment
-- [ ] Application is running on production server (not localhost)
-- [ ] Production URL is accessible from outside the dev machine
-- [ ] App starts cleanly without manual steps after a reboot / restart
 
-### Testing
-- [ ] Unit tests pass for all 3 cloud modules
-- [ ] Integration tests pass for unified interface
-- [ ] End-to-end test completed on production: upload → list → download → delete
+- [ ] Vercel deployment uses latest `main`.
+- [ ] Root Directory is repository root (`./`) unless intentionally using `src/frontend`.
+- [ ] `/api/test-credentials` returns JSON, not Vercel `NOT_FOUND`.
+- [ ] Vercel environment variables are configured for AWS and Azure.
 
----
+### Cloud Configuration
 
-## P1 — Should Pass (document exceptions if skipping)
+- [ ] AWS S3 CORS allows `https://multi-cloud-cyan.vercel.app`.
+- [ ] Azure Blob CORS allows `https://multi-cloud-cyan.vercel.app`.
+- [ ] Exposed AWS key has been rotated.
+- [ ] Exposed Azure storage key has been rotated.
 
-- [ ] Session expiry / timeout configured
-- [ ] Sync correctly skips unchanged files
-- [ ] Partial redundant upload failure is reported clearly to the user
-- [ ] Provider badge visible per file in UI
+### Functionality
 
----
+- [ ] Super Admin login works: `admin / Admin@123`.
+- [ ] Viewer login works: `viewer / View@123`.
+- [ ] Super Admin can upload a 1 MB file from Vercel to AWS + Azure.
+- [ ] Uploaded file appears in AWS S3 console.
+- [ ] Uploaded file appears in Azure Blob container.
+- [ ] File list refreshes after upload.
+- [ ] Download works from Vercel.
+- [ ] Delete works for Super Admin/Admin.
+- [ ] Viewer cannot upload/delete.
+- [ ] Role Management tab is visible only to Super Admin.
+- [ ] Invite link can create Admin or Viewer user.
 
-## P2 — Deferred to Post-Launch
+### Security
 
-- [ ] Granular RBAC beyond admin / read-only
-- [ ] RBAC UI hiding / disabled controls for read-only users
-- [ ] Audit log of user actions
-- [ ] File versioning across providers
-- [ ] Cost / usage monitoring per provider
+- [ ] No AWS secret key appears in browser network responses.
+- [ ] No Azure connection string appears in browser network responses.
+- [ ] `.env` and standalone secret `.env` files are ignored.
+- [ ] Error messages do not reveal stack traces or secrets.
 
----
+## P1 - Should Pass
 
-## Go/No-Go Sign-Off
+- [ ] Provider health drawer shows AWS/Azure status and GCS pending.
+- [ ] Long filename upload modal does not break.
+- [ ] Long filename table row/card/drawer does not break.
+- [ ] Direct upload partial failures show provider-level diagnostics.
+- [ ] Production Playwright E2E is updated and run after CORS.
 
-| Check | Verified By | Date | Notes |
-|-------|-------------|------|-------|
-| P0 Functionality | | | |
-| P0 Auth & Access | | | |
-| P0 Security | | | |
-| P0 Deployment | | | |
-| P0 Testing | | | |
+## Deferred
 
----
+- [ ] GCS implementation.
+- [ ] Persistent user database.
+- [ ] Real JWT/session auth.
+- [ ] Server-side invite storage.
+- [ ] Audit log persistence.
 
-**Go/No-Go Decision:** `GO` / `NO-GO`
-**Made by (PM):**
-**Date:** 2026-06-16
-**Notes:**
+## Current Go/No-Go
+
+**Current decision:** `NO-GO for production upload validation`  
+**Reason:** AWS/Azure CORS not configured yet for direct browser upload.  
+**Next action:** Configure CORS, rotate credentials, redeploy, run production E2E.

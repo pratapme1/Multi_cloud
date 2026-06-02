@@ -1,157 +1,62 @@
-# Backlog — Multi-Cloud Storage Integration
+# Backlog - Multi-Cloud Storage Integration
 
-> Single source of truth for all tasks.
-> Update status here as work moves. PM reviews this at every check-in.
-> For full task rationale, pass criteria, and dependency chain — see roadmap.md.
-> Effort: **S** < 2h | **M** 2–4h | **L** 4–8h
-
----
+**Last updated:** 2026-06-02  
+**Current phase:** AWS/Azure functional prototype + Vercel deployment hardening
 
 ## Status Key
 
 | Status | Meaning |
 |--------|---------|
-| `Open` | Not started |
-| `In Progress` | Actively being worked |
-| `Blocked` | Waiting on a decision or dependency |
-| `Done` | Complete and verified |
-| `Deferred` | Descoped from current milestones; target post go-live |
+| Done | Complete and verified enough for current prototype |
+| In Progress | Partially implemented or actively being worked |
+| Blocked | Waiting on external setup or decision |
+| Open | Not started |
+| Deferred | Intentionally out of current scope |
 
-## Track Key
+## Completed
 
-| Track | Meaning |
-|-------|---------|
-| `PM` | PM-only task; runs in parallel with dev work |
-| `Dev` | Developer-only task |
-| `Both` | Requires both PM and Dev involvement |
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| C1 | Move active backend from .NET to Node.js / Express | Done | Active backend is `src/backend-node`. |
+| C2 | Build React/Vite frontend | Done | Active frontend is `src/frontend`. |
+| C3 | Wire frontend to backend APIs | Done | Frontend uses `/api/*`; Vite proxies locally. |
+| C4 | AWS S3 provider | Done | List, upload, download, delete, health implemented. |
+| C5 | Azure Blob provider | Done | List, upload, download, delete, health implemented. |
+| C6 | GCS placeholder | Done | Visible but disabled for upload/sync. |
+| C7 | Local AWS/Azure end-to-end Playwright flow | Done | 11/11 headed Playwright checks passed before deployment work. |
+| C8 | Vercel frontend deployment config | Done | Root `vercel.json` added. |
+| C9 | Vercel API routes | Done | Explicit routes added under root `api/` and `src/frontend/api/`. |
+| C10 | Role model | Done | Super Admin, Admin, Viewer. |
+| C11 | Manual invite-link flow | Done | Super Admin creates local invite links; signup inherits role. |
+| C12 | Long filename UI hardening | Done | Modal, table, cards, drawer, upload states guarded. |
+| C13 | Direct-upload architecture for Vercel | Done | Browser requests signed URLs and uploads directly to AWS/Azure. |
+| C14 | Supabase auth integration | Done | Login/signup now use Supabase Auth tokens instead of mock/local browser users. |
+| C15 | Server-side invite storage | Done | Invite links are stored in `multi_cloud.invites`. |
 
----
+## Active Blockers
 
-## Pre-Work (Gate: 2026-05-29)
+| ID | Task | Status | Owner | Notes |
+|----|------|--------|-------|-------|
+| B1 | Configure AWS S3 CORS | Blocked | Vishnu / Cloud owner | Needed for direct browser upload from `https://multi-cloud-cyan.vercel.app`. Current symptom: `OPTIONS 403 Forbidden`. |
+| B2 | Configure Azure Blob CORS | Blocked | Vishnu / Cloud owner | Needed for direct browser upload from `https://multi-cloud-cyan.vercel.app`. |
+| B3 | Rotate exposed AWS/Azure credentials | Blocked | Vishnu / Cloud owner | Credentials were pasted into chat and must be treated as exposed. Rotate before final deployment. |
+| B4 | Apply Supabase schema | Blocked | Vishnu / Supabase owner | Migration is in `supabase/migrations`; local apply failed from this machine due DB host connectivity/reset. |
 
-| ID | Task | Track | Owner | Effort | Status | Notes |
-|----|------|-------|-------|--------|--------|-------|
-| P.1 | Manager kickoff — ask Part A questions (Q1–Q24 in discovery.md), document answers | PM | PM | S | Open | Do this first — answers unblock charter sign-off |
-| P.2 | Team kickoff — ask Part A-2 questions (K01–K14 in discovery.md), document answers | PM | PM | S | Done | Completed 2026-05-28. Team = Anushman (full-stack, Node/React) + Anand (QA/validation). Capacity: 2–3 hrs/day. K02, K10, K12–K14 not captured — follow up. |
-| P.3 | D-001: Decide tech stack — language, cloud SDKs, web framework; log in decisions_log.md | Both | Dev + PM | S | Done | Revised 2026-06-01. Node.js / Express + React (Vite). See decisions_log.md D-001. |
-| P.4 | D-002: Decide credential management (.env + library approach); log in decisions_log.md | Both | Dev | S | Done | Closed 2026-05-29. `.env` + `dotenv` locally; production app settings. See decisions_log.md D-002. |
-| P.5 | Repo init: folder structure, .gitignore (covers .env, *.json service accounts), .env.example with all required key names | Dev | Dev | S | Done | Completed 2026-06-01. `src/backend-node/` and `src/frontend/` scaffolded. `.gitignore` and `.env.example` in place. |
-| P.6 | Provision AWS account + S3 bucket; verify credentials work | Dev | Dev | S | Done | Completed 2026-06-01. AWS S3 HeadBucket returns OK; `followRegionRedirects: true` added. |
-| P.7 | Provision Azure account + Blob container; verify connection string works | Dev | Dev | S | Done | Completed 2026-06-01. Azure container `files` reachable via connection string. |
-| P.8 | Provision GCP account + service account + GCS bucket; verify service account JSON auth | Dev | Dev | M | Open | Hardest setup — start first; GCP auth is most involved (R04) |
-| P.9 | Architecture decision: document storage layer pattern + app layer structure | Dev | Dev | S | Done | App layer structure documented in PRD v1.0. D-003 still separately tracks the M2 provider-selection pattern |
-| P.10 | DB schema design: users table — id, username, email, password_hash, role (admin\|readonly), created_at | Dev | Dev | S | Done | Documented in PRD section 4 |
-| P.11 | Charter sign-off: both team members review and sign charter.md | Both | PM | S | Done | Signed 2026-05-28 by Vishnu, Anushman, and Anand |
+## Remaining Development Work
 
----
+| ID | Task | Status | Priority | Notes |
+|----|------|--------|----------|-------|
+| D1 | Production E2E after CORS | Open | P0 | Test login -> upload -> list -> download -> delete on Vercel. |
+| D2 | Improve upload success handling after direct upload | Open | P1 | Refresh file list and show per-provider success/failure cleanly after CORS is fixed. |
+| D3 | Add provider unit tests | Open | P1 | AWS/Azure happy-path and error-path tests. |
+| D4 | Add API tests for auth/RBAC | Open | P1 | Verify Super Admin/Admin/Viewer behavior. |
+| D5 | Harden Supabase auth edge cases | Open | P1 | Add refresh-token handling, expired-session UX, and production auth settings. |
+| D6 | Implement GCS provider | Deferred | P2 | Requires GCP bucket and service account JSON. |
+| D7 | Invite email delivery | Open | P2 | Current invite links are generated and copied manually. |
+| D8 | Add audit trail persistence | Deferred | P2 | Current audit trail is presentational. |
+| D9 | Clean up duplicate Vercel API structure | Open | P2 | Keep both roots until Vercel root setting is confirmed stable. |
+| D10 | Update documentation after CORS validation | Open | P1 | Mark production upload as done once verified. |
 
-## Milestone 1 — API Integration (Gate: 2026-06-05)
+## Current Pending Summary
 
-| ID | Task | Track | Owner | Effort | Status | Notes |
-|----|------|-------|-------|--------|--------|-------|
-| 1.1 | AWS S3 module: upload, download, list (basic — no pagination), delete; auth via IAM key+secret from .env; generic error return with message | Dev | Dev | M | Done | Completed 2026-06-01 in Node.js (`src/backend-node/providers/aws.js`). Pagination with ContinuationToken, cross-cloud download buffer, region-redirect fix. |
-| 1.2 | AWS S3 unit tests: happy path only — 1 test per operation; mock client — no real API calls | Dev | Dev | S | Open | Not yet written |
-| 1.3 | Azure Blob module: upload, download, list (basic — no pagination), delete; auth via connection string from .env; same reduced scope as 1.1 | Dev | Dev | M | Done | Completed 2026-06-01 in Node.js (`src/backend-node/providers/azure.js`). Live-tested against real container. |
-| 1.4 | Azure Blob unit tests: happy path only — same reduced scope as 1.2 | Dev | Dev | S | Open | Not yet written |
-| 1.5 | GCS module: upload, download, list (basic — no pagination), delete; auth via service account JSON path from .env; same reduced scope as 1.1 | Dev | Dev | M | In Progress | Placeholder at `src/backend-node/providers/gcs.js`. Awaiting P.8 credential provisioning before @google-cloud/storage can be wired. |
-| 1.6 | GCS unit tests: happy path only — same reduced scope as 1.2 | Dev | Dev | S | Open | Blocked on 1.5 |
-| 1.7 | **[PM PARALLEL]** UI wireframe — begin designing 5 screens: login, file list, upload modal, delete confirmation, sync panel | PM | PM | M | Done | Completed 2026-06-01. prototype_v3.html is the finalized design reference. React scaffold built from it. All screens + states covered. |
-| 1.8 | M1 presentation prep: slide deck + live demo rehearsal (upload to all 3 providers sequentially) | PM | PM | S | Open | Start by Day 7 (Jun 4) — not the morning of the gate |
-| 1.9 | M1 internal gate check: run M1 pass criteria with developer — live demo evidence only (Jun 4) | Both | PM | S | Open | Pass or fail — document the result in decisions_log.md |
-| 1.10 | M1 presentation to manager (Jun 5) | Both | PM | S | Open | PM tells the story; Dev runs the demo |
-
----
-
-## Milestone 2 — Unified Interface (Gate: 2026-06-10 / Presentation: 2026-06-11)
-
-| ID | Task | Track | Owner | Effort | Status | Notes |
-|----|------|-------|-------|--------|--------|-------|
-| 2.1 | Define StorageProvider interface contract: upload(file, filename), download(filename), list(), delete(filename) — signatures agreed before coding starts | Dev | Dev | S | Open | **Start Jun 4 (end of M1 week)** to protect M2 coding days. PM reviews before 2.3 begins |
-| 2.2 | D-003: Document chosen design pattern (Strategy / Adapter / Factory) in decisions_log.md with rationale | Dev | Dev | S | Open | **Decide Jun 4 (end of M1 week)** — do not wait until Jun 8 |
-| 2.3 | Unified interface implementation: factory or strategy selects provider from ACTIVE_PROVIDER config; all 4 ops work through single interface | Dev | Dev | M | Open | Gate test (2.4) immediately follows. Simpler once 3 modules share consistent structure |
-| 2.4 | Config swap verification: change ACTIVE_PROVIDER in .env → same test runs on different provider, zero code change — PM verifies live | Both | Dev + PM | S | Open | This IS the M2 gate question — if this fails, M2 is not passed |
-| 2.5 | File sync: compare source and target by filename only; copy files missing on target; return {copied, skipped, failed} report | Dev | Dev | M | Open | Filename comparison only — no file-size check; idempotent by design |
-| 2.6 | Sync idempotency: verify sync twice produces same result — confirm as natural property of filename comparison | Dev | Dev | S | Open | Manual check only — not a standalone test suite |
-| 2.7 | Redundant upload: single call writes to 2+ providers; partial failure explicitly reported — which succeeded, which failed | Dev | Dev | M | Open | No silent swallowing of failures — caller must know |
-| 2.8 | Integration validation: Anand runs Postman tests against real APIs — all 4 unified ops, provider swap, sync (missing + unchanged), redundant upload + partial failure | Dev | Anand | S | Open | Manual Postman validation replaces automated test suite; real API calls only |
-| 2.9 | D-005: Confirm and log deployment target before M2 ends — M3 planning depends on this | Both | Dev + PM | S | Done | Closed 2026-05-29. Deployment target is Azure App Service with Node runtime |
-| 2.10 | **[PM PARALLEL]** Complete UI wireframe: finalize all 5 screens with empty + error states; review with developer; hand over by Jun 8 | PM | PM | M | Done | Completed 2026-06-01. prototype_v3.html + full React scaffold handed over. All states: loading, empty, error, readonly, all drawer modes, all upload flows. |
-| 2.11 | M2 presentation prep: architecture diagram + provider-swap demo script + wireframe walkthrough | PM | PM | S | Open | |
-| 2.12 | M2 internal gate check: run M2 pass criteria (Jun 10) | Both | PM | S | Open | Jun 11 is buffer day for presentation — use it |
-| 2.13 | M2 presentation to manager (Jun 11) | Both | PM | S | Open | Show: swap demo live, wireframe, sync + redundancy |
-
----
-
-## Milestone 3 — UI, Auth, Access Control & Go-Live (Gate: 2026-06-16)
-
-> **Jun 15 rule:** No new features on Jun 15. Checklist and E2E test only.
-> **Deferrable if timeline slips:** 3.13 (sync panel), 3.14 (admin panel) — minimum viable M3 is login + file list + upload + download + delete + deploy.
-
-| ID | Task | Track | Owner | Effort | Status | Notes |
-|----|------|-------|-------|--------|--------|-------|
-| 3.1 | D-004: Decide auth approach (JWT vs session); log in decisions_log.md | Both | Dev + PM | S | Open | Must be decided before 3.3 starts |
-| 3.2 | **[START DAY 1 OF M3]** Deployment infrastructure: provision server or PaaS; confirm production URL; set environment variables | Dev | Dev | M | Open | Start Jun 12 — runs in parallel with auth work; do not wait for UI |
-| 3.3 | User model + DB setup: users table per schema in P.10; bcrypt password hashing | Dev | Dev | M | Open | |
-| 3.4 | Auth endpoints: POST /auth/login → token + role; POST /auth/logout; GET /auth/me | Dev | Dev | M | Open | |
-| 3.5 | Auth middleware: all /files and /sync endpoints require valid token; return 401 if missing or invalid | Dev | Dev | M | Open | Must exist before UI can be tested end-to-end |
-| 3.6 | RBAC middleware: admin vs readonly enforced at API layer; admin-only ops return 403 for readonly users | Dev | Dev | M | Open | RBAC at API layer is mandatory — UI hiding alone is not enough |
-| 3.7 | REST API — file endpoints: GET /files, POST /files/upload (multipart + provider param), GET /files/download, DELETE /files | Dev | Dev | M | Open | No provider filter param; simplified error handling; builds directly on module interfaces |
-| 3.8 | REST API — sync + health: POST /sync, GET /health | Dev | Dev | S | Open | Admin user CRUD removed — seed 1 admin + 1 readonly user at deploy time. /health confirms all 3 cloud connections |
-| 3.9 | Web UI — Login screen: username + password fields, error state for invalid credentials, redirect on success | Dev | Dev | M | Open | No self-registration — admin creates accounts |
-| 3.10 | Web UI — File list: table with filename, size, provider badge (AWS=orange, Azure=blue, GCP=green), download + delete actions; empty state | Dev | Dev | M | Open | MVP: no date column, no loading state, no provider filter tabs |
-| 3.11 | Web UI — Upload modal: file picker + provider selector (AWS / Azure / GCP / All Providers), upload button, success/error states | Dev | Dev | M | Open | File picker only — no drag-drop, no progress indicator |
-| 3.12 | Web UI — Delete confirmation: browser native confirm() dialog with filename shown; no custom modal component | Dev | Dev | S | Open | Browser confirm() is sufficient — no custom UI component needed |
-| 3.13 | Web UI — Sync panel: source + target provider selectors, Run Sync button, result card with counts | Dev | Dev | M | **Deferred** | Post go-live. Sync accessible via API — Anand validates via Postman at M2 gate |
-| 3.14 | Web UI — Admin panel: user list + role badges, Add User form, role change; admin-only access | Dev | Dev | M | **Deferred** | Post go-live. Seed 1 admin + 1 readonly user at deploy time — no UI needed for go-live |
-| 3.15 | RBAC in UI: hide upload button, delete icon, sync link, admin panel for readonly users | Dev | Dev | S | **Deferred** | API enforcement (3.5, 3.6) satisfies charter criterion 5. Visual hiding is polish — post go-live |
-| 3.16 | Confirm no cloud credentials in browser: PM opens network tab on live app and checks all responses | Both | PM + Dev | S | Open | P0 security item — must pass before go-live |
-| 3.17 | Security review: .env only on server, HTTPS enforced or exception documented, error messages safe | Both | PM + Dev | M | Open | Walk through release_checklist.md P0 Security section |
-| 3.18 | Deploy to production: app starts cleanly; accessible from outside dev machine at confirmed URL | Dev | Dev | M | Open | Must be done before Jun 15 (checklist day) |
-| 3.19 | End-to-end test on production — PM runs this: login → upload → list → download → delete; verify readonly role cannot delete via API | Both | PM | M | Open | PM runs this personally — not just developer's verbal confirmation |
-| 3.20 | README: setup from fresh clone, how to run locally, full .env variable list with descriptions | Dev | Dev | S | Open | |
-| 3.21 | Release checklist walkthrough: all P0 items verified with evidence (Jun 15) | Both | PM | S | Open | Every P0 item needs evidence — not verbal confirmation |
-| 3.22 | M3 presentation prep: project story arc, live demo script, D-001–D-005 summary, lessons learned | PM | PM | S | Open | |
-| 3.23 | Go/No-Go decision: documented in decisions_log.md and release_checklist.md (Jun 16 morning) | PM | PM | S | Open | If NO-GO: document what failed, fix required, new date |
-| 3.24 | M3 presentation to manager + Go-Live announcement (Jun 16) | Both | PM | S | Open | |
-
----
-
-## Post Go-Live — Handoff
-
-| ID | Task | Track | Owner | Effort | Status | Notes |
-|----|------|-------|-------|--------|--------|-------|
-| H.1 | Credentials and accounts handover: document who owns each cloud account, how to access, expiry dates | PM | PM | S | Open | |
-| H.2 | Lessons learned in decisions_log.md: one technical lesson, one PM lesson | PM | PM | S | Open | |
-| H.3 | Final backlog review: all tasks marked Done or deferred with reason; update health counts below | PM | PM | S | Open | |
-
----
-
-## Backlog Health
-
-> Update these counts at every milestone gate.
-> **Capacity recalibration (2026-05-29):** All task efforts resized and 3 tasks formally deferred (3.13, 3.14, 3.15) to align with 2–3 hrs/day developer availability. See decisions_log.md — Planning Session 3 for full rationale.
-
-| Metric | Count |
-|--------|-------|
-| Total tasks | 60 |
-| Open | 46 |
-| In Progress | 0 |
-| Blocked | 0 |
-| Deferred | 3 (3.13, 3.14, 3.15) |
-| Done | 10 (P.2, P.3, P.4, P.5, P.9, P.10, P.11, 1.7, 2.9, 2.10) |
-| Overdue | 0 |
-| Pre-work tasks | 11 |
-| M1 tasks | 10 |
-| M2 tasks | 13 |
-| M3 tasks | 23 (3 deferred) |
-| Handoff tasks | 3 |
-
----
-
-## PM Checklist — What to Review Every Session
-
-- [ ] Any tasks moved to Blocked since last check? If yes — unblock today.
-- [ ] Any tasks that should be In Progress but are still Open? If yes — ask why.
-- [ ] Are we on pace? Check which phase we're in against today's date.
-- [ ] Any risks materialising? If yes — update risk_log.md.
-- [ ] End of session: update this file before closing.
+The main pending item is **cloud storage CORS**. The deployed app can generate signed upload URLs, but AWS/Azure reject browser preflight requests until their CORS rules allow the Vercel origin.

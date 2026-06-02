@@ -7,6 +7,25 @@
 
 ---
 
+## Current Project Status - 2026-06-02
+
+The active application is now the Node/Express API plus React/Vite frontend.
+
+Current provider status:
+
+| Provider | Status | Notes |
+|----------|--------|-------|
+| AWS S3 | Active | Works locally. Vercel direct upload needs S3 CORS for `https://multi-cloud-cyan.vercel.app`. |
+| Azure Blob | Active | Works locally. Vercel direct upload needs Blob CORS for `https://multi-cloud-cyan.vercel.app`. |
+| GCS | Placeholder | Visible in the UI but intentionally disabled until GCP credentials and implementation are added. |
+
+Important security status:
+
+- Cloud credentials were exposed during troubleshooting and must be rotated before final validation.
+- Update local `.env` and Vercel Environment Variables after rotating credentials.
+- Do not commit `.env`, downloaded access-key files, or connection-string files.
+
+---
 ## Before You Start — Read This First
 
 | Item | Detail |
@@ -15,7 +34,7 @@
 | **UST email — Azure warning** | If UST uses Microsoft 365, your work email is already inside UST's Azure Active Directory tenant. Using it for the free trial may be blocked by IT policy or create the account under UST's control. **Use a personal Microsoft account for Azure.** AWS and GCP are safe to use with your work email. |
 | **`.gitignore` first** | `.env` and `secrets/gcp-service-account.json` must be in `.gitignore` before you generate any credentials. If credentials are committed even once, treat them as compromised and rotate them. |
 | **One person provisions** | Anushman provisions and holds all credentials. They go into `.env` on dev machine only. PM does not need the actual values — only that they work. |
-| **GCP JSON key location** | Save it to `backend/secrets/gcp-service-account.json`. The `secrets/` folder must be in `.gitignore`. Never rename or move the file without updating `.env`. |
+| **GCP JSON key location** | GCS is currently a placeholder. When implemented, keep the service-account JSON outside git and update `.env` with the actual path. |
 
 ---
 
@@ -28,15 +47,6 @@ Before creating any account or credential, verify these lines are in the root `.
 .env
 .env.local
 .env.*.local
-
-# GCP service account key
-secrets/
-*.json
-
-# .NET build artifacts
-bin/
-obj/
-*.user
 
 # Node / React
 node_modules/

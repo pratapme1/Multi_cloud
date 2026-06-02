@@ -2,7 +2,7 @@ import { method, providers, requireAdmin, requireAuth, upload, withMulter } from
 
 async function uploadHandler(req, res) {
   if (!method(req, res, ['POST'])) return;
-  if (!requireAuth(req, res)) return;
+  if (!(await requireAuth(req, res))) return;
   if (!requireAdmin(req, res)) return;
   if (!req.file) return res.status(400).json({ error: 'No file provided' });
 

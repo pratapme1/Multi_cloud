@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { createRoleInvite, getRoleState } from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
-import { ROLES, canRole, createInvite, getInvites, getUsers, roleLabel } from '../roles.js';
+import { ROLES, canRole, roleLabel } from '../roles.js';
 
 const fmt = ts => ts ? new Date(ts).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '-';
 
@@ -10,17 +11,37 @@ export default function RolesPage() {
   const { user, can } = useAuth();
   const toast = useToast();
   const [role, setRole] = useState('admin');
-  const [invites, setInvites] = useState(() => getInvites());
+  const [users, setUsers] = useState([]);
+  const [invites, setInvites] = useState([]);
   const [copied, setCopied] = useState('');
-  const users = useMemo(() => getUsers(), [invites]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   if (!can('manage_roles')) return <Navigate to="/app/files" replace />;
 
   const inviteUrl = token => `${window.location.origin}/signup?invite=${encodeURIComponent(token)}`;
 
-  const handleCreateInvite = () => {
-    const invite = createInvite(role, user?.username ?? 'admin');
-    setInvites(getInvites());
+  const loadRoles = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await getRoleState();
+      setUsers(data.users ?? []);
+      setInvites(data.invites ?? []);
+    } catch (err) {
+      setError(err.message || 'Could not load roles.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadRoles();
+  }, []);
+
+  const handleCreateInvite = async () => {
+    const invite = await createRoleInvite(role);
+    await loadRoles();
     setCopied(invite.token);
     navigator.clipboard?.writeText(inviteUrl(invite.token)).catch(() => {});
     toast(`${roleLabel(role)} invite link created`, 'ok', 'Invite ready');
@@ -83,12 +104,16 @@ export default function RolesPage() {
         <div className="section-head">
           <div>
             <h2>Invite Links</h2>
-            <p>Links stay local to this prototype until the invite service is built.</p>
+            <p>Invite links are stored in Supabase under the multi_cloud schema.</p>
           </div>
         </div>
         <div className="roles-table">
           <div className="rt-head"><span>Role</span><span>Created</span><span>Status</span><span>Link</span></div>
-          {invites.length === 0 ? (
+          {loading ? (
+            <div className="rt-empty">Loading invite links...</div>
+          ) : error ? (
+            <div className="rt-empty">{error}</div>
+          ) : invites.length === 0 ? (
             <div className="rt-empty">No invite links yet. Create one from the panel above.</div>
           ) : invites.map(invite => (
             <div className="rt-row" key={invite.token}>
@@ -107,12 +132,14 @@ export default function RolesPage() {
         <div className="section-head">
           <div>
             <h2>Users</h2>
-            <p>Built-in accounts plus users created from invite links on this browser.</p>
+            <p>Supabase Auth users with profiles in the multi_cloud schema.</p>
           </div>
         </div>
         <div className="roles-table">
           <div className="rt-head"><span>User</span><span>Email</span><span>Role</span><span>Source</span></div>
-          {users.map(account => (
+          {loading ? (
+            <div className="rt-empty">Loading users...</div>
+          ) : users.map(account => (
             <div className="rt-row" key={account.username}>
               <strong>{account.username}</strong>
               <span>{account.email ?? '-'}</span>

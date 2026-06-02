@@ -1,5 +1,3 @@
-import { getStoredUser, getUsers, getInvite, markInviteUsed, saveUser } from '../roles.js';
-
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 const token = () => localStorage.getItem('mc_token') ?? '';
@@ -15,12 +13,6 @@ const handleRes = async res => {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const login = async (username, password) => {
-  const storedUser = getStoredUser(username);
-  if (storedUser) {
-    await new Promise(r => setTimeout(r, 400));
-    if (storedUser.password !== password) throw new Error('Invalid credentials');
-    return { token: `mock-${storedUser.role}-token`, role: storedUser.role, username };
-  }
   const res = await fetch(`${BASE}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -30,22 +22,34 @@ export const login = async (username, password) => {
 };
 
 export const register = async ({ username, email, password, inviteToken }) => {
-  await new Promise(r => setTimeout(r, 800));
-  if (!username || username.length < 3)
-    throw Object.assign(new Error('Username must be at least 3 characters.'), { field: 'username' });
-  if (!/^[a-zA-Z0-9_]+$/.test(username))
-    throw Object.assign(new Error('Username may only contain letters, numbers, and underscores.'), { field: 'username' });
-  if (getUsers().some(user => user.username === username))
-    throw Object.assign(new Error('Username is already taken.'), { field: 'username' });
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    throw Object.assign(new Error('Enter a valid email address.'), { field: 'email' });
-  if (!password || password.length < 6)
-    throw Object.assign(new Error('Password must be at least 6 characters.'), { field: 'password' });
-  const invite = getInvite(inviteToken);
-  const role = invite?.role ?? 'viewer';
-  saveUser({ username, email, password, role });
-  if (invite) markInviteUsed(invite.token, username);
-  return { username, role };
+  const res = await fetch(`${BASE}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, email, password, inviteToken }),
+  });
+  return handleRes(res);
+};
+
+export const getInvite = async tokenValue => {
+  if (!tokenValue) return null;
+  const res = await fetch(`${BASE}/auth/invite?token=${encodeURIComponent(tokenValue)}`);
+  const data = await handleRes(res);
+  return data.invite;
+};
+
+export const getRoleState = async () => {
+  const res = await fetch(`${BASE}/roles`, { headers: authHeader() });
+  return handleRes(res);
+};
+
+export const createRoleInvite = async role => {
+  const res = await fetch(`${BASE}/roles`, {
+    method: 'POST',
+    headers: { ...authHeader(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role }),
+  });
+  const data = await handleRes(res);
+  return data.invite;
 };
 
 // ── Files ─────────────────────────────────────────────────────────────────────

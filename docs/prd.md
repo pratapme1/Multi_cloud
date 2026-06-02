@@ -1,157 +1,120 @@
 # Product Requirements Document - Multi-Cloud Storage Integration
 
-**Version:** 2.0 | **Date:** 2026-06-01 | **Status:** Current  
-**Stack:** Node.js / Express + React / Vite
+**Version:** 3.0  
+**Date:** 2026-06-02  
+**Status:** Current
 
----
+## Product Goal
 
-## 1. Current Implementation Structure
+Provide a web UI for uploading, listing, downloading, deleting, syncing, and managing access for files stored across cloud providers.
 
-```text
-src/
-  backend-node/
-    server.js
-    utils.js
-    providers/
-      aws.js
-      azure.js
-      gcs.js          # placeholder for now
-    package.json
-  frontend/
-    src/
-      api/index.js
-      components/
-      context/
-      pages/
-      App.jsx
-      main.jsx
-    vite.config.js
-    package.json
-```
+## Current Scope
 
----
+| Area | Current State |
+|------|---------------|
+| Frontend | React / Vite app in `src/frontend` |
+| Backend | Node.js / Express local API in `src/backend-node` |
+| Deployment | Vercel static frontend + Vercel serverless API routes |
+| Active providers | AWS S3, Azure Blob |
+| Placeholder provider | GCS |
+| Auth | Mock tokens + browser-local prototype users |
+| Roles | Super Admin, Admin, Viewer |
 
-## 2. Provider Status
+## Roles
 
-| Provider | Status | Notes |
-|----------|--------|-------|
-| AWS S3 | Active | Real list/upload/download/delete through `@aws-sdk/client-s3` |
-| Azure Blob | Active | Real list/upload/download/delete through `@azure/storage-blob` |
-| GCS | Placeholder | Visible in UI, not used for local testing yet |
+| Role | Capabilities |
+|------|--------------|
+| Super Admin | Role management, invite links, upload, sync, delete, download, file list, health |
+| Admin | Upload, sync, delete, download, file list, health |
+| Viewer | File list, download, health |
 
----
-
-## 3. Local Run Commands
-
-Backend:
-
-```powershell
-cd src/backend-node
-npm.cmd start
-```
-
-Frontend:
-
-```powershell
-cd src/frontend
-npm.cmd run dev
-```
-
-Open:
-
-```text
-http://localhost:5173
-```
-
----
-
-## 4. Environment Variables
-
-```env
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=
-AWS_BUCKET_NAME=
-
-AZURE_CONNECTION_STRING=
-AZURE_CONTAINER_NAME=
-
-GCS_PROJECT_ID=
-GCS_BUCKET_NAME=
-GCS_SERVICE_ACCOUNT_JSON_PATH=
-
-ACTIVE_PROVIDER=aws
-JWT_SECRET=
-JWT_EXPIRY_HOURS=24
-```
-
-GCS variables may stay blank while GCS is a placeholder.
-
----
-
-## 5. API Contract
-
-Base URL in local development:
-
-```text
-http://localhost:3001/api
-```
-
-The frontend uses `/api/*` and Vite proxies to the Node backend.
-
-### Auth
-
-`POST /api/auth/login`
-
-```json
-{ "username": "admin", "password": "Admin@123" }
-```
-
-Demo users:
+Built-in demo users:
 
 | Username | Password | Role |
 |----------|----------|------|
-| admin | Admin@123 | admin |
-| viewer | View@123 | viewer |
+| admin | Admin@123 | Super Admin |
+| viewer | View@123 | Viewer |
+
+## Implemented User Flows
+
+- Login with built-in accounts.
+- Signup new browser-local user.
+- Super Admin creates manual invite links for Super Admin/Admin/Viewer.
+- Invited signup inherits selected role.
+- File list with AWS/Azure/GCS visual provider status.
+- Upload modal with AWS + Azure active and GCS placeholder.
+- Download from first available provider.
+- Delete for roles with delete permission.
+- Sync AWS -> Azure for roles with sync permission.
+- Health drawer.
+- Long filename handling across modal/table/card/drawer.
+
+## API Contract
+
+### Auth
+
+```text
+POST /api/auth/login
+```
 
 ### Files
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/files?provider=all|aws|azure` | List files |
-| POST | `/api/files/upload` | Multipart upload. Form fields: `file`, `providers` JSON array |
-| GET | `/api/files/download/:filename?provider=aws|azure` | Download file |
-| DELETE | `/api/files/:filename?provider=aws|azure` | Delete file |
+```text
+GET    /api/files?provider=all|aws|azure
+POST   /api/files/upload
+POST   /api/files/upload-url
+GET    /api/files/download/:filename?provider=aws|azure
+DELETE /api/files/:filename?provider=aws|azure
+```
+
+`/api/files/upload-url` is used on Vercel to avoid serverless payload limits. It returns short-lived signed URLs and the browser uploads directly to AWS/Azure.
 
 ### Sync
 
-`POST /api/sync`
-
-```json
-{ "from": "aws", "targets": ["azure"] }
+```text
+POST /api/sync
 ```
 
 ### Health
 
-`GET /api/health`
+```text
+GET /api/health
+GET /api/test-credentials
+```
 
-Returns provider health, with GCS allowed to report pending while it is a placeholder.
+## Deployment Requirements
 
----
+Vercel should deploy from repository root:
 
-## 6. M1 Acceptance Focus
+```text
+Root Directory: ./
+Framework: Vite
+Install Command: npm install && npm install --prefix src/frontend
+Build Command: cd src/frontend && npm run build
+Output Directory: src/frontend/dist
+```
 
-- AWS list/upload/download/delete works with real S3 bucket.
-- Azure list/upload/download/delete works with real Blob container.
-- Frontend can log in, upload to AWS + Azure, list files, download, and delete as admin.
-- Viewer role receives `403` for upload/delete.
-- GCS remains visible but disabled/placeholder in upload and sync flows.
+Environment variables must be configured in Vercel for AWS and Azure.
 
----
+## Current Blocker
 
-## 7. Deferred
+Direct browser upload requires CORS on AWS S3 and Azure Blob for:
 
-- GCS implementation.
+```text
+https://multi-cloud-cyan.vercel.app
+```
+
+Observed failure:
+
+```text
+OPTIONS 403 Forbidden
+```
+
+## Deferred / Out of Scope for Current Prototype
+
+- Real GCS implementation.
 - Persistent user database.
-- JWT token signing and validation.
-- Production deployment packaging.
+- Refresh-token/session renewal UX.
+- Server-side invite storage.
+- Full automated test suite.
+- Audit log persistence.

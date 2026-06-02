@@ -11,6 +11,15 @@ import multer from 'multer';
 import { AwsProvider }   from './providers/aws.js';
 import { AzureProvider } from './providers/azure.js';
 import { GcsProvider }   from './providers/gcs.js';
+import {
+  createInvite,
+  getInvite,
+  listInvites,
+  listUsers,
+  registerUser,
+  signIn,
+  verifyToken,
+} from './auth/supabaseAuth.js';
 
 const app    = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 100 * 1024 * 1024 } });
@@ -25,30 +34,69 @@ const azure = new AzureProvider();
 const gcs   = new GcsProvider();
 const PROVIDERS = { aws, azure, gcs };
 
-// ── Auth middleware ────────────────────────────────────────────────────────────
-// JWT deferred to M3 — using simple mock tokens for now
-const requireAuth = (req, res, next) => {
+// Auth middleware
+const requireAuth = async (req, res, next) => {
   const auth = req.headers.authorization ?? '';
-  if (!auth.startsWith('Bearer mock-')) return res.status(401).json({ error: 'Unauthorized' });
-  req.role = auth.includes('viewer') ? 'viewer' : 'admin';
-  next();
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  try {
+    const user = await verifyToken(token);
+    req.user = user;
+    req.role = user.role;
+    next();
+  } catch {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
 };
 
 const requireAdmin = (req, res, next) => {
-  if (req.role !== 'admin') return res.status(403).json({ error: 'Forbidden — admin only' });
+  if (!['super_admin', 'admin'].includes(req.role)) return res.status(403).json({ error: 'Forbidden - admin access required' });
   next();
 };
 
-// ── Auth ───────────────────────────────────────────────────────────────────────
-app.post('/api/auth/login', (req, res) => {
+// Auth
+app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body ?? {};
-  if (username === 'admin'  && password === 'Admin@123')
-    return res.json({ token: 'mock-super_admin-token',  role: 'super_admin',  username });
-  if (username === 'viewer' && password === 'View@123')
-    return res.json({ token: 'mock-viewer-token', role: 'viewer', username });
-  res.status(401).json({ error: 'Invalid username or password' });
+  try {
+    res.json(await signIn(username, password));
+  } catch (err) {
+    res.status(401).json({ error: err.message || 'Invalid username or password' });
+  }
 });
 
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    res.status(201).json(await registerUser(req.body ?? {}));
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Registration failed', field: err.field });
+  }
+});
+
+app.get('/api/auth/invite', async (req, res) => {
+  try {
+    res.json({ invite: await getInvite(req.query.token) });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Invite lookup failed' });
+  }
+});
+
+app.get('/api/roles', requireAuth, async (req, res) => {
+  if (req.role !== 'super_admin') return res.status(403).json({ error: 'Forbidden - Super Admin only' });
+  try {
+    const [users, invites] = await Promise.all([listUsers(), listInvites()]);
+    res.json({ users, invites });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Role management failed' });
+  }
+});
+
+app.post('/api/roles', requireAuth, async (req, res) => {
+  if (req.role !== 'super_admin') return res.status(403).json({ error: 'Forbidden - Super Admin only' });
+  try {
+    res.status(201).json({ invite: await createInvite({ role: req.body?.role, createdBy: req.user }) });
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Role management failed' });
+  }
+});
 // ── Files — list ───────────────────────────────────────────────────────────────
 app.get('/api/files', requireAuth, async (req, res) => {
   const { provider = 'all' } = req.query;

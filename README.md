@@ -1,45 +1,49 @@
 # Multi-Cloud Storage Integration
 
-Unified storage layer across AWS S3, Azure Blob Storage, and Google Cloud Storage: one interface for upload, download, sync, redundancy, and access control.
-
----
+Unified file management across AWS S3 and Azure Blob Storage, with Google Cloud Storage kept as a visible placeholder for now.
 
 ## Current Status
 
-| Milestone | Target | Status |
-|-----------|--------|--------|
-| M1 - API Integration | 2026-06-05 | In Progress |
-| M2 - Unified Interface | 2026-06-10 | Not Started |
-| M3 - UI & Access Control | 2026-06-16 | Not Started |
+**Date:** 2026-06-02  
+**Active stack:** Node.js / Express + React / Vite  
+**Frontend deployment:** Vercel  
+**Backend deployment path:** Vercel Serverless API routes under `api/` and `src/frontend/api/`
 
-**Active Phase:** M1 / API Integration  
-**Backend going forward:** Node.js / Express in `src/backend-node`  
-**Frontend:** React / Vite in `src/frontend`
+### What Works
 
-AWS and Azure are the active local-test providers. GCS remains visible as a placeholder until its provider implementation and credentials are added.
+- React/Vite web UI with login, file list, upload modal, download, delete, sync drawer, health drawer, and role management.
+- AWS S3 provider supports list, upload, download, delete, health.
+- Azure Blob provider supports list, upload, download, delete, health.
+- GCS is shown in the UI as a placeholder and intentionally disabled for upload/sync.
+- Local end-to-end Playwright flow passed for AWS + Azure.
+- Vercel frontend loads and API route structure has been added.
+- Role model now supports:
+  - Super Admin
+  - Admin
+  - Viewer
+- Super Admin can create invite links manually and assign invited users to one of the three roles.
+- Supabase Auth integration has been added for persistent users, real access tokens, and server-side invite storage in the `multi_cloud` schema.
+- Long filenames are now guarded in modal, table, card, drawer, and upload states.
+- Vercel upload flow uses direct-to-cloud signed URLs to avoid Vercel payload limits.
 
----
+### Current Blocker
 
-## Team
+Direct browser upload from Vercel to AWS/Azure is blocked until CORS is configured on:
 
-| Role | Name |
-|------|------|
-| Project Manager / PO / Designer | Vishnu |
-| Full-stack Developer | Anushman |
-| QA / Validation | Anand |
+- AWS S3 bucket: `multicloud-dev-anand`
+- Azure Blob Storage account/container
 
----
+The observed error is an S3/Azure preflight failure:
 
-## Implementation Target
+```text
+OPTIONS 403 Forbidden
+```
 
-- Backend: Node.js / Express
-- Frontend: React (Vite)
-- Cloud SDKs: `@aws-sdk/client-s3`, `@azure/storage-blob`, `@google-cloud/storage` later
-- Auth: mock bearer tokens for local M1/M2 testing; JWT planned for M3
-- Secrets: local `.env`; production app settings
-- Deployment target: Azure App Service with Node runtime
+This is not a Vercel payload error anymore. It means storage CORS must allow:
 
----
+```text
+https://multi-cloud-cyan.vercel.app
+```
 
 ## Run Locally
 
@@ -57,23 +61,72 @@ cd src/frontend
 npm.cmd run dev
 ```
 
-Open `http://localhost:5173`.
+Open:
 
-Demo credentials:
+```text
+http://localhost:5173
+```
 
-- `admin` / `Admin@123`
-- `viewer` / `View@123`
+## Demo Accounts
 
----
+| Username | Password | Role |
+|----------|----------|------|
+| admin | Admin@123 | Super Admin |
+| viewer | View@123 | Viewer |
 
-## Project Docs
+Demo users are bootstrapped in Supabase on first login when `SUPABASE_BOOTSTRAP_DEMO_USERS` is not set to `false`.
 
-| Document | Purpose |
-|----------|---------|
-| [Charter](docs/charter.md) | Scope, objectives, success criteria |
-| [PRD](docs/prd.md) | Build specification and target architecture |
-| [Roadmap](docs/roadmap.md) | Timeline and milestone plan |
-| [Backlog](docs/backlog.md) | Tasks, owners, status |
-| [Risk Log](docs/risk_log.md) | Risks and mitigations |
-| [Decisions Log](docs/decisions_log.md) | Key decisions and rationale |
-| [Release Checklist](docs/release_checklist.md) | Go-live gate criteria |
+## Environment Variables
+
+Use `.env` locally and Vercel Environment Variables for deployment.
+
+```env
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=
+AWS_BUCKET_NAME=
+
+AZURE_CONNECTION_STRING=
+AZURE_CONTAINER_NAME=
+
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+DATABASE_URL=
+POOLED_DATABASE_URL=
+DIRECT_URL=
+
+GCS_PROJECT_ID=
+GCS_BUCKET_NAME=
+GCS_SERVICE_ACCOUNT_JSON_PATH=
+```
+
+Do not commit real credentials.
+
+## Vercel Deployment
+
+Recommended Vercel settings:
+
+```text
+Root Directory: ./
+Framework Preset: Vite
+Install Command: npm install && npm install --prefix src/frontend
+Build Command: cd src/frontend && npm run build
+Output Directory: src/frontend/dist
+```
+
+After deploy, verify:
+
+```text
+https://multi-cloud-cyan.vercel.app/api/test-credentials
+```
+
+## Pending
+
+- Configure AWS S3 and Azure Blob CORS for direct browser upload.
+- Rotate exposed AWS/Azure credentials and update local/Vercel env vars.
+- Apply the Supabase `multi_cloud` schema if it has not been applied from SQL editor or `npm.cmd run supabase:schema`.
+- Implement GCS provider for real use.
+- Add automated unit tests for provider modules.
+- Add production E2E once CORS is fixed.

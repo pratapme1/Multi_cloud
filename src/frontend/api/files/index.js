@@ -2,7 +2,7 @@ import { listFiles, method, requireAuth } from '../_shared.js';
 
 export default async function handler(req, res) {
   if (!method(req, res, ['GET'])) return;
-  if (!requireAuth(req, res)) return;
+  if (!(await requireAuth(req, res))) return;
 
   try {
     const files = await listFiles(req.query.provider ?? 'all');

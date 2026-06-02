@@ -1,19 +1,44 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { register } from '../api/index.js';
-import { getInvite, roleLabel } from '../roles.js';
+import { getInvite, register } from '../api/index.js';
+import { roleLabel } from '../roles.js';
 
 export default function SignUpPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const inviteToken = params.get('invite');
-  const invite = inviteToken ? getInvite(inviteToken) : null;
+  const [invite, setInvite] = useState(null);
+  const [inviteChecked, setInviteChecked] = useState(!inviteToken);
   const [form, setForm] = useState({ username: '', email: '', password: '', confirm: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const set = field => e => setForm(f => ({ ...f, [field]: e.target.value }));
+
+  useEffect(() => {
+    let active = true;
+    if (!inviteToken) {
+      setInvite(null);
+      setInviteChecked(true);
+      return () => { active = false; };
+    }
+
+    setInviteChecked(false);
+    getInvite(inviteToken)
+      .then(result => {
+        if (!active) return;
+        setInvite(result && !result.usedBy ? result : null);
+      })
+      .catch(() => {
+        if (active) setInvite(null);
+      })
+      .finally(() => {
+        if (active) setInviteChecked(true);
+      });
+
+    return () => { active = false; };
+  }, [inviteToken]);
 
   const validate = () => {
     const errs = {};
@@ -54,13 +79,13 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {inviteToken && !invite && (
+        {inviteToken && inviteChecked && !invite && (
           <div className="alert a-err" style={{ marginBottom: 12 }}>
             Invalid invite link. You can still create a Viewer account.
           </div>
         )}
 
-        {invite && !success && (
+        {invite && inviteChecked && !success && (
           <div className="alert a-inf" style={{ marginBottom: 12 }}>
             This invite grants <strong>{roleLabel(invite.role)}</strong> access after signup.
           </div>

@@ -3,6 +3,7 @@ import multer from 'multer';
 import { AwsProvider } from '../src/backend-node/providers/aws.js';
 import { AzureProvider } from '../src/backend-node/providers/azure.js';
 import { GcsProvider } from '../src/backend-node/providers/gcs.js';
+import { signIn, verifyToken } from '../src/backend-node/auth/supabaseAuth.js';
 
 const app = express();
 const upload = multer({
@@ -17,27 +18,31 @@ const azure = new AzureProvider();
 const gcs = new GcsProvider();
 const PROVIDERS = { aws, azure, gcs };
 
-const requireAuth = (req, res, next) => {
+const requireAuth = async (req, res, next) => {
   const auth = req.headers.authorization ?? '';
-  if (!auth.startsWith('Bearer mock-')) return res.status(401).json({ error: 'Unauthorized' });
-  req.role = auth.includes('viewer') ? 'viewer' : 'admin';
-  next();
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  try {
+    const user = await verifyToken(token);
+    req.user = user;
+    req.role = user.role;
+    next();
+  } catch {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
 };
 
 const requireAdmin = (req, res, next) => {
-  if (req.role !== 'admin') return res.status(403).json({ error: 'Forbidden - admin only' });
+  if (!['super_admin', 'admin'].includes(req.role)) return res.status(403).json({ error: 'Forbidden - admin access required' });
   next();
 };
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body ?? {};
-  if (username === 'admin' && password === 'Admin@123') {
-    return res.json({ token: 'mock-super_admin-token', role: 'super_admin', username });
+  try {
+    res.json(await signIn(username, password));
+  } catch (err) {
+    res.status(401).json({ error: err.message || 'Invalid username or password' });
   }
-  if (username === 'viewer' && password === 'View@123') {
-    return res.json({ token: 'mock-viewer-token', role: 'viewer', username });
-  }
-  res.status(401).json({ error: 'Invalid username or password' });
 });
 
 app.get('/api/files', requireAuth, async (req, res) => {

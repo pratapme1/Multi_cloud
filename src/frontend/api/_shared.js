@@ -3,6 +3,7 @@ import multer from 'multer';
 import { AwsProvider } from '../src/serverless/aws.js';
 import { AzureProvider } from '../src/serverless/azure.js';
 import { GcsProvider } from '../src/serverless/gcs.js';
+import { verifyToken } from '../src/serverless/supabaseAuth.js';
 
 export const upload = multer({
   storage: multer.memoryStorage(),
@@ -15,19 +16,23 @@ export const providers = {
   gcs: new GcsProvider(),
 };
 
-export function requireAuth(req, res) {
+export async function requireAuth(req, res) {
   const auth = req.headers.authorization ?? '';
-  if (!auth.startsWith('Bearer mock-')) {
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  try {
+    const user = await verifyToken(token);
+    req.user = user;
+    req.role = user.role;
+    return true;
+  } catch {
     res.status(401).json({ error: 'Unauthorized' });
     return false;
   }
-  req.role = auth.includes('viewer') ? 'viewer' : 'admin';
-  return true;
 }
 
 export function requireAdmin(req, res) {
-  if (req.role !== 'admin') {
-    res.status(403).json({ error: 'Forbidden - admin only' });
+  if (!['super_admin', 'admin'].includes(req.role)) {
+    res.status(403).json({ error: 'Forbidden - admin access required' });
     return false;
   }
   return true;

@@ -1,23 +1,33 @@
-Multi-Cloud Storage Integration
+# Multi-Cloud Storage Integration
 
-Description: Create an application that integrates storage solutions from multiple cloud providers: AWS S3, Azure Blob Storage, and Google Cloud Storage. The project focuses on understanding different cloud storage APIs and building a unified interface.
+## Summary
 
-Current status (2026-06-01): M1 API Integration is active. The implementation stack going forward is Node.js / Express for the backend and React / Vite for the frontend. AWS and Azure are active for local real-file testing. GCS is a placeholder for now.
+Build a web app that lets users manage files across multiple cloud storage providers from one interface.
 
-Milestone 1: API Integration
+## Current Implementation
 
-Requirements:
-- Set up accounts and services on AWS, Azure, and Google Cloud.
-- Develop a module to interact with each cloud provider's storage API.
+- Backend: Node.js / Express in `src/backend-node`
+- Frontend: React / Vite in `src/frontend`
+- Deployment: Vercel frontend + Vercel serverless API routes
+- Active providers: AWS S3 and Azure Blob Storage
+- Placeholder provider: Google Cloud Storage
 
-Milestone 2: Unified Storage Interface
+## Current Status - 2026-06-02
 
-Requirements:
-- Create a single interface for uploading, downloading, and managing files across different clouds.
-- Implement file synchronization and data redundancy.
+AWS and Azure work locally with real file operations. The deployed Vercel app loads and API routes are present, but direct browser upload to AWS/Azure is blocked until storage CORS is configured for the Vercel domain.
 
-Milestone 3: User Interface and Access Control
+Role management has been added with three roles:
 
-Requirements:
-- Develop a user-friendly web interface for file management.
-- Implement access control and security measures.
+- Super Admin
+- Admin
+- Viewer
+
+Super Admin can create manual invite links that assign one of those roles during signup.
+
+## Main Pending Items
+
+- Configure AWS/Azure CORS for `https://multi-cloud-cyan.vercel.app`
+- Rotate exposed cloud keys
+- Validate production upload/list/download/delete after CORS
+- Implement GCS
+- Apply Supabase schema and finish production auth validation

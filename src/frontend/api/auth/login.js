@@ -1,14 +1,14 @@
 import { method } from '../_shared.js';
+import { signIn } from '../../src/serverless/supabaseAuth.js';
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (!method(req, res, ['POST'])) return;
 
   const { username, password } = req.body ?? {};
-  if (username === 'admin' && password === 'Admin@123') {
-    return res.status(200).json({ token: 'mock-super_admin-token', role: 'super_admin', username });
+  try {
+    const session = await signIn(username, password);
+    res.status(200).json(session);
+  } catch (err) {
+    res.status(401).json({ error: err.message || 'Invalid username or password' });
   }
-  if (username === 'viewer' && password === 'View@123') {
-    return res.status(200).json({ token: 'mock-viewer-token', role: 'viewer', username });
-  }
-  res.status(401).json({ error: 'Invalid username or password' });
 }
