@@ -5,11 +5,11 @@ import { FileTypeIcon, ProviderIcons, PL } from './FileIcons.jsx';
 
 const PC = { aws: 'pb-aws', azure: 'pb-az', gcs: 'pb-gcs' };
 
-export default function Drawer({ mode, file, onClose, onSimulateDeg }) {
+export default function Drawer({ mode, file, onClose, onSimulateDeg, onRefresh }) {
   return (
     <div className="drawer">
-      {mode === 'file' && file && <FileDetail file={file} onClose={onClose} />}
-      {mode === 'sync'          && <SyncPanel file={file} onClose={onClose} />}
+      {mode === 'file' && file && <FileDetail file={file} onClose={onClose} onRefresh={onRefresh} />}
+      {mode === 'sync'          && <SyncPanel file={file} onClose={onClose} onRefresh={onRefresh} />}
       {(mode === 'health' || mode === 'health-deg') && (
         <HealthPanel degraded={mode === 'health-deg'} onClose={onClose} onSimulateDeg={onSimulateDeg} />
       )}
@@ -17,9 +17,9 @@ export default function Drawer({ mode, file, onClose, onSimulateDeg }) {
   );
 }
 
-function FileDetail({ file, onClose }) {
+function FileDetail({ file, onClose, onRefresh }) {
   const toast = useToast();
-  const [syncing, setSyncing] = useState(null); // provider key being synced
+  const [syncing, setSyncing] = useState(null);
 
   const ALL_PROVIDERS = ['aws', 'azure', 'gcs'];
   const missing = ALL_PROVIDERS.filter(p => !file.providers.includes(p));
@@ -31,10 +31,12 @@ function FileDetail({ file, onClose }) {
       const r = await syncFile(file.name, source, [targetProvider]);
       if (r.copied > 0) {
         toast(`Synced to ${PL[targetProvider]}`, 'ok', `${file.name} is now on ${PL[targetProvider]}`);
+        onRefresh?.();
       } else if (r.skipped > 0) {
         toast(`Already on ${PL[targetProvider]}`, 'inf');
+        onRefresh?.();
       } else {
-        toast(`Sync failed`, 'err');
+        toast('Sync failed', 'err');
       }
     } catch {
       toast('Sync failed', 'err');
@@ -133,7 +135,7 @@ function FileDetail({ file, onClose }) {
   );
 }
 
-function SyncPanel({ onClose }) {
+function SyncPanel({ onClose, onRefresh }) {
   const toast = useToast();
   const [from, setFrom] = useState('aws');
   const [targets, setTargets] = useState(['azure']);
@@ -160,6 +162,7 @@ function SyncPanel({ onClose }) {
       setResult(r);
       const dest = validTargets.map(t => PL[t]).join(', ');
       toast(`${r.copied} copied, ${r.skipped} skipped`, 'ok', `Sync complete → ${dest}`);
+      onRefresh?.();
     } catch {
       toast('Sync failed', 'err');
     } finally {

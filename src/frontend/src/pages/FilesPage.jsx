@@ -180,6 +180,7 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
             file={selectedFile}
             onClose={onCloseDrawer}
             onSimulateDeg={() => setHealthDeg(true)}
+            onRefresh={load}
           />
         )}
       </div>
@@ -187,7 +188,7 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
       {showUpload && (
         <UploadModal
           existingFiles={allFiles}
-          onClose={() => setShowUpload(false)}
+          onClose={() => { setShowUpload(false); load(); }}
           onSuccess={() => { setShowUpload(false); load(); }}
         />
       )}
