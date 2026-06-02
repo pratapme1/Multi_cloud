@@ -97,15 +97,10 @@ function SyncPanel({ onClose }) {
   const PROVIDERS = [
     { key: 'aws',   label: 'AWS S3',      color: 'var(--aws)' },
     { key: 'azure', label: 'Azure Blob',  color: 'var(--azure)' },
-    { key: 'gcs',   label: 'GCS',         color: 'var(--gcs)', disabled: true },
+    { key: 'gcs',   label: 'GCS',         color: 'var(--gcs)' },
   ];
 
   const toggleTarget = key => {
-    const opt = PROVIDERS.find(p => p.key === key);
-    if (opt?.disabled) {
-      toast('GCS is a placeholder for now. Sync is enabled for AWS and Azure only.', 'inf');
-      return;
-    }
     setTargets(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
   };
 
@@ -141,7 +136,7 @@ function SyncPanel({ onClose }) {
         <select className="sel" value={from} onChange={e => setFrom(e.target.value)} style={{ width: '100%', marginBottom: 16 }}>
           <option value="aws">AWS S3</option>
           <option value="azure">Azure Blob</option>
-          <option value="gcs" disabled>GCS (placeholder)</option>
+          <option value="gcs">GCS</option>
         </select>
 
         <label className="fl">Destinations</label>
@@ -150,10 +145,9 @@ function SyncPanel({ onClose }) {
           return (
             <div
               key={p.key}
-              className={`tgchk${checked ? ' checked' : ''}${p.disabled ? ' disabled' : ''}`}
+              className={`tgchk${checked ? ' checked' : ''}`}
               onClick={() => toggleTarget(p.key)}
-              title={p.disabled ? 'GCS placeholder - not enabled for local testing yet' : p.label}
-              style={p.disabled ? { opacity: .55, cursor: 'not-allowed' } : undefined}
+              title={p.label}
             >
               <div className="tgchk-box">{checked && '✓'}</div>
               <div style={{ width: 9, height: 9, borderRadius: '50%', background: p.color, flexShrink: 0 }} />

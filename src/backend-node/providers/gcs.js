@@ -70,6 +70,27 @@ export class GcsProvider {
     await this.#getStorage().bucket(process.env.GCS_BUCKET_NAME).file(name).delete();
   }
 
+  async getUploadUrl({ name, contentType, uploadedBy }) {
+    if (!this.isConfigured) throw new Error('GCS not configured');
+    const file = this.#getStorage().bucket(process.env.GCS_BUCKET_NAME).file(name);
+    const [url] = await file.getSignedUrl({
+      version: 'v4',
+      action: 'write',
+      expires: Date.now() + 10 * 60 * 1000,
+      contentType: contentType ?? 'application/octet-stream',
+      extensionHeaders: { 'x-goog-meta-uploadedby': uploadedBy ?? 'Unknown' },
+    });
+    return {
+      provider: 'gcs',
+      method: 'PUT',
+      url,
+      headers: {
+        'Content-Type': contentType ?? 'application/octet-stream',
+        'x-goog-meta-uploadedby': uploadedBy ?? 'Unknown',
+      },
+    };
+  }
+
   async health() {
     if (!this.isConfigured) {
       return { name: 'GCS', key: 'gcs', status: 'pending', note: 'GCS_SERVICE_ACCOUNT_JSON_PATH not set', latencyMs: null };

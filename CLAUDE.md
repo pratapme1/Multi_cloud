@@ -62,7 +62,7 @@
 
 **Active Milestone:** M1 - API Integration (Gate: 2026-06-05)  
 **Current Goal:** Resolve AWS/Azure CORS and credential rotation blockers, then implement the P0 code-review fixes (CR1, CR2) before production go-live. Next: unit tests (1.2, 1.4), GCS wiring (1.5/1.6), M1 gate demo.  
-**What's running:** Backend at `src/backend-node/` (port 3001) + React frontend at `src/frontend/` (port 5173). AWS S3 and Azure Blob live; GCS is a placeholder.  
+**What's running:** Backend at `src/backend-node/` (port 3001) + React frontend at `src/frontend/` (port 5173). All three providers live locally and on Vercel — AWS S3, Azure Blob, GCS all healthy.  
 **Blockers / watch items:** AWS/Azure CORS not yet configured. Credentials must be rotated (R01). GCS provisioning still open. Unit tests not yet written.  
 **Code-review fix queue:** 8 findings logged (2026-06-02). P0: CR1 (unauthenticated `/api/test-credentials`), CR2 (wrong-file drawer). P1: CR3 (Content-Disposition encoding), CR4 (HeadObject serial), CR5 (sort direction). P2: CR6–CR8. Full detail in `docs/backlog.md`.  
 **Closed decisions:** D-001 (tech stack — Node.js, revised 2026-06-01), D-002 (credential management), D-003 (provider pattern), D-005 (deployment target), D-006 (direct upload), D-007 (role model).  

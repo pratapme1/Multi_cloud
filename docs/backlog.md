@@ -22,7 +22,7 @@
 | C3 | Wire frontend to backend APIs | Done | Frontend uses `/api/*`; Vite proxies locally. |
 | C4 | AWS S3 provider | Done | List, upload, download, delete, health implemented. |
 | C5 | Azure Blob provider | Done | List, upload, download, delete, health implemented. |
-| C6 | GCS placeholder | Done | Visible but disabled for upload/sync. |
+| C6 | GCS provider — full implementation | Done | listFiles, uploadFile, getFileContent, deleteFile, health all implemented. Live on Vercel: status ok, 153 ms. |
 | C7 | Local AWS/Azure end-to-end Playwright flow | Done | 11/11 headed Playwright checks passed before deployment work. |
 | C8 | Vercel frontend deployment config | Done | Root `vercel.json` added. |
 | C9 | Vercel API routes | Done | Consolidated into one catch-all function to stay under the Hobby plan function limit. |
@@ -51,7 +51,7 @@
 | D3 | Add provider unit tests | Open | P1 | AWS/Azure happy-path and error-path tests. |
 | D4 | Add API tests for auth/RBAC | Open | P1 | Verify Super Admin/Admin/Viewer behavior. |
 | D5 | Harden Supabase auth edge cases | Open | P1 | Add refresh-token handling, expired-session UX, and production auth settings. |
-| D6 | Implement GCS provider | Deferred | P2 | Waiting for GCP bucket and service account JSON details. |
+| D6 | Implement GCS provider | Done | — | Completed 2026-06-02. All three providers live on Vercel. |
 | D7 | Invite email delivery | Open | P2 | Current invite links are generated and copied manually. |
 | D8 | Add audit trail persistence | Deferred | P2 | Current audit trail is presentational. |
 | D9 | Clean up duplicate Vercel API structure | Done | Removed duplicate route trees; one catch-all API function remains. |

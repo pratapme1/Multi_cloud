@@ -6,7 +6,7 @@ import { FileTypeIcon } from './FileIcons.jsx';
 const PROV_OPTIONS = [
   { key: 'aws',   label: 'AWS S3',               color: 'var(--aws)',   abbr: 'AWS' },
   { key: 'azure', label: 'Azure Blob Storage',   color: 'var(--azure)', abbr: 'AZ' },
-  { key: 'gcs',   label: 'Google Cloud Storage', color: 'var(--gcs)',   abbr: 'GCS', disabled: true },
+  { key: 'gcs',   label: 'Google Cloud Storage', color: 'var(--gcs)',   abbr: 'GCS' },
 ];
 
 const formatSize = bytes => {
@@ -43,11 +43,6 @@ export default function UploadModal({ existingFiles = [], onClose, onSuccess }) 
   const existingNames = new Set(existingFiles.map(f => f.name).filter(Boolean).map(name => name.toLowerCase()));
 
   const toggle = key => {
-    const opt = PROV_OPTIONS.find(p => p.key === key);
-    if (opt?.disabled) {
-      toast('GCS is a placeholder for now. Use AWS and Azure for local testing.', 'inf');
-      return;
-    }
     setSelected(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
   };
 
@@ -176,24 +171,13 @@ export default function UploadModal({ existingFiles = [], onClose, onSuccess }) 
                   return (
                     <div
                       key={p.key}
-                      className={`pchk${checked ? ' checked' : ''}${p.disabled ? ' disabled' : ''}`}
+                      className={`pchk${checked ? ' checked' : ''}`}
                       onClick={() => toggle(p.key)}
-                      title={p.disabled ? 'GCS placeholder - not enabled for local testing yet' : p.label}
-                      style={p.disabled ? { opacity: .55, cursor: 'not-allowed' } : undefined}
+                      title={p.label}
                     >
                       <div className="pchk-box">{checked && '✓'}</div>
                       <div className="pdot" style={{ background: p.color }} />
                       <span style={{ fontSize: 13, fontWeight: 700, flex: 1 }}>{p.label}</span>
-                      {p.disabled && (
-                        <span style={{ fontSize: 10, fontWeight: 800, background: 'var(--sur2)', color: 'var(--tx3)', border: '1px solid var(--bd)', padding: '1px 6px', borderRadius: 999 }}>
-                          Placeholder
-                        </span>
-                      )}
-                      {checked && selected.length === 2 && p.key === 'azure' && (
-                        <span style={{ fontSize: 10, fontWeight: 800, background: 'var(--acb)', color: 'var(--ac)', border: '1px solid var(--acd)', padding: '1px 6px', borderRadius: 999 }}>
-                          AWS + Azure
-                        </span>
-                      )}
                     </div>
                   );
                 })}
@@ -202,7 +186,7 @@ export default function UploadModal({ existingFiles = [], onClose, onSuccess }) 
                   <div style={{ fontSize: 11.5, color: 'var(--tx3)', lineHeight: 1.5 }}>
                     {selected.length === 0 && 'No destination selected.'}
                     {selected.length === 1 && `Uploading to ${PROV_OPTIONS.find(p => p.key === selected[0])?.label}.`}
-                    {selected.length === 2 && <><strong style={{ color: 'var(--ok)' }}>AWS + Azure ready</strong> - GCS stays as a placeholder for now.</>}
+                    {selected.length === 2 && <strong style={{ color: 'var(--ok)' }}>Uploading to {selected.map(k => PROV_OPTIONS.find(p => p.key === k)?.abbr).join(' + ')}.</strong>}
                     {selected.length === 3 && <><strong style={{ color: 'var(--ok)' }}>✓ Fully redundant</strong> — stored on all 3 providers.</>}
                   </div>
                 </div>

@@ -8,7 +8,7 @@
 |----|------|-------|--------|------------------------|
 | R01 | Cloud credentials exposed in chat/history | High | Active | Rotate AWS access key and Azure storage key, then update `.env` and Vercel env vars. |
 | R02 | Vercel direct upload blocked by AWS/Azure CORS | High | Active | Add CORS rules for `https://multi-cloud-cyan.vercel.app` to S3 and Azure Blob. |
-| R03 | GCS not implemented | Medium | Accepted | Keep disabled placeholder until GCP service account and bucket are ready. |
+| R03 | GCS not implemented | Medium | Closed | GCS provider fully implemented and live on Vercel 2026-06-02. |
 | R04 | Supabase auth needs production validation | Medium | Active | Schema is applied/exposed and auth is working; validate token expiry/session behavior and add RBAC tests before production use. |
 | R05 | Duplicate Vercel API route locations may create maintenance drift | Medium | Active | Keep temporarily while deployment root was uncertain; consolidate after Vercel root is confirmed. |
 | R06 | Direct upload exposes object names in signed URLs | Medium | Active | Accept for prototype; add object key sanitization/prefixing later. |
@@ -24,6 +24,7 @@
 | R08 | Vercel function payload too large for upload | Mitigated with signed direct-to-cloud upload URLs. |
 | R09 | Long filenames break UI layout | Mitigated with truncation, wrapping, and `minmax(0, 1fr)` layout fixes. |
 | R10 | Admin/viewer login broken due missing API routes | Mitigated by explicit Vercel API routes; verify on latest deployment. |
+| R11 | GCS not provisioned / credentials not available | Closed 2026-06-02 — GCS live on Vercel, all three providers healthy (AWS 98 ms, Azure 89 ms, GCS 153 ms). |
 
 ## Highest Priority
 

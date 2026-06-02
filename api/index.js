@@ -228,10 +228,11 @@ app.post('/api/files/upload-url', requireAuth, requireAdmin, async (req, res) =>
 
   const urls = {};
   const errors = {};
-  await Promise.allSettled(providers.filter(provider => provider !== 'gcs').map(async provider => {
+  await Promise.allSettled(providers.map(async provider => {
     try {
-      if (provider === 'aws') urls.aws = await awsUploadUrl({ name, contentType, uploadedBy });
+      if (provider === 'aws')        urls.aws   = await awsUploadUrl({ name, contentType, uploadedBy });
       else if (provider === 'azure') urls.azure = azureUploadUrl({ name, contentType, uploadedBy });
+      else if (provider === 'gcs')   urls.gcs   = await gcs.getUploadUrl({ name, contentType, uploadedBy });
       else errors[provider] = 'Unknown provider';
     } catch (err) {
       errors[provider] = err.message;
