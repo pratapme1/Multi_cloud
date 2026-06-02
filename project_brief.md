@@ -14,7 +14,7 @@ Build a web app that lets users manage files across multiple cloud storage provi
 
 ## Current Status - 2026-06-02
 
-AWS and Azure work locally with real file operations. The deployed Vercel app loads and API routes are present, but direct browser upload to AWS/Azure is blocked until storage CORS is configured for the Vercel domain.
+AWS and Azure work locally with real file operations. The deployed Vercel app loads and uses direct browser upload to AWS/Azure, which requires storage CORS for the Vercel domain. Supabase auth/schema is applied, exposed, and working. GCS remains pending until service account details are available.
 
 Role management has been added with three roles:
 
@@ -26,8 +26,7 @@ Super Admin can create manual invite links that assign one of those roles during
 
 ## Main Pending Items
 
-- Configure AWS/Azure CORS for `https://multi-cloud-cyan.vercel.app`
-- Rotate exposed cloud keys
-- Validate production upload/list/download/delete after CORS
-- Implement GCS
-- Apply Supabase schema and finish production auth validation
+- Configure/confirm AWS/Azure CORS for direct browser upload
+- Rotate exposed AWS/Azure credentials
+- Implement GCS after service account details are available
+- Run production E2E automation after GCS setup

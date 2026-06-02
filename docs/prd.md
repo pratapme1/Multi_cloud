@@ -113,6 +113,7 @@ OPTIONS 403 Forbidden
 ## Deferred / Out of Scope for Current Prototype
 
 - Real GCS implementation.
+- Production E2E automation after GCS setup.
 - Persistent user database.
 - Refresh-token/session renewal UX.
 - Server-side invite storage.

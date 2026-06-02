@@ -9,10 +9,10 @@
 | R01 | Cloud credentials exposed in chat/history | High | Active | Rotate AWS access key and Azure storage key, then update `.env` and Vercel env vars. |
 | R02 | Vercel direct upload blocked by AWS/Azure CORS | High | Active | Add CORS rules for `https://multi-cloud-cyan.vercel.app` to S3 and Azure Blob. |
 | R03 | GCS not implemented | Medium | Accepted | Keep disabled placeholder until GCP service account and bucket are ready. |
-| R04 | Supabase auth needs production validation | High | Active | Supabase Auth code is implemented; apply schema, validate token expiry/session behavior, and add RBAC tests before production use. |
+| R04 | Supabase auth needs production validation | Medium | Active | Schema is applied/exposed and auth is working; validate token expiry/session behavior and add RBAC tests before production use. |
 | R05 | Duplicate Vercel API route locations may create maintenance drift | Medium | Active | Keep temporarily while deployment root was uncertain; consolidate after Vercel root is confirmed. |
 | R06 | Direct upload exposes object names in signed URLs | Medium | Active | Accept for prototype; add object key sanitization/prefixing later. |
-| R07 | Lack of automated tests for providers/RBAC | Medium | Active | Add unit/API tests after CORS unblock. |
+| R07 | Lack of automated tests for providers/RBAC | Medium | Active | Add unit/API tests and production E2E after GCS setup. |
 
 ## Closed / Mitigated
 
@@ -26,4 +26,5 @@
 
 1. Rotate exposed keys.
 2. Configure AWS/Azure CORS.
-3. Run production E2E.
+3. Add GCS service account details and implementation.
+4. Run production E2E after GCS setup.

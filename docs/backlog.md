@@ -32,6 +32,7 @@
 | C13 | Direct-upload architecture for Vercel | Done | Browser requests signed URLs and uploads directly to AWS/Azure. |
 | C14 | Supabase auth integration | Done | Login/signup now use Supabase Auth tokens instead of mock/local browser users. |
 | C15 | Server-side invite storage | Done | Invite links are stored in `multi_cloud.invites`. |
+| C16 | Supabase schema setup | Done | `multi_cloud` schema is applied, exposed, and working. |
 
 ## Active Blockers
 
@@ -40,23 +41,22 @@
 | B1 | Configure AWS S3 CORS | Blocked | Vishnu / Cloud owner | Needed for direct browser upload from `https://multi-cloud-cyan.vercel.app`. Current symptom: `OPTIONS 403 Forbidden`. |
 | B2 | Configure Azure Blob CORS | Blocked | Vishnu / Cloud owner | Needed for direct browser upload from `https://multi-cloud-cyan.vercel.app`. |
 | B3 | Rotate exposed AWS/Azure credentials | Blocked | Vishnu / Cloud owner | Credentials were pasted into chat and must be treated as exposed. Rotate before final deployment. |
-| B4 | Apply Supabase schema | Blocked | Vishnu / Supabase owner | Migration is in `supabase/migrations`; local apply failed from this machine due DB host connectivity/reset. |
 
 ## Remaining Development Work
 
 | ID | Task | Status | Priority | Notes |
 |----|------|--------|----------|-------|
-| D1 | Production E2E after CORS | Open | P0 | Test login -> upload -> list -> download -> delete on Vercel. |
-| D2 | Improve upload success handling after direct upload | Open | P1 | Refresh file list and show per-provider success/failure cleanly after CORS is fixed. |
+| D1 | Production E2E after GCS setup | Open | P0 | Test login -> upload -> list -> download -> delete on Vercel after AWS, Azure, and GCS are ready. |
+| D2 | Improve upload success handling after direct upload | Open | P1 | Refresh file list and show per-provider success/failure cleanly after final cloud setup. |
 | D3 | Add provider unit tests | Open | P1 | AWS/Azure happy-path and error-path tests. |
 | D4 | Add API tests for auth/RBAC | Open | P1 | Verify Super Admin/Admin/Viewer behavior. |
 | D5 | Harden Supabase auth edge cases | Open | P1 | Add refresh-token handling, expired-session UX, and production auth settings. |
-| D6 | Implement GCS provider | Deferred | P2 | Requires GCP bucket and service account JSON. |
+| D6 | Implement GCS provider | Deferred | P2 | Waiting for GCP bucket and service account JSON details. |
 | D7 | Invite email delivery | Open | P2 | Current invite links are generated and copied manually. |
 | D8 | Add audit trail persistence | Deferred | P2 | Current audit trail is presentational. |
 | D9 | Clean up duplicate Vercel API structure | Done | Removed duplicate route trees; one catch-all API function remains. |
-| D10 | Update documentation after CORS validation | Open | P1 | Mark production upload as done once verified. |
+| D10 | Update documentation after full cloud validation | Open | P1 | Mark production upload as done once AWS/Azure/GCS verification is complete. |
 
 ## Current Pending Summary
 
-The main pending item is **cloud storage CORS**. The deployed app can generate signed upload URLs, but AWS/Azure reject browser preflight requests until their CORS rules allow the Vercel origin.
+The main pending items are **AWS/Azure CORS**, **credential rotation**, and **GCS service account setup**. Production E2E automation will run after GCS is configured so the test suite validates the full three-cloud flow.

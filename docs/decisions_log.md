@@ -36,7 +36,7 @@ health()
 **Date:** 2026-06-02  
 **Decision:** Use mock bearer tokens and browser-local users/invites for prototype.  
 **Rationale:** Keeps the demo moving while role flows are designed.  
-**Consequence:** Persistent DB + real JWT/session auth remains pending.
+**Consequence:** Supabase-backed persistent auth is now implemented; production session edge cases and RBAC tests remain pending.
 
 ### D-005 - Deployment Target
 
@@ -73,10 +73,10 @@ health()
 |----|-----------------|-------|-------|
 | D-008 | Persistent auth design | Dev + PM | JWT vs sessions once DB is added. |
 | D-009 | GCS implementation date | Dev + PM | Depends on GCP credentials and bucket. |
-| D-010 | Keep duplicate Vercel API routes or consolidate | Resolved | Consolidated to `api/[...path].js` to avoid Vercel Hobby plan function limits. |
+| D-010 | Keep duplicate Vercel API routes or consolidate | Resolved | Consolidated to `api/index.js` to avoid Vercel Hobby plan function limits. |
 
 ## Weekly Status
 
 ### 2026-06-02
 
-AWS/Azure local testing works. Vercel deployment is active, but production direct upload is blocked by cloud CORS. Role management and invite-link prototype are implemented. GCS remains a placeholder. Exposed cloud credentials must be rotated before production validation.
+AWS/Azure local testing works. Vercel deployment is active with direct upload. Supabase `multi_cloud` schema is applied/exposed and auth is working. AWS/Azure CORS and credential rotation still need final cloud-side confirmation. GCS remains a placeholder until service account details are available. Production E2E automation will run after GCS setup.

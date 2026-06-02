@@ -78,7 +78,7 @@ AZURE_CONTAINER_NAME=
 # Google Cloud Storage
 GCS_PROJECT_ID=
 GCS_BUCKET_NAME=
-GCS_SERVICE_ACCOUNT_JSON_PATH=./backend/secrets/gcp-service-account.json
+GCS_SERVICE_ACCOUNT_JSON_PATH=
 
 # Database (M3)
 DB_CONNECTION_STRING=
@@ -188,7 +188,7 @@ A service account is how the application authenticates to GCP — it is not a hu
 4. Select **JSON** → Click **Create**
 5. A `.json` file downloads automatically to your Downloads folder
 6. Rename it to `gcp-service-account.json`
-7. Move it to: `backend/secrets/gcp-service-account.json`
+7. Save it outside git and set `GCS_SERVICE_ACCOUNT_JSON_PATH` to that local path when GCS implementation begins.
 8. **Verify** the `secrets/` folder is listed in `.gitignore` before proceeding
 
 ---
@@ -198,7 +198,7 @@ A service account is how the application authenticates to GCP — it is not a hu
 In a terminal, set the environment variable and list buckets to confirm auth works:
 
 ```bash
-export GCS_SERVICE_ACCOUNT_JSON_PATH="./backend/secrets/gcp-service-account.json"
+export GCS_SERVICE_ACCOUNT_JSON_PATH="<path-to-service-account-json>"
 ```
 
 Then from a test script or the SDK, call `ListBuckets` for the project. The bucket `multicloud-dev-[yourname]` should appear in the response.
@@ -210,7 +210,7 @@ Then from a test script or the SDK, call `ListBuckets` for the project. The buck
 ```env
 GCS_PROJECT_ID=multi-cloud-integration-123456
 GCS_BUCKET_NAME=multicloud-dev-yourname
-GCS_SERVICE_ACCOUNT_JSON_PATH=./backend/secrets/gcp-service-account.json
+GCS_SERVICE_ACCOUNT_JSON_PATH=
 ```
 
 ---
@@ -452,7 +452,7 @@ Before Anushman starts coding the SDK modules (1.1, 1.3, 1.5), confirm every ite
 | # | Check | Who | Status |
 |---|-------|-----|--------|
 | V1 | GCS bucket exists and is accessible | Anushman | |
-| V2 | GCP service account JSON key file is at `backend/secrets/gcp-service-account.json` | Anushman | |
+| V2 | GCP service account JSON key file path is confirmed and outside git | Anushman | Pending |
 | V3 | `secrets/` folder is in `.gitignore` | Anushman | |
 | V4 | AWS S3 bucket exists in `us-east-1` | Anushman | |
 | V5 | IAM user `multicloud-dev` has `AmazonS3FullAccess` | Anushman | |
@@ -506,7 +506,7 @@ Once all 3 accounts are verified working, update `docs/backlog.md`:
 | P.5 | Done | Repo init, `.gitignore`, `.env.example` created |
 | P.6 | Done | AWS S3 bucket `[name]` in `us-east-1`. IAM user `multicloud-dev` created |
 | P.7 | Done | Azure Storage Account `[name]`. Container `files`. Resource group `multicloud-rg` |
-| P.8 | Done | GCS bucket `[name]`. Service account `multicloud-dev-sa`. JSON key at `backend/secrets/` |
+| P.8 | Pending | GCS bucket/service account details will be added when available |
 
 ---
 

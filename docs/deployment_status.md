@@ -10,7 +10,7 @@
 | Deployment platform | Vercel |
 | Recommended Root Directory | `./` |
 | Frontend build output | `src/frontend/dist` |
-| API routes | Single catch-all function: `api/[...path].js` |
+| API routes | Single catch-all function: `api/index.js` |
 
 ## Direct Upload Architecture
 
@@ -24,9 +24,9 @@ This avoids Vercel's function payload limit.
 
 The API is intentionally consolidated into one catch-all serverless function so the app stays under the Vercel Hobby plan limit of 12 functions.
 
-## Current Blocker
+## Current Cloud Tasks
 
-Storage CORS is not configured yet. Current symptom:
+Direct browser upload requires storage CORS. If CORS is missing or incomplete, the browser may show:
 
 ```text
 OPTIONS 403 Forbidden
@@ -41,7 +41,7 @@ AWS Console -> S3 -> `multicloud-dev-anand` -> Permissions -> CORS:
 ```json
 [
   {
-    "AllowedHeaders": ["*"],
+    "AllowedHeaders": ["*", "x-amz-meta-uploadedby"],
     "AllowedMethods": ["GET", "PUT", "POST", "HEAD"],
     "AllowedOrigins": ["https://multi-cloud-cyan.vercel.app"],
     "ExposeHeaders": ["ETag", "x-amz-request-id", "x-amz-id-2"],
@@ -50,6 +50,8 @@ AWS Console -> S3 -> `multicloud-dev-anand` -> Permissions -> CORS:
 ]
 ```
 
+Using only `["*"]` is also acceptable and is the simplest dev setting.
+
 ## Required Azure Blob CORS
 
 Azure Portal -> Storage Account -> Resource sharing (CORS) -> Blob service:
@@ -57,10 +59,12 @@ Azure Portal -> Storage Account -> Resource sharing (CORS) -> Blob service:
 ```text
 Allowed origins: https://multi-cloud-cyan.vercel.app
 Allowed methods: PUT, GET, HEAD, OPTIONS
-Allowed headers: *
+Allowed headers: *, x-ms-blob-type, x-ms-meta-uploadedby
 Exposed headers: *
 Max age: 3000
 ```
+
+Using only `*` for allowed headers is also acceptable for the current prototype.
 
 ## Security Action
 
@@ -73,3 +77,6 @@ Pending:
 - Update `.env`.
 - Update Vercel Environment Variables.
 - Redeploy latest `main`.
+- Configure/confirm AWS S3 CORS.
+- Configure/confirm Azure Blob CORS.
+- Add GCS credentials and implementation when service account details are ready.

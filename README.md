@@ -7,7 +7,7 @@ Unified file management across AWS S3 and Azure Blob Storage, with Google Cloud 
 **Date:** 2026-06-02  
 **Active stack:** Node.js / Express + React / Vite  
 **Frontend deployment:** Vercel  
-**Backend deployment path:** Single Vercel catch-all serverless function at `api/[...path].js`
+**Backend deployment path:** Single Vercel catch-all serverless function at `api/index.js`
 
 ### What Works
 
@@ -23,23 +23,18 @@ Unified file management across AWS S3 and Azure Blob Storage, with Google Cloud 
   - Viewer
 - Super Admin can create invite links manually and assign invited users to one of the three roles.
 - Supabase Auth integration has been added for persistent users, real access tokens, and server-side invite storage in the `multi_cloud` schema.
+- Supabase `multi_cloud` schema is applied, exposed, and working.
 - Long filenames are now guarded in modal, table, card, drawer, and upload states.
 - Vercel upload flow uses direct-to-cloud signed URLs to avoid Vercel payload limits.
 
-### Current Blocker
+### Current Cloud Setup Tasks
 
-Direct browser upload from Vercel to AWS/Azure is blocked until CORS is configured on:
+Direct browser upload from Vercel to AWS/Azure requires CORS on:
 
 - AWS S3 bucket: `multicloud-dev-anand`
 - Azure Blob Storage account/container
 
-The observed error is an S3/Azure preflight failure:
-
-```text
-OPTIONS 403 Forbidden
-```
-
-This is not a Vercel payload error anymore. It means storage CORS must allow:
+Storage CORS must allow:
 
 ```text
 https://multi-cloud-cyan.vercel.app
@@ -126,7 +121,6 @@ https://multi-cloud-cyan.vercel.app/api/test-credentials
 
 - Configure AWS S3 and Azure Blob CORS for direct browser upload.
 - Rotate exposed AWS/Azure credentials and update local/Vercel env vars.
-- Apply the Supabase `multi_cloud` schema if it has not been applied from SQL editor or `npm.cmd run supabase:schema`.
-- Implement GCS provider for real use.
+- Implement GCS provider after service account details are available.
 - Add automated unit tests for provider modules.
-- Add production E2E once CORS is fixed.
+- Add production E2E automation after GCS is also configured.

@@ -1,6 +1,6 @@
 # Release Checklist - Go/No-Go
 
-**Target:** Prototype validation after CORS is fixed  
+**Target:** Prototype validation after AWS/Azure CORS and GCS setup  
 **Last updated:** 2026-06-02
 
 ## P0 - Must Pass
@@ -46,7 +46,7 @@
 - [ ] Long filename upload modal does not break.
 - [ ] Long filename table row/card/drawer does not break.
 - [ ] Direct upload partial failures show provider-level diagnostics.
-- [ ] Production Playwright E2E is updated and run after CORS.
+- [ ] Production Playwright E2E is updated and run after GCS setup.
 
 ## Deferred
 
@@ -58,6 +58,6 @@
 
 ## Current Go/No-Go
 
-**Current decision:** `NO-GO for production upload validation`  
-**Reason:** AWS/Azure CORS not configured yet for direct browser upload.  
-**Next action:** Configure CORS, rotate credentials, redeploy, run production E2E.
+**Current decision:** `NO-GO for full production E2E`  
+**Reason:** AWS/Azure CORS and GCS setup still need final configuration.  
+**Next action:** Configure CORS, rotate credentials, add GCS service account details, redeploy, then run production E2E.
