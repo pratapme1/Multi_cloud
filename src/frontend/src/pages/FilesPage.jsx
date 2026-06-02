@@ -34,6 +34,10 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
   const [selectedNames, setSelectedNames] = useState(new Set());
   const [bulkDeleting, setBulkDeleting]   = useState(false);
 
+  // ── Delete all ──────────────────────────────────────────────────
+  const [showDeleteAll, setShowDeleteAll]     = useState(false);
+  const [deleteAllBusy, setDeleteAllBusy]     = useState(false);
+
   const loadHealth = useCallback(async () => {
     setHealthLoading(true);
     try {
@@ -195,6 +199,30 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
     load();
   };
 
+  const handleDeleteAll = async () => {
+    const snapshot = [...allFiles];
+    setAllFiles([]);
+    setShowDeleteAll(false);
+    setDeleteAllBusy(true);
+
+    const failures = [];
+    await Promise.all(snapshot.map(async f => {
+      try { await deleteFile(f.name, f.providers); }
+      catch (err) {
+        failures.push(f.name);
+        console.error(`[delete-all] failed for "${f.name}":`, err?.message ?? err);
+      }
+    }));
+
+    if (failures.length === 0) {
+      toast(`All ${snapshot.length} files deleted`, 'ok', 'Delete all');
+    } else {
+      toast(`${snapshot.length - failures.length} deleted · ${failures.length} failed`, 'wa', 'Delete all');
+    }
+    setDeleteAllBusy(false);
+    load();
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       <Topbar
@@ -222,6 +250,7 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
         selectMode={selectMode}
         onToggleSelectMode={selectMode ? exitSelectMode : enterSelectMode}
         canSelect={can('delete')}
+        onDeleteAll={can('delete') && allFiles.length > 0 ? () => setShowDeleteAll(true) : null}
       />
 
       <div className={`cw${drawerOpen ? ' open' : ''}`}>
@@ -326,6 +355,15 @@ export default function FilesPage({ drawer, selIdx, onDrawer, onSelectFile, onCl
           onSuccess={() => { setShowUpload(false); load(); }}
         />
       )}
+
+      {showDeleteAll && (
+        <DeleteAllModal
+          count={allFiles.length}
+          busy={deleteAllBusy}
+          onClose={() => setShowDeleteAll(false)}
+          onConfirm={handleDeleteAll}
+        />
+      )}
     </div>
   );
 }
@@ -420,5 +458,115 @@ function ErrorState({ onRetry, onHealth }) {
         <button className="btn btn-p" onClick={onRetry}>↻ Retry</button>
       </div>
     </>
+  );
+}
+
+function DeleteAllModal({ count, busy, onClose, onConfirm }) {
+  const [input, setInput] = useState('');
+  const PHRASE = 'delete all';
+  const valid = input.trim().toLowerCase() === PHRASE;
+
+  return (
+    <div className="mlayer" onClick={e => { if (e.target.classList.contains('mlayer') && !busy) onClose(); }}>
+      <div className="modal da-modal" onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="mh da-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="da-icon">
+              <svg viewBox="0 0 20 20" width="22" height="22" fill="none">
+                <path d="M10 2L2 17h16L10 2z" stroke="#ef4444" strokeWidth="1.8" strokeLinejoin="round" fill="rgba(239,68,68,.12)"/>
+                <path d="M10 8v4M10 14.5v.5" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div className="mt" style={{ color: 'var(--er)' }}>Delete All Files</div>
+              <div className="ms">Permanent · irreversible · affects all providers</div>
+            </div>
+          </div>
+          <button className="icb" onClick={onClose} disabled={busy}>✕</button>
+        </div>
+
+        {/* Warning body */}
+        <div className="mb">
+          <div className="da-warn-box">
+            <div className="da-warn-title">
+              You are about to delete all {count} file{count !== 1 ? 's' : ''} permanently.
+            </div>
+            <ul className="da-warn-list">
+              <li>Every file will be removed from <strong>AWS S3, Azure Blob Storage, and Google Cloud Storage</strong></li>
+              <li>There is <strong>no trash, no undo, and no recovery</strong> after this action</li>
+              <li>All team members will immediately lose access to these files</li>
+              <li>Signed URLs and download links for these files will stop working</li>
+            </ul>
+          </div>
+
+          <div className="da-divider" />
+
+          <div style={{ marginBottom: 8 }}>
+            <span style={{ fontSize: 13, color: 'var(--tx2)' }}>
+              To confirm, type{' '}
+              <span className="da-phrase">delete all</span>
+              {' '}in the box below:
+            </span>
+          </div>
+
+          <div className="fg" style={{ margin: 0 }}>
+            <input
+              autoFocus
+              autoComplete="off"
+              placeholder="Type: delete all"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && valid && !busy) onConfirm(); }}
+              className={input.length > 0 ? (valid ? 'da-input-ok' : 'err') : ''}
+              style={{
+                borderColor: input.length > 0 ? (valid ? 'var(--ok)' : 'var(--er)') : undefined,
+                boxShadow: input.length > 0 && valid ? '0 0 0 3px rgba(16,185,129,.15)' : input.length > 0 ? '0 0 0 3px rgba(239,68,68,.12)' : undefined,
+                fontFamily: 'monospace',
+                fontSize: 14,
+                letterSpacing: '.04em',
+              }}
+            />
+          </div>
+
+          {input.length > 0 && !valid && (
+            <div style={{ fontSize: 12, color: 'var(--er)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <svg viewBox="0 0 12 12" width="11" height="11" fill="none">
+                <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.3"/>
+                <path d="M6 3.5v3M6 8v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              Must match exactly: <strong style={{ fontFamily: 'monospace' }}>delete all</strong>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="mf">
+          <button className="btn btn-s" onClick={onClose} disabled={busy}>
+            Cancel — keep files
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={onConfirm}
+            disabled={!valid || busy}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 180 }}
+          >
+            {busy ? (
+              <><span className="spin">↻</span> Deleting…</>
+            ) : (
+              <>
+                <svg viewBox="0 0 14 14" width="12" height="12" fill="none">
+                  <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M5.5 6v4M8.5 6v4M3 3.5l.7 8a.5.5 0 00.5.5h5.6a.5.5 0 00.5-.5l.7-8"
+                    stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Delete all {count} files forever
+              </>
+            )}
+          </button>
+        </div>
+
+      </div>
+    </div>
   );
 }

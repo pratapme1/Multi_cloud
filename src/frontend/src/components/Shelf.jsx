@@ -26,7 +26,7 @@ function formatAge(ts) {
 export default function Shelf({
   files, filter, view, onFilter, onView, onReload, lastRefreshed,
   sortBy, sortDir, onSort,
-  selectMode, onToggleSelectMode, canSelect,
+  selectMode, onToggleSelectMode, canSelect, onDeleteAll,
 }) {
   const counts = {
     all:   files.length,
@@ -109,6 +109,20 @@ export default function Shelf({
             </svg>
           </button>
         </div>
+        {onDeleteAll && (
+          <button
+            className="btn btn-sm btn-danger"
+            onClick={onDeleteAll}
+            title="Delete all files permanently"
+            style={{ display: 'flex', alignItems: 'center', gap: 5 }}
+          >
+            <svg viewBox="0 0 13 13" width="11" height="11" fill="none">
+              <path d="M1.5 3h10M4 3V2a.5.5 0 01.5-.5h4a.5.5 0 01.5.5v1M4.5 5.5v4M8.5 5.5v4M2.5 3l.6 7.5a.5.5 0 00.5.5h5.8a.5.5 0 00.5-.5L10.5 3"
+                stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Delete All
+          </button>
+        )}
         <button className="btn btn-s btn-sm" onClick={onReload} title="Refresh files">
           <svg viewBox="0 0 16 16" width="13" height="13" fill="none">
             <path d="M13.2 5.2A5.8 5.8 0 0 0 3.6 4.1L2.5 5.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
